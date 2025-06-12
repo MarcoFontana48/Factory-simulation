@@ -6,16 +6,9 @@ dependencyResolutionManagement {
 //    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
 }
 
-rootProject.name = "ise-lab-code-jason"
+rootProject.name = "factory-simulation"
 
-include("helloworld")
-include("computation")
-include("interaction")
-include("fanboy")
-include("domotic")
-include("thermostat")
-include("robots")
-include("contractnet")
+include("factory")
 
 develocity {
     buildScan {

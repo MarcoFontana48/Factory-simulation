@@ -1,0 +1,15 @@
+
+MAS factory {
+
+	infrastructure: Centralised
+
+	environment: env.HouseEnv(gui) // use "nogui" not to show the GUI
+
+	agents:
+		robot;
+		owner;
+		supermarket;
+
+	aslSourcePath:
+		"src/main/asl";
+}
