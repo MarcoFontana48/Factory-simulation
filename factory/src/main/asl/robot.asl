@@ -5,27 +5,27 @@ available(package, truck). // Let's assume there is beer ("env.HouseEnv" takes c
 /* Plans library */
 
 /* Handle owner's orders */
-+!has(deliveryA, package) // How to ensure owner has beer?
++!has(delivery, package) // How to ensure owner has beer?
 	: available(package, truck)
 	<- !at(robot, truck); // ...reach the fridge...
 		open(truck); get(package); close(truck); // ...get the beer (notice EXTERNAL actions)...
-		!at(robot, deliveryA); // ...reach the owner...
+		!at(robot, delivery); // ...reach the owner...
 		hand_in(package); // ...give beer to owner...
-		?has(deliveryA, package); // ...ensure owner has beer
+		?has(delivery, package); // ...ensure owner has beer
 		.date(YY, MM, DD);
 		.time(HH, NN, SS);
 		+consumed(YY, MM, DD, HH, NN, SS, package). // (track number of beer consumed)
 
 @waitfor
-+!has(deliveryA, package)
++!has(delivery, package)
 	: not available(package, truck) // if there is NOT beer available...
 	<- .send(truck, achieve, order(package, 5)); // ...order new beer stock...
 		!at(robot, truck). // ...then wait at the fridge (it is well known that beer automagically appear in the fridge)
 
-+!has(deliveryA, package)
++!has(delivery, package)
 	<- .concat("The Department of Health does not allow me to give you more than ", L,
 		" packages a day...I am very sorry about that :/", M);
-		.send(deliveryA, tell, msg(M)). // ...warn the owner
+		.send(delivery, tell, msg(M)). // ...warn the owner
 		
 /* Handle movement */
 +!at(robot, P) // if arrived at destination (P = "owner" | "fridge")...
@@ -40,7 +40,7 @@ available(package, truck). // Let's assume there is beer ("env.HouseEnv" takes c
 +delivered(package, _Qtd, _OrderId)[source(truck)] // As soon as beer is delivered...
 	: true
 	<- +available(package, truck); // ...track the new stock...
-		!has(deliveryA, package). // ...and re-try to satisfy owners' orders (notice we are stuck at the fridge since plan @waitfor)
+		!has(delivery, package). // ...and re-try to satisfy owners' orders (notice we are stuck at the fridge since plan @waitfor)
 
 /* NOTICE: "stock" and "has" beliefs are "perceptions",
  * thus they are automagically added by Jason runtime,
