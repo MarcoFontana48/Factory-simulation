@@ -9,15 +9,15 @@ import java.util.logging.Logger;
 //TODO: refactor to become FACTORY
 public class FactoryEnv extends Environment {
     // action literals
-    public static final Literal of = Literal.parseLiteral("open(fridge)");
-    public static final Literal clf = Literal.parseLiteral("close(fridge)");
-    public static final Literal gb = Literal.parseLiteral("get(beer)");
-    public static final Literal hb = Literal.parseLiteral("hand_in(beer)");
-    public static final Literal sb = Literal.parseLiteral("sip(beer)");
+    public static final Literal of = Literal.parseLiteral("open(itemgen)");
+    public static final Literal clf = Literal.parseLiteral("close(itemgen)");
+    public static final Literal gb = Literal.parseLiteral("get(package)");
+    public static final Literal hb = Literal.parseLiteral("hand_in(package)");
+    public static final Literal sb = Literal.parseLiteral("sip(package)");
 
     // belief literals
-    public static final Literal hob = Literal.parseLiteral("has(owner,beer)");
-    public static final Literal af = Literal.parseLiteral("at(robot,fridge)");
+    public static final Literal hob = Literal.parseLiteral("has(owner,package)");
+    public static final Literal af = Literal.parseLiteral("at(robot,itemgen)");
     public static final Literal ao = Literal.parseLiteral("at(robot,owner)");
 
     static Logger logger = Logger.getLogger(FactoryEnv.class.getName());
@@ -60,7 +60,7 @@ public class FactoryEnv extends Environment {
         if (this.model.fridgeOpen) {
             this.addPercept(
                     "robot",
-                    Literal.parseLiteral("stock(beer,"
+                    Literal.parseLiteral("stock(package,"
                             + "\"" + this.model.availableItem + "\"" + ")"
                     )
             );
@@ -86,12 +86,16 @@ public class FactoryEnv extends Environment {
         } else if (action.equals(FactoryEnv.clf)) { // clf = close(fridge)
             result = this.model.closeFridge();
         } else if (action.getFunctor().equals("move_towards")) {
-            final String l = action.getTerm(0).toString(); // get where to move
+            final String location = action.getTerm(0).toString(); // get where to move
             Location dest = null;
-            if (l.equals("fridge")) {
+            if (location.equals("itemgen")) {
                 dest = this.model.itemGeneratorLocation;
-            } else if (l.equals("owner")) {
+            } else if (location.equals("owner")) {
                 dest = this.model.itemDeliveryLocationA;
+            } else if (location.equals("deliveryB")) {
+                dest = this.model.itemDeliveryLocationB;
+            } else if (location.equals("deliveryC")) {
+                dest = this.model.itemDeliveryLocationC;
             }
             result = this.model.moveTowards(dest);
         } else if (action.equals(FactoryEnv.gb)) { // gb = get(beer)

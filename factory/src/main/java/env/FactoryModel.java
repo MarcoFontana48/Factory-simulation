@@ -19,8 +19,9 @@ public class FactoryModel extends GridWorldModel {
     boolean isCarryingItem = false;
     // how many sips the owner did
     int sipCount = 0;
-    // how many packages are available
+    // package available
     String availableItem = "A";
+    String carriedPackageType = "";
 
     // where the environment objects are
     Location itemGeneratorLocation = new Location(FactoryModel.GSize / 2, 0);
@@ -51,7 +52,7 @@ public class FactoryModel extends GridWorldModel {
     );
 
     public FactoryModel() {
-        // create a grid with one mobile agent (/*super(FactoryModel.GSize, FactoryModel.GSize, 3); */)
+        // create a grid with mobile agents (/*super(FactoryModel.GSize, FactoryModel.GSize, 3); */)
         super(FactoryModel.GSize, FactoryModel.GSize, 3);
         // set the agent's initial position
         this.setAgPos(0, 5, 4);
@@ -72,7 +73,6 @@ public class FactoryModel extends GridWorldModel {
      * interaction. As such, they first check actions pre-conditions, then carry out
      * actions post-conditions.
      */
-
     boolean openFridge() {
         if (!this.fridgeOpen) {
             this.fridgeOpen = true;
@@ -115,6 +115,7 @@ public class FactoryModel extends GridWorldModel {
 
     boolean getPackage() {
         if (this.fridgeOpen && (!this.availableItem.isEmpty()) && !this.isCarryingItem) {
+            this.carriedPackageType = this.availableItem; // Remember what type we picked up
             this.availableItem = "";
             this.isCarryingItem = true;
             if (this.view != null) {
