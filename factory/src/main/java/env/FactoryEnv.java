@@ -9,15 +9,15 @@ import java.util.logging.Logger;
 //TODO: refactor to become FACTORY
 public class FactoryEnv extends Environment {
     // action literals
-    public static final Literal of = Literal.parseLiteral("open(itemgen)");
-    public static final Literal clf = Literal.parseLiteral("close(itemgen)");
+    public static final Literal of = Literal.parseLiteral("open(packageGen)");
+    public static final Literal clf = Literal.parseLiteral("close(packageGen)");
     public static final Literal gb = Literal.parseLiteral("get(package)");
     public static final Literal hb = Literal.parseLiteral("hand_in(package)");
     public static final Literal sb = Literal.parseLiteral("take_item(package)");
 
     // belief literals
     public static final Literal hob = Literal.parseLiteral("has(deliveryA,package)");
-    public static final Literal af = Literal.parseLiteral("at(robot,itemgen)");
+    public static final Literal af = Literal.parseLiteral("at(robot,packageGen)");
     public static final Literal ao = Literal.parseLiteral("at(robot,deliveryA)");
 
     static Logger logger = Logger.getLogger(FactoryEnv.class.getName());
@@ -88,7 +88,7 @@ public class FactoryEnv extends Environment {
         } else if (action.getFunctor().equals("move_towards")) {
             final String location = action.getTerm(0).toString(); // get where to move
             Location dest = null;
-            if (location.equals("itemgen")) {
+            if (location.equals("packageGen")) {
                 dest = this.model.packageGeneratorLocation;
             } else if (location.equals("deliveryA")) {
                 dest = this.model.packageDeliveryLocationA;

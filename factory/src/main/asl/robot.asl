@@ -1,6 +1,6 @@
 /* Initial beliefs AND RULES */
 
-available(package, itemgen). // Let's assume there is beer ("env.HouseEnv" takes care of this)
+available(package, packageGen). // Let's assume there is beer ("env.HouseEnv" takes care of this)
 limit(package, 10). // Let's take care of my owner health
 
 too_much(B) :- // What does "drinking too much" implies?
@@ -11,9 +11,9 @@ too_much(B) :- // What does "drinking too much" implies?
 
 /* Handle owner's orders */
 +!has(deliveryA, package) // How to ensure owner has beer?
-	: available(package, itemgen) & not too_much(package) // if there is beer available and owner is still sober...
-	<- !at(robot, itemgen); // ...reach the fridge...
-		open(itemgen); get(package); close(itemgen); // ...get the beer (notice EXTERNAL actions)...
+	: available(package, packageGen) & not too_much(package) // if there is beer available and owner is still sober...
+	<- !at(robot, packageGen); // ...reach the fridge...
+		open(packageGen); get(package); close(packageGen); // ...get the beer (notice EXTERNAL actions)...
 		!at(robot, deliveryA); // ...reach the owner...
 		hand_in(package); // ...give beer to owner...
 		?has(deliveryA, package); // ...ensure owner has beer
@@ -23,9 +23,9 @@ too_much(B) :- // What does "drinking too much" implies?
 
 @waitfor
 +!has(deliveryA, package)
-	: not available(package, itemgen) // if there is NOT beer available...
+	: not available(package, packageGen) // if there is NOT beer available...
 	<- .send(supermarket, achieve, order(package, 5)); // ...order new beer stock...
-		!at(robot, itemgen). // ...then wait at the fridge (it is well known that beer automagically appear in the fridge)
+		!at(robot, packageGen). // ...then wait at the fridge (it is well known that beer automagically appear in the fridge)
 
 +!has(deliveryA, package)
 	: too_much(package) & limit(package, L) // if owner is no longer sober...
@@ -49,7 +49,7 @@ too_much(B) :- // What does "drinking too much" implies?
 /* Handle beer stock */
 +delivered(package, _Qtd, _OrderId)[source(supermarket)] // As soon as beer is delivered...
 	: true
-	<- +available(package, itemgen); // ...track the new stock...
+	<- +available(package, packageGen); // ...track the new stock...
 		!has(deliveryA, package). // ...and re-try to satisfy owners' orders (notice we are stuck at the fridge since plan @waitfor)
 
 /* NOTICE: "stock" and "has" beliefs are "perceptions",
@@ -58,12 +58,12 @@ too_much(B) :- // What does "drinking too much" implies?
  * in the env.HouseEnv class (extending class jason.environment.Environment)
  */
 +stock(package, "")
-	: available(package, itemgen)
-	<- -available(package, itemgen). // no more beer in the fridge
+	: available(package, packageGen)
+	<- -available(package, packageGen). // no more beer in the fridge
 
 +stock(package, N)
-	: N > 0 & not available(package, itemgen)
-	<- -+available(package, itemgen). // notice ATOMIC update of available beers
+	: N > 0 & not available(package, packageGen)
+	<- -+available(package, packageGen). // notice ATOMIC update of available beers
 
 /* Plans failure handling*/
 
