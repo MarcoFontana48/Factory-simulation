@@ -36,16 +36,12 @@ public class FactoryView extends GridWorldView {
         
         // Rest of your original code stays the same
         final Location robotLocation = copyOf(this.model.getAgPos(0));
-        final Location packageGeneratorLocation = copyOf(this.model.packageGeneratorLocation);
-        final Location packageDeliveryLocationA = copyOf(this.model.packageDeliveryLocationA);
-        final Location packageDeliveryLocationB = copyOf(this.model.packageDeliveryLocationB);
-        final Location packageDeliveryLocationC = copyOf(this.model.packageDeliveryLocationC);
+        final Location packageGeneratorLocation = copyOf(this.model.truckLocation);
+        final Location packageDeliveryLocation = copyOf(this.model.deliveryLocation);
         final String availablePackage = this.model.availablePackage;
         final int itemCount = this.model.itemCount;
         SwingUtilities.invokeLater(() -> {
-            String deliveryNameA = "A";
-            String deliveryNameB = "B";
-            String deliveryNameC = "C";
+            String deliveryName = "Tar";
             super.drawAgent(graphics, x, y, Color.lightGray, -1);
             switch (item) {
                 case FactoryModel.PACKAGE_GENERATOR:
@@ -59,35 +55,15 @@ public class FactoryView extends GridWorldView {
                         this.drawString(graphics, x, y, this.defaultFont, "Gen (" + availablePackage + ")");
                     }
                     break;
-                case FactoryModel.PACKAGE_DELIVERY_A:
-                    if (robotLocation.equals(packageDeliveryLocationA)) {
+                case FactoryModel.PACKAGE_DELIVERY:
+                    if (robotLocation.equals(packageDeliveryLocation)) {
                         super.drawAgent(graphics, x, y, Color.green.darker(), -1);
                     }
                     if (itemCount > 0) {
-                        deliveryNameA += " (" + itemCount + ")";
+                        deliveryName += " (" + itemCount + ")";
                     }
                     graphics.setColor(Color.black);
-                    this.drawString(graphics, x, y, this.defaultFont, deliveryNameA);
-                    break;
-                case FactoryModel.PACKAGE_DELIVERY_B:
-                    if (robotLocation.equals(packageDeliveryLocationB)) {
-                        super.drawAgent(graphics, x, y, Color.green.darker(), -1);
-                    }
-                    if (itemCount > 0) {
-                        deliveryNameB += " (" + itemCount + ")";
-                    }
-                    graphics.setColor(Color.black);
-                    this.drawString(graphics, x, y, this.defaultFont, deliveryNameB);
-                    break;
-                case FactoryModel.PACKAGE_DELIVERY_C:
-                    if (robotLocation.equals(packageDeliveryLocationC)) {
-                        super.drawAgent(graphics, x, y, Color.green.darker(), -1);
-                    }
-                    if (itemCount > 0) {
-                        deliveryNameC += " (" + itemCount + ")";
-                    }
-                    graphics.setColor(Color.black);
-                    this.drawString(graphics, x, y, this.defaultFont, deliveryNameC);
+                    this.drawString(graphics, x, y, this.defaultFont, deliveryName);
                     break;
                 default:
                     break;
@@ -98,13 +74,11 @@ public class FactoryView extends GridWorldView {
     @Override
     public void drawAgent(final Graphics graphics, final int x, final int y, Color color, final int id) {
         final Location robotLocation = copyOf(this.model.getAgPos(0));
-        final Location packageGeneratorLocation = copyOf(this.model.packageGeneratorLocation);
-        final Location packageDeliveryLocationA = copyOf(this.model.packageDeliveryLocationA);
-        final Location packageDeliveryLocationB = copyOf(this.model.packageDeliveryLocationB);
-        final Location packageDeliveryLocationC = copyOf(this.model.packageDeliveryLocationC);
+        final Location packageGeneratorLocation = copyOf(this.model.truckLocation);
+        final Location packageDeliveryLocation = copyOf(this.model.deliveryLocation);
         final boolean isCarryingPackage = this.model.isCarryingPackage;
         SwingUtilities.invokeLater(() -> {
-            if (!(robotLocation.equals(packageDeliveryLocationA) || robotLocation.equals(packageDeliveryLocationB) || robotLocation.equals(packageDeliveryLocationC) || robotLocation.equals(packageGeneratorLocation))) {
+            if (!(robotLocation.equals(packageDeliveryLocation) || robotLocation.equals(packageGeneratorLocation))) {
                 super.drawAgent(graphics, x, y, isCarryingPackage ? Color.cyan : Color.cyan.darker(), id);    // colora il robot a seconda che abbia o meno un 'package' in mano
                 graphics.setColor(Color.black);
                 //super.drawString(graphics, x, y, this.defaultFont, "Robot" + id);

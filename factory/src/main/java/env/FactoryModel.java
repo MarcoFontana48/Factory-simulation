@@ -1,70 +1,75 @@
 package env;
 
-import java.util.List;
-
 import jason.environment.grid.GridWorldModel;
 import jason.environment.grid.Location;
 
 //TODO: refactor to become FACTORY
 public class FactoryModel extends GridWorldModel {
     public static final int PACKAGE_GENERATOR = 16;
-    public static final int PACKAGE_DELIVERY_A = 32;
-    public static final int PACKAGE_DELIVERY_B = 33;
-    public static final int PACKAGE_DELIVERY_C = 34;
+    public static final int PACKAGE_DELIVERY = 32;
     public static final int OBSTACLE = 4;
-    public static final int GSize = 11;
-    // whether the fridge is open
-    boolean fridgeOpen = false;
-    // whether the robot is carrying beer
+    public static final int GSize = 13;
+    boolean truckOpen = false;
     boolean isCarryingPackage = false;
-    // how many sips the owner did
     int itemCount = 0;
-    // package available
     String availablePackage = "a";
     String carriedPackageType = "";
-
-    // where the environment objects are
-    Location packageGeneratorLocation = new Location(FactoryModel.GSize / 2, 0);
-    Location packageDeliveryLocationA = new Location(FactoryModel.GSize / 2 + 2, FactoryModel.GSize - 1);
-    Location packageDeliveryLocationB = new Location(FactoryModel.GSize / 2, FactoryModel.GSize - 1);
-    Location packageDeliveryLocationC = new Location(FactoryModel.GSize / 2 - 2, FactoryModel.GSize - 1);
-    List<Location> obstacles = List.of(
-        // first row
-        new Location(0, 0), new Location(1, 0), new Location(2, 0), new Location(3, 0), new Location(4, 0), new Location(6, 0), new Location(7, 0), new Location(8, 0), new Location(9, 0), new Location(10, 0),
-        // second row (empty)
-        // third row
-        new Location(2, 2), new Location(3, 2), new Location(4, 2), new Location(8, 2),
-        // fourth row
-        new Location(4, 3), new Location(6, 3), new Location(7, 3), new Location(8, 3),
-        // fifth row
-        new Location(0, 4), new Location(1, 4), new Location(6, 4), new Location(10, 4),
-        // sixth row
-        new Location(3, 5), new Location(4, 5), new Location(5, 5), new Location(6, 5), new Location(8, 5),
-        // seventh row
-        new Location(8, 6), new Location(9, 6), new Location(10, 6),
-        // eighth row
-        new Location(0, 7), new Location(1, 7), new Location(2, 7), new Location(4, 7), new Location(5, 7), new Location(10, 7),
-        // ninth row
-        new Location(2, 8), new Location(5, 8), new Location(6, 8), new Location(7, 8), new Location(8, 8),
-        // tenth row (empty)
-        // eleventh row
-        new Location(0, 10), new Location(1, 10), new Location(2, 10), new Location(4, 10), new Location(6, 10), new Location(8, 10), new Location(9, 10), new Location(10, 10)
-    );
+    Location truckLocation = new Location(FactoryModel.GSize / 2, 0);
+    Location deliveryLocation = new Location(FactoryModel.GSize / 2, FactoryModel.GSize - 1);
 
     public FactoryModel() {
         // create a grid with mobile agents (/*super(FactoryModel.GSize, FactoryModel.GSize, 3); */)
         super(FactoryModel.GSize, FactoryModel.GSize, 3);
-        // set the agent's initial position
-        this.setAgPos(0, 5, 4);
-        this.setAgPos(1, 0, 1);
-        this.setAgPos(2, 10, 1);
-        // initial location of package generator and delivery
-        this.add(FactoryModel.PACKAGE_GENERATOR, this.packageGeneratorLocation);
-        this.add(FactoryModel.PACKAGE_DELIVERY_A, this.packageDeliveryLocationA);
-        this.add(FactoryModel.PACKAGE_DELIVERY_B, this.packageDeliveryLocationB);
-        this.add(FactoryModel.PACKAGE_DELIVERY_C, this.packageDeliveryLocationC);
-        // add obstacles
-        obstacles.forEach(loc -> this.add(FactoryModel.OBSTACLE, loc));
+        this.addRobotsPosition();
+        this.addTruckPosition();
+        this.addDeliveryPosition();
+        this.addWalls();
+    }
+
+    private void addDeliveryPosition() {
+        this.add(FactoryModel.PACKAGE_DELIVERY, this.deliveryLocation);
+    }
+
+    private void addTruckPosition() {
+        this.add(FactoryModel.PACKAGE_GENERATOR, this.truckLocation);
+    }
+
+    private void addRobotsPosition() {
+        int x, y;
+        do {
+            x = (int) (Math.random() * GSize);
+            y = (int) (Math.random() * GSize);
+        } while (!isFree(x, y));
+        this.setAgPos(0, x, y);
+    }
+
+    private void addWalls() {
+        // first row 
+        this.addWall(0, 0, 5, 0); this.addWall(7, 0, 12, 0);
+        // second row
+        this.addWall(0, 1, 0, 1); this.addWall(12, 1, 12, 1);
+        // third row
+        this.addWall(0, 2, 0, 2); this.addWall(3, 2, 5, 2); this.addWall(9, 2, 9, 2); this.addWall(12, 2, 12, 2);
+        // fourth row
+        this.addWall(0, 3, 0, 3); this.addWall(5, 3, 5, 3); this.addWall(7,3,9,3); this.addWall(12,3,12,3);
+        // fifth row
+        this.addWall(0, 4, 2, 4); this.addWall(7, 4, 7, 4); this.addWall(11, 4, 12, 4);
+        // sixth row
+        this.addWall(0, 5, 0, 5); this.addWall(4, 5, 7, 5); this.addWall(9, 5, 9, 5); this.addWall(12, 5, 12, 5);
+        // seventh row
+        this.addWall(0, 6, 0, 6); this.addWall(9, 6, 12, 6);
+        // eighth row
+        this.addWall(0, 7, 3, 7); this.addWall(5, 7, 6, 7); this.addWall(11, 7, 12, 7);
+        // ninth row
+        this.addWall(0, 8, 0, 8); this.addWall(3, 8, 3, 8); this.addWall(6, 8, 9, 8); this.addWall(12, 8, 12, 8);
+        // tenth row
+        this.addWall(0, 9, 0, 9); this.addWall(12, 9, 12, 9);
+        // eleventh row
+        this.addWall(0, 10, 0, 10); this.addWall(2, 10, 3, 10); this.addWall(6, 10, 6, 10); this.addWall(9, 10, 12, 10);
+        // twelfth row
+        this.addWall(0, 11, 0, 11); this.addWall(12, 11, 12, 11);
+        // thirteenth row
+        this.addWall(0, 12, 5, 12); this.addWall(7, 12, 12, 12);
     }
 
     /*
@@ -73,17 +78,17 @@ public class FactoryModel extends GridWorldModel {
      * interaction. As such, they first check actions pre-conditions, then carry out
      * actions post-conditions.
      */
-    boolean openFridge() {
-        if (!this.fridgeOpen) {
-            this.fridgeOpen = true;
+    boolean openTruck() {
+        if (!this.truckOpen) {
+            this.truckOpen = true;
             return true;
         }
         return false;
     }
 
-    boolean closeFridge() {
-        if (this.fridgeOpen) {
-            this.fridgeOpen = false;
+    boolean closeTruck() {
+        if (this.truckOpen) {
+            this.truckOpen = false;
             return true;
         }
         return false;
@@ -91,35 +96,80 @@ public class FactoryModel extends GridWorldModel {
 
     boolean moveTowards(final Location dest) {
         final Location r1 = this.getAgPos(0);
-        // compute where to move
-        if (r1.x < dest.x) {
-            r1.x++;
-        } else if (r1.x > dest.x) {
-            r1.x--;
+        final Location originalPos = new Location(r1.x, r1.y); // Store original position
+        java.util.Random random = new java.util.Random();
+
+        // decide probabilistically whether to move towards or away from the target
+        // chance to move towards the target (in order to make the robot eventually reach the target and not get stuck)
+        boolean moveTowardsTarget = random.nextDouble() < 0.75;
+
+        Location verticalMove = new Location(r1.x, r1.y);
+        if (moveTowardsTarget) {
+            // Move towards target
+            if (verticalMove.y < dest.y) {
+                verticalMove.y++;
+            } else if (verticalMove.y > dest.y) {
+                verticalMove.y--;
+            }
+        } else {
+            // Move away from target
+            if (verticalMove.y < dest.y) {
+                verticalMove.y--;
+            } else if (verticalMove.y > dest.y) {
+                verticalMove.y++;
+            }
         }
-        if (r1.y < dest.y) {
-            r1.y++;
-        } else if (r1.y > dest.y) {
-            r1.y--;
+
+        // If vertical movement is possible, do it
+        if (this.isFree(verticalMove.x, verticalMove.y)) {
+            this.setAgPos(0, verticalMove);
+            // repaint fridge and owner locations (to repaint colors)
+            if (this.view != null) {
+                this.view.update(this.truckLocation.x, this.truckLocation.y);
+                this.view.update(this.deliveryLocation.x, this.deliveryLocation.y);
+            }
+            return true;
         }
-        this.setAgPos(0, r1); // actually move the robot in the grid
-        // repaint fridge and owner locations (to repaint colors)
-        if (this.view != null) {
-            this.view.update(this.packageGeneratorLocation.x, this.packageGeneratorLocation.y);
-            this.view.update(this.packageDeliveryLocationA.x, this.packageDeliveryLocationA.y);
-            this.view.update(this.packageDeliveryLocationB.x, this.packageDeliveryLocationB.y);
-            this.view.update(this.packageDeliveryLocationC.x, this.packageDeliveryLocationC.y);
+
+        // If vertical movement is blocked, try random horizontal movements
+        int attempts = 0;
+        int maxAttempts = this.getWidth(); // Prevent infinite loop
+
+        while (attempts < maxAttempts) {
+            Location horizontalMove = new Location(originalPos.x, originalPos.y);
+
+            // Randomly choose left or right
+            if (random.nextBoolean()) {
+                horizontalMove.x = (horizontalMove.x + 1) % this.getWidth();
+            } else {
+                horizontalMove.x = (horizontalMove.x - 1 + this.getWidth()) % this.getWidth();
+            }
+
+            // If this horizontal position is free, move there
+            if (this.isFree(horizontalMove.x, horizontalMove.y)) {
+                this.setAgPos(0, horizontalMove);
+                // repaint fridge and owner locations (to repaint colors)
+                if (this.view != null) {
+                    this.view.update(this.truckLocation.x, this.truckLocation.y);
+                    this.view.update(this.deliveryLocation.x, this.deliveryLocation.y);
+                }
+                return true;
+            }
+
+            attempts++;
         }
+        
+        // If no movement was possible, return true to indicate the action was attempted, even if it didn't result in a change of position.
         return true;
     }
 
     boolean getPackage() {
-        if (this.fridgeOpen && (!this.availablePackage.isEmpty()) && !this.isCarryingPackage) {
+        if (this.truckOpen && (!this.availablePackage.isEmpty()) && !this.isCarryingPackage) {
             this.carriedPackageType = this.availablePackage; // Remember what type we picked up
             this.availablePackage = "";
             this.isCarryingPackage = true;
             if (this.view != null) {
-                this.view.update(this.packageGeneratorLocation.x, this.packageGeneratorLocation.y);
+                this.view.update(this.truckLocation.x, this.truckLocation.y);
             }
             return true;
         }
@@ -129,7 +179,7 @@ public class FactoryModel extends GridWorldModel {
     boolean addPackage(final String name) {
         this.availablePackage = name;
         if (this.view != null) {
-            this.view.update(this.packageGeneratorLocation.x, this.packageGeneratorLocation.y);
+            this.view.update(this.truckLocation.x, this.truckLocation.y);
         }
         return true;
     }
@@ -139,7 +189,7 @@ public class FactoryModel extends GridWorldModel {
             this.itemCount = new java.util.Random().nextInt(20) + 5; // randomly generate the number of items in the package
             this.isCarryingPackage = false;
             if (this.view != null) {
-                this.view.update(this.packageDeliveryLocationA.x, this.packageDeliveryLocationA.y);
+                this.view.update(this.deliveryLocation.x, this.deliveryLocation.y);
             }
             return true;
         }
@@ -150,7 +200,7 @@ public class FactoryModel extends GridWorldModel {
         if (this.itemCount > 0) {
             this.itemCount--;
             if (this.view != null) {
-                this.view.update(this.packageDeliveryLocationA.x, this.packageDeliveryLocationA.y);
+                this.view.update(this.deliveryLocation.x, this.deliveryLocation.y);
             }
             return true;
         }
