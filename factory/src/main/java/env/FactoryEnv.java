@@ -107,7 +107,7 @@ public class FactoryEnv extends Environment {
         } else if (action.getFunctor().equals("deliver")) {
             // simulate delivery time
             try {
-                Thread.sleep(10_000);
+                Thread.sleep(5_000);
                 // randomly generate a package type (it can either be a, b, or c)
                 String packageType = action.getTerm(1).toString().replaceAll("\"", "");
                 String[] types = {"a", "b", "c"};

@@ -33,10 +33,6 @@ too_much(B) :- // What does "drinking too much" implies?
 		" packages a day...I am very sorry about that :/", M);
 		.send(deliveryA, tell, msg(M)). // ...warn the owner
 		
-+?time(T)
-	: true
-	<- time.check(T). // notice USER-DEFINED INTERNAL action ("package.class" notation)
-
 /* Handle movement */
 +!at(robot, P) // if arrived at destination (P = "owner" | "fridge")...
 	: at(robot, P)
