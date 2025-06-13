@@ -7,12 +7,8 @@ import jason.environment.Environment;
 import jason.environment.grid.Location;
 import java.util.logging.Logger;
 
-/**
- * Any Jason environment "entry point" should extend
- * jason.environment.Environment class to override methods init(),
- * updatePercepts() and executeAction().
- */
-public class HouseEnv extends Environment {
+//TODO: refactor to become FACTORY
+public class FactoryEnv extends Environment {
 
     // action literals
     public static final Literal of = Literal.parseLiteral("open(fridge)");
@@ -26,16 +22,16 @@ public class HouseEnv extends Environment {
     public static final Literal af = Literal.parseLiteral("at(robot,fridge)");
     public static final Literal ao = Literal.parseLiteral("at(robot,owner)");
 
-    static Logger logger = Logger.getLogger(HouseEnv.class.getName());
+    static Logger logger = Logger.getLogger(FactoryEnv.class.getName());
 
-    HouseModel model; // the model of the grid
+    FactoryModel model; // the model of the grid
 
     @Override
     public void init(final String[] args) {
-        this.model = new HouseModel();
+        this.model = new FactoryModel();
 
         if ((args.length == 1) && args[0].equals("gui")) {
-            final HouseView view = new HouseView(this.model);
+            final FactoryView view = new FactoryView(this.model);
             this.model.setView(view);
         }
         // boot the agents' percepts
@@ -55,11 +51,11 @@ public class HouseEnv extends Environment {
         final Location lRobot = this.model.getAgPos(0);
 
         // the robot can perceive where it is
-        if (lRobot.equals(this.model.lFridge)) {
-            this.addPercept("robot", HouseEnv.af);
+        if (lRobot.equals(this.model.itemGeneratorLocation)) {
+            this.addPercept("robot", FactoryEnv.af);
         }
-        if (lRobot.equals(this.model.lOwner)) {
-            this.addPercept("robot", HouseEnv.ao);
+        if (lRobot.equals(this.model.itemDeliveryLocationA)) {
+            this.addPercept("robot", FactoryEnv.ao);
         }
 
         // the robot can perceive the beer stock only when at the (open) fridge
@@ -72,8 +68,8 @@ public class HouseEnv extends Environment {
 
         // the robot can perceive if the owner has beer (the owner too)
         if (this.model.sipCount > 0) {
-            this.addPercept("robot", HouseEnv.hob);
-            this.addPercept("owner", HouseEnv.hob);
+            this.addPercept("robot", FactoryEnv.hob);
+            this.addPercept("owner", FactoryEnv.hob);
         }
     }
 
@@ -85,24 +81,24 @@ public class HouseEnv extends Environment {
     public boolean executeAction(final String ag, final Structure action) {
         System.out.println("[" + ag + "] doing: " + action);
         boolean result = false;
-        if (action.equals(HouseEnv.of)) { // of = open(fridge)
+        if (action.equals(FactoryEnv.of)) { // of = open(fridge)
             result = this.model.openFridge();
-        } else if (action.equals(HouseEnv.clf)) { // clf = close(fridge)
+        } else if (action.equals(FactoryEnv.clf)) { // clf = close(fridge)
             result = this.model.closeFridge();
         } else if (action.getFunctor().equals("move_towards")) {
             final String l = action.getTerm(0).toString(); // get where to move
             Location dest = null;
             if (l.equals("fridge")) {
-                dest = this.model.lFridge;
+                dest = this.model.itemGeneratorLocation;
             } else if (l.equals("owner")) {
-                dest = this.model.lOwner;
+                dest = this.model.itemDeliveryLocationA;
             }
             result = this.model.moveTowards(dest);
-        } else if (action.equals(HouseEnv.gb)) { // gb = get(beer)
+        } else if (action.equals(FactoryEnv.gb)) { // gb = get(beer)
             result = this.model.getBeer();
-        } else if (action.equals(HouseEnv.hb)) { // hb = hand_in(beer)
+        } else if (action.equals(FactoryEnv.hb)) { // hb = hand_in(beer)
             result = this.model.handInBeer();
-        } else if (action.equals(HouseEnv.sb)) { // sb = sip(beer)
+        } else if (action.equals(FactoryEnv.sb)) { // sb = sip(beer)
             result = this.model.sipBeer();
         } else if (action.getFunctor().equals("deliver")) {
             // simulate delivery time
@@ -112,11 +108,11 @@ public class HouseEnv extends Environment {
                         .getTerm(1)).solve()); // add the number of beers
                                                // delivered
             } catch (final Exception e) {
-                HouseEnv.logger.info("Failed to execute action deliver!" + e);
+                FactoryEnv.logger.info("Failed to execute action deliver!" + e);
             }
 
         } else {
-            HouseEnv.logger.info("Failed to execute action " + action);
+            FactoryEnv.logger.info("Failed to execute action " + action);
         }
         // only if action completed successfully, update agents' percepts
         if (result) {

@@ -3,9 +3,10 @@ MAS factory {
 
 	infrastructure: Centralised
 
-	environment: env.HouseEnv(gui) // use "nogui" not to show the GUI
+	environment: env.FactoryEnv(gui)
 
 	agents:
+		//TODO: add agents and rename stuff to factory-like names  (supermarket --> deliveryA,B,C; owner --> itemGenerator; robot --> it's fine like this, just add more of them 1,2,3)
 		robot;
 		owner;
 		supermarket;
