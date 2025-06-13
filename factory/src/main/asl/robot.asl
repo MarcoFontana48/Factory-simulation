@@ -57,7 +57,7 @@ too_much(B) :- // What does "drinking too much" implies?
  * provided that YOU have correctly implemented method "updatePercepts()"
  * in the env.HouseEnv class (extending class jason.environment.Environment)
  */
-+stock(beer, 0)
++stock(beer, "")
 	: available(beer, fridge)
 	<- -available(beer, fridge). // no more beer in the fridge
 

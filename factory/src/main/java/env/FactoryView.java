@@ -25,15 +25,22 @@ public class FactoryView extends GridWorldView {
         return new Location(location.x, location.y);
     }
 
-    /** draw application objects */
     @Override
     public void draw(final Graphics graphics, final int x, final int y, final int item) {
+        // Handle obstacles FIRST, outside of SwingUtilities block
+        if (item == FactoryModel.OBSTACLE) {
+            graphics.setColor(Color.black);
+            super.drawObstacle(graphics, x, y);
+            return; // Exit early for obstacles
+        }
+        
+        // Rest of your original code stays the same
         final Location robotLocation = copyOf(this.model.getAgPos(0));
         final Location ItemGeneratorLocation = copyOf(this.model.itemGeneratorLocation);
         final Location deliveryLocationA = copyOf(this.model.itemDeliveryLocationA);
         final Location deliveryLocationB = copyOf(this.model.itemDeliveryLocationB);
         final Location deliveryLocationC = copyOf(this.model.itemDeliveryLocationC);
-        final int availableBeers = this.model.availableBeers;
+        final String availableItem = this.model.availableItem;
         final int sipCount = this.model.sipCount;
         SwingUtilities.invokeLater(() -> {
             String deliveryNameA = "A";
@@ -46,7 +53,11 @@ public class FactoryView extends GridWorldView {
                         super.drawAgent(graphics, x, y, Color.yellow, -1);
                     }
                     graphics.setColor(Color.black);
-                    this.drawString(graphics, x, y, this.defaultFont, "Fridge (" + availableBeers + ")");
+                    if (availableItem.isEmpty()) {
+                        this.drawString(graphics, x, y, this.defaultFont, "Gen");
+                    } else {
+                        this.drawString(graphics, x, y, this.defaultFont, "Gen (" + availableItem + ")");
+                    }
                     break;
                 case FactoryModel.ITEM_DELIVERY_A:
                     if (robotLocation.equals(deliveryLocationA)) {

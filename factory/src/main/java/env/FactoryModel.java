@@ -1,15 +1,17 @@
 package env;
 
+import java.util.List;
+
 import jason.environment.grid.GridWorldModel;
 import jason.environment.grid.Location;
 
 //TODO: refactor to become FACTORY
 public class FactoryModel extends GridWorldModel {
-
     public static final int ITEM_GENERATOR = 16;
     public static final int ITEM_DELIVERY_A = 32;
     public static final int ITEM_DELIVERY_B = 33;
     public static final int ITEM_DELIVERY_C = 34;
+    public static final int OBSTACLE = 4;
     public static final int GSize = 11;
     // whether the fridge is open
     boolean fridgeOpen = false;
@@ -17,26 +19,51 @@ public class FactoryModel extends GridWorldModel {
     boolean isCarryingItem = false;
     // how many sips the owner did
     int sipCount = 0;
-    // how many beers are available
-    int availableBeers = 2;
+    // how many packages are available
+    String availableItem = "A";
 
     // where the environment objects are
     Location itemGeneratorLocation = new Location(FactoryModel.GSize / 2, 0);
     Location itemDeliveryLocationA = new Location(FactoryModel.GSize / 2 + 2, FactoryModel.GSize - 1);
     Location itemDeliveryLocationB = new Location(FactoryModel.GSize / 2, FactoryModel.GSize - 1);
     Location itemDeliveryLocationC = new Location(FactoryModel.GSize / 2 - 2, FactoryModel.GSize - 1);
+    List<Location> obstacles = List.of(
+        // first row
+        new Location(0, 0), new Location(1, 0), new Location(2, 0), new Location(3, 0), new Location(4, 0), new Location(6, 0), new Location(7, 0), new Location(8, 0), new Location(9, 0), new Location(10, 0),
+        // second row (empty)
+        // third row
+        new Location(2, 2), new Location(3, 2), new Location(4, 2), new Location(8, 2),
+        // fourth row
+        new Location(4, 3), new Location(6, 3), new Location(7, 3), new Location(8, 3),
+        // fifth row
+        new Location(0, 4), new Location(1, 4), new Location(6, 4), new Location(10, 4),
+        // sixth row
+        new Location(3, 5), new Location(4, 5), new Location(5, 5), new Location(6, 5), new Location(8, 5),
+        // seventh row
+        new Location(8, 6), new Location(9, 6), new Location(10, 6),
+        // eighth row
+        new Location(0, 7), new Location(1, 7), new Location(2, 7), new Location(4, 7), new Location(5, 7), new Location(10, 7),
+        // ninth row
+        new Location(2, 8), new Location(5, 8), new Location(6, 8), new Location(7, 8), new Location(8, 8),
+        // tenth row (empty)
+        // eleventh row
+        new Location(0, 10), new Location(1, 10), new Location(2, 10), new Location(4, 10), new Location(6, 10), new Location(8, 10), new Location(9, 10), new Location(10, 10)
+    );
 
     public FactoryModel() {
-        // create a 7x7 grid with one mobile agent
-        super(FactoryModel.GSize, FactoryModel.GSize, 1);
+        // create a grid with one mobile agent (/*super(FactoryModel.GSize, FactoryModel.GSize, 3); */)
+        super(FactoryModel.GSize, FactoryModel.GSize, 3);
         // set the agent's initial position
-        this.setAgPos(0, FactoryModel.GSize / 2, FactoryModel.GSize / 2);
+        this.setAgPos(0, 5, 4);
+        this.setAgPos(1, 0, 1);
+        this.setAgPos(2, 10, 1);
         // initial location of item generator and delivery
         this.add(FactoryModel.ITEM_GENERATOR, this.itemGeneratorLocation);
         this.add(FactoryModel.ITEM_DELIVERY_A, this.itemDeliveryLocationA);
         this.add(FactoryModel.ITEM_DELIVERY_B, this.itemDeliveryLocationB);
         this.add(FactoryModel.ITEM_DELIVERY_C, this.itemDeliveryLocationC);
-        //TODO: check if you can add obstacles here so that the robot avoids them
+        // add obstacles
+        obstacles.forEach(loc -> this.add(FactoryModel.OBSTACLE, loc));
     }
 
     /*
@@ -86,9 +113,9 @@ public class FactoryModel extends GridWorldModel {
         return true;
     }
 
-    boolean getBeer() {
-        if (this.fridgeOpen && (this.availableBeers > 0) && !this.isCarryingItem) {
-            this.availableBeers--;
+    boolean getPackage() {
+        if (this.fridgeOpen && (!this.availableItem.isEmpty()) && !this.isCarryingItem) {
+            this.availableItem = "";
             this.isCarryingItem = true;
             if (this.view != null) {
                 this.view.update(this.itemGeneratorLocation.x, this.itemGeneratorLocation.y);
@@ -98,8 +125,9 @@ public class FactoryModel extends GridWorldModel {
         return false;
     }
 
-    boolean addBeer(final int n) {
-        this.availableBeers += n;
+    boolean addPackage(final String name) {
+        this.availableItem = name;
+        System.out.println("[" + this.getAgPos(0) + "] added package: " + this.availableItem);
         if (this.view != null) {
             this.view.update(this.itemGeneratorLocation.x, this.itemGeneratorLocation.y);
         }

@@ -1,7 +1,6 @@
 package env;
 
 import jason.asSyntax.Literal;
-import jason.asSyntax.NumberTerm;
 import jason.asSyntax.Structure;
 import jason.environment.Environment;
 import jason.environment.grid.Location;
@@ -9,7 +8,6 @@ import java.util.logging.Logger;
 
 //TODO: refactor to become FACTORY
 public class FactoryEnv extends Environment {
-
     // action literals
     public static final Literal of = Literal.parseLiteral("open(fridge)");
     public static final Literal clf = Literal.parseLiteral("close(fridge)");
@@ -63,7 +61,9 @@ public class FactoryEnv extends Environment {
             this.addPercept(
                     "robot",
                     Literal.parseLiteral("stock(beer,"
-                            + this.model.availableBeers + ")"));
+                            + "\"" + this.model.availableItem + "\"" + ")"
+                    )
+            );
         }
 
         // the robot can perceive if the owner has beer (the owner too)
@@ -95,7 +95,7 @@ public class FactoryEnv extends Environment {
             }
             result = this.model.moveTowards(dest);
         } else if (action.equals(FactoryEnv.gb)) { // gb = get(beer)
-            result = this.model.getBeer();
+            result = this.model.getPackage();
         } else if (action.equals(FactoryEnv.hb)) { // hb = hand_in(beer)
             result = this.model.handInBeer();
         } else if (action.equals(FactoryEnv.sb)) { // sb = sip(beer)
@@ -103,14 +103,16 @@ public class FactoryEnv extends Environment {
         } else if (action.getFunctor().equals("deliver")) {
             // simulate delivery time
             try {
-                Thread.sleep(4000);
-                result = this.model.addBeer((int) ((NumberTerm) action
-                        .getTerm(1)).solve()); // add the number of beers
-                                               // delivered
+                Thread.sleep(10_000);
+                // randomly generate a package type (it can either be A, B, or C)
+                String packageType = action.getTerm(1).toString().replaceAll("\"", "");
+                String[] types = {"A", "B", "C"};
+                packageType = types[(int) (Math.random() * types.length)];
+                // add the package to the model
+                result = this.model.addPackage(packageType);
             } catch (final Exception e) {
                 FactoryEnv.logger.info("Failed to execute action deliver!" + e);
             }
-
         } else {
             FactoryEnv.logger.info("Failed to execute action " + action);
         }
