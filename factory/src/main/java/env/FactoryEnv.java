@@ -49,10 +49,10 @@ public class FactoryEnv extends Environment {
         final Location lRobot = this.model.getAgPos(0);
 
         // the robot can perceive where it is
-        if (lRobot.equals(this.model.itemGeneratorLocation)) {
+        if (lRobot.equals(this.model.packageGeneratorLocation)) {
             this.addPercept("robot", FactoryEnv.af);
         }
-        if (lRobot.equals(this.model.itemDeliveryLocationA)) {
+        if (lRobot.equals(this.model.packageDeliveryLocationA)) {
             this.addPercept("robot", FactoryEnv.ao);
         }
 
@@ -61,13 +61,13 @@ public class FactoryEnv extends Environment {
             this.addPercept(
                     "robot",
                     Literal.parseLiteral("stock(package,"
-                            + "\"" + this.model.availableItem + "\"" + ")"
+                            + "\"" + this.model.availablePackage + "\"" + ")"
                     )
             );
         }
 
         // the robot can perceive if the owner has beer (the owner too)
-        if (this.model.sipCount > 0) {
+        if (this.model.itemCount > 0) {
             this.addPercept("robot", FactoryEnv.hob);
             this.addPercept("deliveryA", FactoryEnv.hob);
         }
@@ -89,13 +89,13 @@ public class FactoryEnv extends Environment {
             final String location = action.getTerm(0).toString(); // get where to move
             Location dest = null;
             if (location.equals("itemgen")) {
-                dest = this.model.itemGeneratorLocation;
+                dest = this.model.packageGeneratorLocation;
             } else if (location.equals("deliveryA")) {
-                dest = this.model.itemDeliveryLocationA;
+                dest = this.model.packageDeliveryLocationA;
             } else if (location.equals("deliveryB")) {
-                dest = this.model.itemDeliveryLocationB;
+                dest = this.model.packageDeliveryLocationB;
             } else if (location.equals("deliveryC")) {
-                dest = this.model.itemDeliveryLocationC;
+                dest = this.model.packageDeliveryLocationC;
             }
             result = this.model.moveTowards(dest);
         } else if (action.equals(FactoryEnv.gb)) { // gb = get(beer)

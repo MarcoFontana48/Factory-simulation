@@ -7,27 +7,27 @@ import jason.environment.grid.Location;
 
 //TODO: refactor to become FACTORY
 public class FactoryModel extends GridWorldModel {
-    public static final int ITEM_GENERATOR = 16;
-    public static final int ITEM_DELIVERY_A = 32;
-    public static final int ITEM_DELIVERY_B = 33;
-    public static final int ITEM_DELIVERY_C = 34;
+    public static final int PACKAGE_GENERATOR = 16;
+    public static final int PACKAGE_DELIVERY_A = 32;
+    public static final int PACKAGE_DELIVERY_B = 33;
+    public static final int PACKAGE_DELIVERY_C = 34;
     public static final int OBSTACLE = 4;
     public static final int GSize = 11;
     // whether the fridge is open
     boolean fridgeOpen = false;
     // whether the robot is carrying beer
-    boolean isCarryingItem = false;
+    boolean isCarryingPackage = false;
     // how many sips the owner did
-    int sipCount = 0;
+    int itemCount = 0;
     // package available
-    String availableItem = "a";
+    String availablePackage = "a";
     String carriedPackageType = "";
 
     // where the environment objects are
-    Location itemGeneratorLocation = new Location(FactoryModel.GSize / 2, 0);
-    Location itemDeliveryLocationA = new Location(FactoryModel.GSize / 2 + 2, FactoryModel.GSize - 1);
-    Location itemDeliveryLocationB = new Location(FactoryModel.GSize / 2, FactoryModel.GSize - 1);
-    Location itemDeliveryLocationC = new Location(FactoryModel.GSize / 2 - 2, FactoryModel.GSize - 1);
+    Location packageGeneratorLocation = new Location(FactoryModel.GSize / 2, 0);
+    Location packageDeliveryLocationA = new Location(FactoryModel.GSize / 2 + 2, FactoryModel.GSize - 1);
+    Location packageDeliveryLocationB = new Location(FactoryModel.GSize / 2, FactoryModel.GSize - 1);
+    Location packageDeliveryLocationC = new Location(FactoryModel.GSize / 2 - 2, FactoryModel.GSize - 1);
     List<Location> obstacles = List.of(
         // first row
         new Location(0, 0), new Location(1, 0), new Location(2, 0), new Location(3, 0), new Location(4, 0), new Location(6, 0), new Location(7, 0), new Location(8, 0), new Location(9, 0), new Location(10, 0),
@@ -58,11 +58,11 @@ public class FactoryModel extends GridWorldModel {
         this.setAgPos(0, 5, 4);
         this.setAgPos(1, 0, 1);
         this.setAgPos(2, 10, 1);
-        // initial location of item generator and delivery
-        this.add(FactoryModel.ITEM_GENERATOR, this.itemGeneratorLocation);
-        this.add(FactoryModel.ITEM_DELIVERY_A, this.itemDeliveryLocationA);
-        this.add(FactoryModel.ITEM_DELIVERY_B, this.itemDeliveryLocationB);
-        this.add(FactoryModel.ITEM_DELIVERY_C, this.itemDeliveryLocationC);
+        // initial location of package generator and delivery
+        this.add(FactoryModel.PACKAGE_GENERATOR, this.packageGeneratorLocation);
+        this.add(FactoryModel.PACKAGE_DELIVERY_A, this.packageDeliveryLocationA);
+        this.add(FactoryModel.PACKAGE_DELIVERY_B, this.packageDeliveryLocationB);
+        this.add(FactoryModel.PACKAGE_DELIVERY_C, this.packageDeliveryLocationC);
         // add obstacles
         obstacles.forEach(loc -> this.add(FactoryModel.OBSTACLE, loc));
     }
@@ -105,21 +105,21 @@ public class FactoryModel extends GridWorldModel {
         this.setAgPos(0, r1); // actually move the robot in the grid
         // repaint fridge and owner locations (to repaint colors)
         if (this.view != null) {
-            this.view.update(this.itemGeneratorLocation.x, this.itemGeneratorLocation.y);
-            this.view.update(this.itemDeliveryLocationA.x, this.itemDeliveryLocationA.y);
-            this.view.update(this.itemDeliveryLocationB.x, this.itemDeliveryLocationB.y);
-            this.view.update(this.itemDeliveryLocationC.x, this.itemDeliveryLocationC.y);
+            this.view.update(this.packageGeneratorLocation.x, this.packageGeneratorLocation.y);
+            this.view.update(this.packageDeliveryLocationA.x, this.packageDeliveryLocationA.y);
+            this.view.update(this.packageDeliveryLocationB.x, this.packageDeliveryLocationB.y);
+            this.view.update(this.packageDeliveryLocationC.x, this.packageDeliveryLocationC.y);
         }
         return true;
     }
 
     boolean getPackage() {
-        if (this.fridgeOpen && (!this.availableItem.isEmpty()) && !this.isCarryingItem) {
-            this.carriedPackageType = this.availableItem; // Remember what type we picked up
-            this.availableItem = "";
-            this.isCarryingItem = true;
+        if (this.fridgeOpen && (!this.availablePackage.isEmpty()) && !this.isCarryingPackage) {
+            this.carriedPackageType = this.availablePackage; // Remember what type we picked up
+            this.availablePackage = "";
+            this.isCarryingPackage = true;
             if (this.view != null) {
-                this.view.update(this.itemGeneratorLocation.x, this.itemGeneratorLocation.y);
+                this.view.update(this.packageGeneratorLocation.x, this.packageGeneratorLocation.y);
             }
             return true;
         }
@@ -127,20 +127,20 @@ public class FactoryModel extends GridWorldModel {
     }
 
     boolean addPackage(final String name) {
-        this.availableItem = name;
-        System.out.println("[" + this.getAgPos(0) + "] added package: " + this.availableItem);
+        this.availablePackage = name;
+        System.out.println("[" + this.getAgPos(0) + "] added package: " + this.availablePackage);
         if (this.view != null) {
-            this.view.update(this.itemGeneratorLocation.x, this.itemGeneratorLocation.y);
+            this.view.update(this.packageGeneratorLocation.x, this.packageGeneratorLocation.y);
         }
         return true;
     }
 
     boolean handInBeer() {
-        if (this.isCarryingItem) {
-            this.sipCount = 10;
-            this.isCarryingItem = false;
+        if (this.isCarryingPackage) {
+            this.itemCount = new java.util.Random().nextInt(20) + 5; // randomly generate the number of items in the package
+            this.isCarryingPackage = false;
             if (this.view != null) {
-                this.view.update(this.itemDeliveryLocationA.x, this.itemDeliveryLocationA.y);
+                this.view.update(this.packageDeliveryLocationA.x, this.packageDeliveryLocationA.y);
             }
             return true;
         }
@@ -148,10 +148,10 @@ public class FactoryModel extends GridWorldModel {
     }
 
     boolean sipBeer() {
-        if (this.sipCount > 0) {
-            this.sipCount--;
+        if (this.itemCount > 0) {
+            this.itemCount--;
             if (this.view != null) {
-                this.view.update(this.itemDeliveryLocationA.x, this.itemDeliveryLocationA.y);
+                this.view.update(this.packageDeliveryLocationA.x, this.packageDeliveryLocationA.y);
             }
             return true;
         }
