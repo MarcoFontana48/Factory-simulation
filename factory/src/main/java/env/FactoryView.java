@@ -14,7 +14,7 @@ public class FactoryView extends GridWorldView {
     public FactoryView(final FactoryModel model) {
         super(model, "Factory Simulation", 700);
         this.model = model;
-        this.defaultFont = new Font("Noto Sans", Font.BOLD, 16); // change default font
+        this.defaultFont = new Font("Noto Sans", Font.BOLD, 16);
         SwingUtilities.invokeLater(() -> {
             this.setVisible(true);
             this.repaint();
@@ -105,7 +105,7 @@ public class FactoryView extends GridWorldView {
         final boolean isCarryingPackage = this.model.isCarryingPackage;
         SwingUtilities.invokeLater(() -> {
             if (!(robotLocation.equals(packageDeliveryLocationA) || robotLocation.equals(packageDeliveryLocationB) || robotLocation.equals(packageDeliveryLocationC) || robotLocation.equals(packageGeneratorLocation))) {
-                super.drawAgent(graphics, x, y, isCarryingPackage ? Color.gray : Color.lightGray, id);    // colora il robot a seconda che abbia o meno un oggetto in mano
+                super.drawAgent(graphics, x, y, isCarryingPackage ? Color.gray : Color.lightGray, id);    // colora il robot a seconda che abbia o meno un 'package' in mano
                 graphics.setColor(Color.black);
                 super.drawString(graphics, x, y, this.defaultFont, "Robot" + id);
             }
