@@ -50,7 +50,7 @@ public class FactoryView extends GridWorldView {
             switch (item) {
                 case FactoryModel.PACKAGE_GENERATOR:
                     if (robotLocation.equals(packageGeneratorLocation)) {
-                        super.drawAgent(graphics, x, y, Color.yellow, -1);
+                        super.drawAgent(graphics, x, y, Color.green.darker(), -1);
                     }
                     graphics.setColor(Color.black);
                     if (availablePackage.isEmpty()) {
@@ -61,7 +61,7 @@ public class FactoryView extends GridWorldView {
                     break;
                 case FactoryModel.PACKAGE_DELIVERY_A:
                     if (robotLocation.equals(packageDeliveryLocationA)) {
-                        super.drawAgent(graphics, x, y, Color.red, -1);
+                        super.drawAgent(graphics, x, y, Color.green.darker(), -1);
                     }
                     if (itemCount > 0) {
                         deliveryNameA += " (" + itemCount + ")";
@@ -71,7 +71,7 @@ public class FactoryView extends GridWorldView {
                     break;
                 case FactoryModel.PACKAGE_DELIVERY_B:
                     if (robotLocation.equals(packageDeliveryLocationB)) {
-                        super.drawAgent(graphics, x, y, Color.red, -1);
+                        super.drawAgent(graphics, x, y, Color.green.darker(), -1);
                     }
                     if (itemCount > 0) {
                         deliveryNameB += " (" + itemCount + ")";
@@ -81,7 +81,7 @@ public class FactoryView extends GridWorldView {
                     break;
                 case FactoryModel.PACKAGE_DELIVERY_C:
                     if (robotLocation.equals(packageDeliveryLocationC)) {
-                        super.drawAgent(graphics, x, y, Color.red, -1);
+                        super.drawAgent(graphics, x, y, Color.green.darker(), -1);
                     }
                     if (itemCount > 0) {
                         deliveryNameC += " (" + itemCount + ")";
@@ -105,9 +105,9 @@ public class FactoryView extends GridWorldView {
         final boolean isCarryingPackage = this.model.isCarryingPackage;
         SwingUtilities.invokeLater(() -> {
             if (!(robotLocation.equals(packageDeliveryLocationA) || robotLocation.equals(packageDeliveryLocationB) || robotLocation.equals(packageDeliveryLocationC) || robotLocation.equals(packageGeneratorLocation))) {
-                super.drawAgent(graphics, x, y, isCarryingPackage ? Color.gray : Color.lightGray, id);    // colora il robot a seconda che abbia o meno un 'package' in mano
+                super.drawAgent(graphics, x, y, isCarryingPackage ? Color.cyan : Color.cyan.darker(), id);    // colora il robot a seconda che abbia o meno un 'package' in mano
                 graphics.setColor(Color.black);
-                super.drawString(graphics, x, y, this.defaultFont, "Robot" + id);
+                //super.drawString(graphics, x, y, this.defaultFont, "Robot" + id);
             }
         });
     }

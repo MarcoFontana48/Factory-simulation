@@ -7,9 +7,9 @@ MAS factory {
 
 	agents:
 		//TODO: add agents and rename stuff to factory-like names  (supermarket --> deliveryA,B,C; owner --> itemGenerator; robot --> it's fine like this, just add more of them 1,2,3)
-		robot robot;
+		robot;
 		deliveryA delivery;
-		supermarket;
+		truck;
 
 	aslSourcePath:
 		"src/main/asl";

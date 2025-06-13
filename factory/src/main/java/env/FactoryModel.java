@@ -128,7 +128,6 @@ public class FactoryModel extends GridWorldModel {
 
     boolean addPackage(final String name) {
         this.availablePackage = name;
-        System.out.println("[" + this.getAgPos(0) + "] added package: " + this.availablePackage);
         if (this.view != null) {
             this.view.update(this.packageGeneratorLocation.x, this.packageGeneratorLocation.y);
         }

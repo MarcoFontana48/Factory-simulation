@@ -9,16 +9,16 @@ import java.util.logging.Logger;
 //TODO: refactor to become FACTORY
 public class FactoryEnv extends Environment {
     // action literals
-    public static final Literal of = Literal.parseLiteral("open(packageGen)");
-    public static final Literal clf = Literal.parseLiteral("close(packageGen)");
-    public static final Literal gb = Literal.parseLiteral("get(package)");
-    public static final Literal hb = Literal.parseLiteral("hand_in(package)");
-    public static final Literal sb = Literal.parseLiteral("take_item(package)");
+    public static final Literal openTruck = Literal.parseLiteral("open(truck)");
+    public static final Literal closeTruck = Literal.parseLiteral("close(truck)");
+    public static final Literal getPackage = Literal.parseLiteral("get(package)");
+    public static final Literal handInPackage = Literal.parseLiteral("hand_in(package)");
+    public static final Literal takePackage = Literal.parseLiteral("take_item(package)");
 
     // belief literals
-    public static final Literal hob = Literal.parseLiteral("has(deliveryA,package)");
-    public static final Literal af = Literal.parseLiteral("at(robot,packageGen)");
-    public static final Literal ao = Literal.parseLiteral("at(robot,deliveryA)");
+    public static final Literal hasDeliveryAPackage = Literal.parseLiteral("has(deliveryA,package)");
+    public static final Literal atTruck = Literal.parseLiteral("at(robot,truck)");
+    public static final Literal atDeliveryA = Literal.parseLiteral("at(robot,deliveryA)");
 
     static Logger logger = Logger.getLogger(FactoryEnv.class.getName());
 
@@ -50,10 +50,10 @@ public class FactoryEnv extends Environment {
 
         // the robot can perceive where it is
         if (lRobot.equals(this.model.packageGeneratorLocation)) {
-            this.addPercept("robot", FactoryEnv.af);
+            this.addPercept("robot", FactoryEnv.atTruck);
         }
         if (lRobot.equals(this.model.packageDeliveryLocationA)) {
-            this.addPercept("robot", FactoryEnv.ao);
+            this.addPercept("robot", FactoryEnv.atDeliveryA);
         }
 
         // the robot can perceive the beer stock only when at the (open) fridge
@@ -68,8 +68,8 @@ public class FactoryEnv extends Environment {
 
         // the robot can perceive if the owner has beer (the owner too)
         if (this.model.itemCount > 0) {
-            this.addPercept("robot", FactoryEnv.hob);
-            this.addPercept("deliveryA", FactoryEnv.hob);
+            this.addPercept("robot", FactoryEnv.hasDeliveryAPackage);
+            this.addPercept("deliveryA", FactoryEnv.hasDeliveryAPackage);
         }
     }
 
@@ -81,14 +81,14 @@ public class FactoryEnv extends Environment {
     public boolean executeAction(final String ag, final Structure action) {
         System.out.println("[" + ag + "] doing: " + action);
         boolean result = false;
-        if (action.equals(FactoryEnv.of)) { // of = open(fridge)
+        if (action.equals(FactoryEnv.openTruck)) { // of = open(fridge)
             result = this.model.openFridge();
-        } else if (action.equals(FactoryEnv.clf)) { // clf = close(fridge)
+        } else if (action.equals(FactoryEnv.closeTruck)) { // clf = close(fridge)
             result = this.model.closeFridge();
         } else if (action.getFunctor().equals("move_towards")) {
             final String location = action.getTerm(0).toString(); // get where to move
             Location dest = null;
-            if (location.equals("packageGen")) {
+            if (location.equals("truck")) {
                 dest = this.model.packageGeneratorLocation;
             } else if (location.equals("deliveryA")) {
                 dest = this.model.packageDeliveryLocationA;
@@ -98,11 +98,11 @@ public class FactoryEnv extends Environment {
                 dest = this.model.packageDeliveryLocationC;
             }
             result = this.model.moveTowards(dest);
-        } else if (action.equals(FactoryEnv.gb)) { // gb = get(beer)
+        } else if (action.equals(FactoryEnv.getPackage)) { // gb = get(beer)
             result = this.model.getPackage();
-        } else if (action.equals(FactoryEnv.hb)) { // hb = hand_in(beer)
+        } else if (action.equals(FactoryEnv.handInPackage)) { // hb = hand_in(beer)
             result = this.model.deliverPackage();
-        } else if (action.equals(FactoryEnv.sb)) { // sb = sip(beer)
+        } else if (action.equals(FactoryEnv.takePackage)) { // sb = sip(beer)
             result = this.model.takeItem();
         } else if (action.getFunctor().equals("deliver")) {
             // simulate delivery time
@@ -114,6 +114,7 @@ public class FactoryEnv extends Environment {
                 packageType = types[(int) (Math.random() * types.length)];
                 // add the package to the model
                 result = this.model.addPackage(packageType);
+                System.out.println("[" + ag + "] added package: " + packageType);
             } catch (final Exception e) {
                 FactoryEnv.logger.info("Failed to execute action deliver!" + e);
             }
