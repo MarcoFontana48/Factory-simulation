@@ -7,24 +7,24 @@
 
 +!get(package) // How to get beer?
 	: true
-	<- .send(robot, achieve, has(owner, package)). // "achieve" -> achievement-goal addition
+	<- .send(robot, achieve, has(deliveryA, package)). // "achieve" -> achievement-goal addition
 
-+has(owner, package) // As soon as I perceive to have beer, drink it
++has(deliveryA, package) // As soon as I perceive to have beer, drink it
 	: true
 	<- !drink(package). // sub-goal: if I have beer, drink it
 
--has(owner, package) // As soon as I perceive NOT to have beer, I want it
+-has(deliveryA, package) // As soon as I perceive NOT to have beer, I want it
 	: true
 	<- !get(package).
 
 /* Sub-plans */
 
 +!drink(package) // How to drink beer? (if I have it)
-	: has(owner, package) // while I have beer...
+	: has(deliveryA, package) // while I have beer...
 	<- sip(package); !drink(package). // ...keep drinking (notice EXTERNAL action "sip", defined in "env.HouseEnv")
 
 +!drink(package) // How to drink beer? (if I do NOT have it)
-	: not has(owner, package) // if I do NOT have beer...
+	: not has(deliveryA, package) // if I do NOT have beer...
 	<- true. // ...stop drinking (simply drop recursion)
  
 +!check_bored

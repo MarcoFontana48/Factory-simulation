@@ -10,28 +10,28 @@ too_much(B) :- // What does "drinking too much" implies?
 /* Plans library */
 
 /* Handle owner's orders */
-+!has(owner, package) // How to ensure owner has beer?
++!has(deliveryA, package) // How to ensure owner has beer?
 	: available(package, itemgen) & not too_much(package) // if there is beer available and owner is still sober...
 	<- !at(robot, itemgen); // ...reach the fridge...
 		open(itemgen); get(package); close(itemgen); // ...get the beer (notice EXTERNAL actions)...
-		!at(robot, owner); // ...reach the owner...
+		!at(robot, deliveryA); // ...reach the owner...
 		hand_in(package); // ...give beer to owner...
-		?has(owner, package); // ...ensure owner has beer
+		?has(deliveryA, package); // ...ensure owner has beer
 		.date(YY, MM, DD);
 		.time(HH, NN, SS);
 		+consumed(YY, MM, DD, HH, NN, SS, package). // (track number of beer consumed)
 
 @waitfor
-+!has(owner, package)
++!has(deliveryA, package)
 	: not available(package, itemgen) // if there is NOT beer available...
 	<- .send(supermarket, achieve, order(package, 5)); // ...order new beer stock...
 		!at(robot, itemgen). // ...then wait at the fridge (it is well known that beer automagically appear in the fridge)
 
-+!has(owner, package)
++!has(deliveryA, package)
 	: too_much(package) & limit(package, L) // if owner is no longer sober...
 	<- .concat("The Department of Health does not allow me to give you more than ", L,
 		" packages a day...I am very sorry about that :/", M);
-		.send(owner, tell, msg(M)). // ...warn the owner
+		.send(deliveryA, tell, msg(M)). // ...warn the owner
 		
 +?time(T)
 	: true
@@ -50,7 +50,7 @@ too_much(B) :- // What does "drinking too much" implies?
 +delivered(package, _Qtd, _OrderId)[source(supermarket)] // As soon as beer is delivered...
 	: true
 	<- +available(package, itemgen); // ...track the new stock...
-		!has(owner, package). // ...and re-try to satisfy owners' orders (notice we are stuck at the fridge since plan @waitfor)
+		!has(deliveryA, package). // ...and re-try to satisfy owners' orders (notice we are stuck at the fridge since plan @waitfor)
 
 /* NOTICE: "stock" and "has" beliefs are "perceptions",
  * thus they are automagically added by Jason runtime,

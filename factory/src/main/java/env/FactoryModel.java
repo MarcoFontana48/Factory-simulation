@@ -20,7 +20,7 @@ public class FactoryModel extends GridWorldModel {
     // how many sips the owner did
     int sipCount = 0;
     // package available
-    String availableItem = "A";
+    String availableItem = "a";
     String carriedPackageType = "";
 
     // where the environment objects are

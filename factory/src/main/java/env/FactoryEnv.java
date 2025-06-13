@@ -16,9 +16,9 @@ public class FactoryEnv extends Environment {
     public static final Literal sb = Literal.parseLiteral("sip(package)");
 
     // belief literals
-    public static final Literal hob = Literal.parseLiteral("has(owner,package)");
+    public static final Literal hob = Literal.parseLiteral("has(deliveryA,package)");
     public static final Literal af = Literal.parseLiteral("at(robot,itemgen)");
-    public static final Literal ao = Literal.parseLiteral("at(robot,owner)");
+    public static final Literal ao = Literal.parseLiteral("at(robot,deliveryA)");
 
     static Logger logger = Logger.getLogger(FactoryEnv.class.getName());
 
@@ -43,7 +43,7 @@ public class FactoryEnv extends Environment {
     void updatePercepts() {
         // clear the percepts of the agents
         this.clearPercepts("robot");
-        this.clearPercepts("owner");
+        this.clearPercepts("deliveryA");
 
         // get the robot location
         final Location lRobot = this.model.getAgPos(0);
@@ -69,7 +69,7 @@ public class FactoryEnv extends Environment {
         // the robot can perceive if the owner has beer (the owner too)
         if (this.model.sipCount > 0) {
             this.addPercept("robot", FactoryEnv.hob);
-            this.addPercept("owner", FactoryEnv.hob);
+            this.addPercept("deliveryA", FactoryEnv.hob);
         }
     }
 
@@ -90,7 +90,7 @@ public class FactoryEnv extends Environment {
             Location dest = null;
             if (location.equals("itemgen")) {
                 dest = this.model.itemGeneratorLocation;
-            } else if (location.equals("owner")) {
+            } else if (location.equals("deliveryA")) {
                 dest = this.model.itemDeliveryLocationA;
             } else if (location.equals("deliveryB")) {
                 dest = this.model.itemDeliveryLocationB;
@@ -108,9 +108,9 @@ public class FactoryEnv extends Environment {
             // simulate delivery time
             try {
                 Thread.sleep(10_000);
-                // randomly generate a package type (it can either be A, B, or C)
+                // randomly generate a package type (it can either be a, b, or c)
                 String packageType = action.getTerm(1).toString().replaceAll("\"", "");
-                String[] types = {"A", "B", "C"};
+                String[] types = {"a", "b", "c"};
                 packageType = types[(int) (Math.random() * types.length)];
                 // add the package to the model
                 result = this.model.addPackage(packageType);
