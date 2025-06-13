@@ -41,7 +41,7 @@ public class FactoryView extends GridWorldView {
         final Location packageDeliveryLocationB = copyOf(this.model.packageDeliveryLocationB);
         final Location packageDeliveryLocationC = copyOf(this.model.packageDeliveryLocationC);
         final String availablePackage = this.model.availablePackage;
-        final int sipCount = this.model.itemCount;
+        final int itemCount = this.model.itemCount;
         SwingUtilities.invokeLater(() -> {
             String deliveryNameA = "A";
             String deliveryNameB = "B";
@@ -63,8 +63,8 @@ public class FactoryView extends GridWorldView {
                     if (robotLocation.equals(packageDeliveryLocationA)) {
                         super.drawAgent(graphics, x, y, Color.red, -1);
                     }
-                    if (sipCount > 0) {
-                        deliveryNameA += " (" + sipCount + ")";
+                    if (itemCount > 0) {
+                        deliveryNameA += " (" + itemCount + ")";
                     }
                     graphics.setColor(Color.black);
                     this.drawString(graphics, x, y, this.defaultFont, deliveryNameA);
@@ -73,8 +73,8 @@ public class FactoryView extends GridWorldView {
                     if (robotLocation.equals(packageDeliveryLocationB)) {
                         super.drawAgent(graphics, x, y, Color.red, -1);
                     }
-                    if (sipCount > 0) {
-                        deliveryNameB += " (" + sipCount + ")";
+                    if (itemCount > 0) {
+                        deliveryNameB += " (" + itemCount + ")";
                     }
                     graphics.setColor(Color.black);
                     this.drawString(graphics, x, y, this.defaultFont, deliveryNameB);
@@ -83,8 +83,8 @@ public class FactoryView extends GridWorldView {
                     if (robotLocation.equals(packageDeliveryLocationC)) {
                         super.drawAgent(graphics, x, y, Color.red, -1);
                     }
-                    if (sipCount > 0) {
-                        deliveryNameC += " (" + sipCount + ")";
+                    if (itemCount > 0) {
+                        deliveryNameC += " (" + itemCount + ")";
                     }
                     graphics.setColor(Color.black);
                     this.drawString(graphics, x, y, this.defaultFont, deliveryNameC);

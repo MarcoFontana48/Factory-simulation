@@ -13,7 +13,7 @@ public class FactoryEnv extends Environment {
     public static final Literal clf = Literal.parseLiteral("close(itemgen)");
     public static final Literal gb = Literal.parseLiteral("get(package)");
     public static final Literal hb = Literal.parseLiteral("hand_in(package)");
-    public static final Literal sb = Literal.parseLiteral("sip(package)");
+    public static final Literal sb = Literal.parseLiteral("take_item(package)");
 
     // belief literals
     public static final Literal hob = Literal.parseLiteral("has(deliveryA,package)");
@@ -101,9 +101,9 @@ public class FactoryEnv extends Environment {
         } else if (action.equals(FactoryEnv.gb)) { // gb = get(beer)
             result = this.model.getPackage();
         } else if (action.equals(FactoryEnv.hb)) { // hb = hand_in(beer)
-            result = this.model.handInBeer();
+            result = this.model.deliverPackage();
         } else if (action.equals(FactoryEnv.sb)) { // sb = sip(beer)
-            result = this.model.sipBeer();
+            result = this.model.takeItem();
         } else if (action.getFunctor().equals("deliver")) {
             // simulate delivery time
             try {

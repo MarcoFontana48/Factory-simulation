@@ -21,7 +21,7 @@
 
 +!drink(package) // How to drink beer? (if I have it)
 	: has(deliveryA, package) // while I have beer...
-	<- sip(package); !drink(package). // ...keep drinking (notice EXTERNAL action "sip", defined in "env.HouseEnv")
+	<- take_item(package); !drink(package). // ...keep drinking (notice EXTERNAL action "sip", defined in "env.HouseEnv")
 
 +!drink(package) // How to drink beer? (if I do NOT have it)
 	: not has(deliveryA, package) // if I do NOT have beer...

@@ -135,7 +135,7 @@ public class FactoryModel extends GridWorldModel {
         return true;
     }
 
-    boolean handInBeer() {
+    boolean deliverPackage() {
         if (this.isCarryingPackage) {
             this.itemCount = new java.util.Random().nextInt(20) + 5; // randomly generate the number of items in the package
             this.isCarryingPackage = false;
@@ -147,7 +147,7 @@ public class FactoryModel extends GridWorldModel {
         return false;
     }
 
-    boolean sipBeer() {
+    boolean takeItem() {
         if (this.itemCount > 0) {
             this.itemCount--;
             if (this.view != null) {
