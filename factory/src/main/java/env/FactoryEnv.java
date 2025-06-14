@@ -106,7 +106,7 @@ public class FactoryEnv extends Environment {
                 Thread.sleep(5_000);
                 // randomly generate a package type (it can either be a, b, or c)
                 String packageType = action.getTerm(1).toString().replaceAll("\"", "");
-                String[] types = {"a", "b", "c"};
+                String[] types = {"a"};
                 packageType = types[(int) (Math.random() * types.length)];
                 // add the package to the model
                 result = this.model.addPackage(packageType);
@@ -121,7 +121,7 @@ public class FactoryEnv extends Environment {
         if (result) {
             this.updatePercepts();
             try {
-                Thread.sleep(250);
+                Thread.sleep(500);
             } catch (final Exception e) {
             }
         }
