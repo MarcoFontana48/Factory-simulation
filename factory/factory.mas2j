@@ -3,13 +3,15 @@ MAS factory {
 
 	infrastructure: Centralised
 
-	environment: env.FactoryEnv(gui)
+	environment: env.FactoryEnv(nogui)
 
 	agents:
-		//TODO: add agents and rename stuff to factory-like names  (supermarket --> deliveryA,B,C; owner --> itemGenerator; robot --> it's fine like this, just add more of them 1,2,3)
-		robot;
-		deliveryA delivery;
-		truck;
+		d_bot_1 delivery_robot;
+		d_bot_2 delivery_robot;
+		//d_bot_3 delivery_robot;
+		ch_st_1 charging_station;
+		//deliveryA delivery_place;
+		//truck;
 
 	aslSourcePath:
 		"src/main/asl";

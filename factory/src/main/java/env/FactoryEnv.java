@@ -78,8 +78,8 @@ public class FactoryEnv extends Environment {
      * (success/failure)
      */
     @Override
-    public boolean executeAction(final String ag, final Structure action) {
-        System.out.println("[" + ag + "] doing: " + action);
+    public boolean executeAction(final String agentNameString, final Structure action) {
+        System.out.println("[" + agentNameString + "] doing: " + action);
         boolean result = false;
         if (action.equals(FactoryEnv.openTruck)) { // of = open(fridge)
             result = this.model.openTruck();
@@ -93,9 +93,9 @@ public class FactoryEnv extends Environment {
             } else if (location.equals("deliveryA")) {
                 dest = this.model.deliveryLocation;
             }
-            final int agId = this.getAgIdBasedOnName(ag); // get the agent id based on its name
+            final int agId = this.getAgIdBasedOnName(agentNameString); // get the agent id based on its name
             result = this.model.moveTowards(agId, dest);
-            if (ag.contains("robot")) {
+            if (agentNameString.contains("robot")) {
                 model.decreaseEnergy(agId);
             }
         } else if (action.equals(FactoryEnv.getPackage)) { // gb = get(beer)
@@ -108,13 +108,13 @@ public class FactoryEnv extends Environment {
             // simulate delivery time
             try {
                 Thread.sleep(5_000);
-                // randomly generate a package type (it can either be a, b, or c)
+                // randomly generate a package
                 String packageType = action.getTerm(1).toString().replaceAll("\"", "");
                 String[] types = {"a"};
-                packageType = types[(int) (Math.random() * types.length)];
+                packageType = types[(int) (Math.random() * types.length)];  // currently, only one type of package
                 // add the package to the model
                 result = this.model.addPackage(packageType);
-                System.out.println("[" + ag + "] added package: " + packageType);
+                System.out.println("[" + agentNameString + "] added package: " + packageType);
             } catch (final Exception e) {
                 FactoryEnv.logger.info("Failed to execute action deliver!" + e);
             }
@@ -134,7 +134,13 @@ public class FactoryEnv extends Environment {
 
     public int getAgIdBasedOnName(String agName) {
         return switch (agName) {
-            case "robot" -> 0;
+            case "d_bot_1" -> 0;
+            case "d_bot_2" -> 1;
+            case "d_bot_3" -> 2;
+            case "ch_st_1" -> 3;
+            case "ch_st_2" -> 4;
+            case "truck_1" -> 5;
+            case "deliv_A" -> 6;
             default -> -1;
         };
     }
