@@ -93,7 +93,11 @@ public class FactoryEnv extends Environment {
             } else if (location.equals("deliveryA")) {
                 dest = this.model.deliveryLocation;
             }
-            result = this.model.moveTowards(dest);
+            final int agId = this.getAgIdBasedOnName(ag); // get the agent id based on its name
+            result = this.model.moveTowards(agId, dest);
+            if (ag.contains("robot")) {
+                model.decreaseEnergy(agId);
+            }
         } else if (action.equals(FactoryEnv.getPackage)) { // gb = get(beer)
             result = this.model.getPackage();
         } else if (action.equals(FactoryEnv.handInPackage)) { // hb = hand_in(beer)
@@ -126,5 +130,12 @@ public class FactoryEnv extends Environment {
             }
         }
         return result;
+    }
+
+    public int getAgIdBasedOnName(String agName) {
+        return switch (agName) {
+            case "robot" -> 0;
+            default -> -1;
+        };
     }
 }

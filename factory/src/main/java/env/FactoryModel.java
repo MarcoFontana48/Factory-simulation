@@ -1,6 +1,11 @@
 package env;
 
+import java.util.Map;
+
+import env.agent.DeliveryRobot;
+import env.behaviour.MovementManager;
 import jason.environment.grid.GridWorldModel;
+import jason.environment.grid.GridWorldView;
 import jason.environment.grid.Location;
 
 //TODO: refactor to become FACTORY
@@ -9,13 +14,15 @@ public class FactoryModel extends GridWorldModel {
     public static final int PACKAGE_DELIVERY = 32;
     public static final int OBSTACLE = 4;
     public static final int GSize = 13;
+    public final MovementManager navigationManager = new MovementManager(this);
+    public Location truckLocation = new Location(FactoryModel.GSize / 2, 0);
+    public Location deliveryLocation = new Location(FactoryModel.GSize / 2, FactoryModel.GSize - 1);
     boolean truckOpen = false;
     boolean isCarryingPackage = false;
     int itemCount = 0;
     String availablePackage = "a";
     String carriedPackageType = "";
-    Location truckLocation = new Location(FactoryModel.GSize / 2, 0);
-    Location deliveryLocation = new Location(FactoryModel.GSize / 2, FactoryModel.GSize - 1);
+    Map<Integer, DeliveryRobot> robots = new java.util.HashMap<>();
 
     public FactoryModel() {
         // create a grid with mobile agents (/*super(FactoryModel.GSize, FactoryModel.GSize, 3); */)
@@ -40,7 +47,11 @@ public class FactoryModel extends GridWorldModel {
             x = (int) (Math.random() * GSize);
             y = (int) (Math.random() * GSize);
         } while (!isFree(x, y));
-        this.setAgPos(0, x, y);
+        for (int i = 0; i < 3; i++) {
+            DeliveryRobot robot = new DeliveryRobot(i);
+            this.robots.put(i, robot);
+            this.setAgPos(i, new Location(x, y));
+        }
     }
 
     private void addWalls() {
@@ -94,135 +105,8 @@ public class FactoryModel extends GridWorldModel {
         return false;
     }
 
-    boolean moveTowards(final Location dest) {
-        final Location r1 = this.getAgPos(0);
-        final Location originalPos = new Location(r1.x, r1.y); // Store original position
-        java.util.Random random = new java.util.Random();
-        
-        // Calculate initial distances to determine priority
-        int verticalDistance = Math.abs(r1.y - dest.y);
-        int horizontalDistance = Math.abs(r1.x - dest.x);
-        boolean prioritizeVertical = verticalDistance >= horizontalDistance;
-        
-        // decide probabilistically whether to move towards or away from the target
-        // chance to move towards the target (in order to make the robot eventually reach the target and not get stuck)
-        boolean moveTowardsTarget = random.nextDouble() < 0.75;
-        
-        if (prioritizeVertical) {
-            // Try vertical movement first
-            Location verticalMove = new Location(r1.x, r1.y);
-            if (moveTowardsTarget) {
-                // Move towards target
-                if (verticalMove.y < dest.y) {
-                    verticalMove.y++;
-                } else if (verticalMove.y > dest.y) {
-                    verticalMove.y--;
-                }
-            } else {
-                // Move away from target
-                if (verticalMove.y < dest.y) {
-                    verticalMove.y--;
-                } else if (verticalMove.y > dest.y) {
-                    verticalMove.y++;
-                }
-            }
-            
-            // If vertical movement is possible, do it
-            if (this.isFree(verticalMove.x, verticalMove.y)) {
-                this.setAgPos(0, verticalMove);
-                // repaint fridge and owner locations (to repaint colors)
-                if (this.view != null) {
-                    this.view.update(this.truckLocation.x, this.truckLocation.y);
-                    this.view.update(this.deliveryLocation.x, this.deliveryLocation.y);
-                }
-                return true;
-            }
-            
-            // If vertical movement is blocked, try random horizontal movements
-            int attempts = 0;
-            int maxAttempts = this.getWidth(); // Prevent infinite loop
-            while (attempts < maxAttempts) {
-                Location horizontalMove = new Location(originalPos.x, originalPos.y);
-                // Randomly choose left or right
-                if (random.nextBoolean()) {
-                    horizontalMove.x = (horizontalMove.x + 1) % this.getWidth();
-                } else {
-                    horizontalMove.x = (horizontalMove.x - 1 + this.getWidth()) % this.getWidth();
-                }
-                
-                // If this horizontal position is free, move there
-                if (this.isFree(horizontalMove.x, horizontalMove.y)) {
-                    this.setAgPos(0, horizontalMove);
-                    // repaint fridge and owner locations (to repaint colors)
-                    if (this.view != null) {
-                        this.view.update(this.truckLocation.x, this.truckLocation.y);
-                        this.view.update(this.deliveryLocation.x, this.deliveryLocation.y);
-                    }
-                    return true;
-                }
-                attempts++;
-            }
-        } else {
-            // Prioritize horizontal movement
-            Location horizontalMove = new Location(r1.x, r1.y);
-            if (moveTowardsTarget) {
-                // Move towards target
-                if (horizontalMove.x < dest.x) {
-                    horizontalMove.x++;
-                } else if (horizontalMove.x > dest.x) {
-                    horizontalMove.x--;
-                }
-            } else {
-                // Move away from target
-                if (horizontalMove.x < dest.x) {
-                    horizontalMove.x--;
-                } else if (horizontalMove.x > dest.x) {
-                    horizontalMove.x++;
-                }
-            }
-            
-            // Handle wraparound for horizontal movement
-            horizontalMove.x = (horizontalMove.x + this.getWidth()) % this.getWidth();
-            
-            // If horizontal movement is possible, do it
-            if (this.isFree(horizontalMove.x, horizontalMove.y)) {
-                this.setAgPos(0, horizontalMove);
-                // repaint fridge and owner locations (to repaint colors)
-                if (this.view != null) {
-                    this.view.update(this.truckLocation.x, this.truckLocation.y);
-                    this.view.update(this.deliveryLocation.x, this.deliveryLocation.y);
-                }
-                return true;
-            }
-            
-            // If horizontal movement is blocked, try random vertical movements
-            int attempts = 0;
-            int maxAttempts = this.getHeight(); // Prevent infinite loop
-            while (attempts < maxAttempts) {
-                Location verticalMove = new Location(originalPos.x, originalPos.y);
-                // Randomly choose up or down
-                if (random.nextBoolean()) {
-                    verticalMove.y++;
-                } else {
-                    verticalMove.y--;
-                }
-                
-                // If this vertical position is free, move there
-                if (this.isFree(verticalMove.x, verticalMove.y)) {
-                    this.setAgPos(0, verticalMove);
-                    // repaint fridge and owner locations (to repaint colors)
-                    if (this.view != null) {
-                        this.view.update(this.truckLocation.x, this.truckLocation.y);
-                        this.view.update(this.deliveryLocation.x, this.deliveryLocation.y);
-                    }
-                    return true;
-                }
-                attempts++;
-            }
-        }
-        
-        // If no movement was possible, return true to indicate the action was attempted, even if it didn't result in a change of position.
-        return true;
+    boolean moveTowards(final int agentId, final Location dest) {
+        return navigationManager.moveTowards(agentId, dest);
     }
 
     boolean getPackage() {
@@ -267,5 +151,23 @@ public class FactoryModel extends GridWorldModel {
             return true;
         }
         return false;
+    }
+
+    public void decreaseEnergy(final int agentId) {
+        DeliveryRobot robot = this.getRobotById(agentId);
+        if (robot == null) {
+            throw new IllegalArgumentException("Robot with ID " + agentId + " does not exist.");
+        }
+
+        int decreaseEnergyAmount = 1;
+        robot.decreaseEnergy(decreaseEnergyAmount);
+    }
+
+    public DeliveryRobot getRobotById(int agentId) {
+        return this.robots.get(agentId);
+    }
+
+    public GridWorldView getView() {
+        return this.view;
     }
 }

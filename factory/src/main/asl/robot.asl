@@ -1,8 +1,7 @@
-/* Initial beliefs AND RULES */
 
-available(package, truck). // Let's assume there is beer ("env.HouseEnv" takes care of this)
 
-/* Plans library */
+available(package, truck).
+
 
 /* Handle owner's orders */
 +!has(deliveryA, package) // How to ensure owner has beer?
