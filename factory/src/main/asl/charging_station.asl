@@ -2,7 +2,6 @@
 
 /* Beliefs */
 location(10, 15).  // Charging station location coordinates
-available(true).   // Charging station availability
 
 /* Plans */
 
@@ -15,15 +14,14 @@ available(true).   // Charging station availability
 /* Respond to queries about charging station location, a station replies only if available (if no robots are currently charging).
 If multiple robots are going to the same station, because they concurrently asked for its position, they will all go the station,
 but the station will not be available to charge all and the others have to wait */
-+?whereIsChargingStation(Requester)[source(Requester)] : available(true) <-
++?whereIsChargingStation(Requester)[source(Requester)] <-
     .my_name(ChargingStationName);
     ?location(X, Y);
     .println("Charging station ", ChargingStationName, " responding to location query from ", Requester);
     .send(Requester, tell, chargingStationLocation(X, Y)).
 
 /* Handle charging requests */
-+chargingRequest(RobotName)[source(RobotName)] : available(true) <-
-    -+available(false);  // Mark as busy
++chargingRequest(RobotName)[source(RobotName)] <-
     .println("Received charging request from ", RobotName);
     .println("Starting charging process for ", RobotName);
     +charging_robot(RobotName);
@@ -51,7 +49,6 @@ but the station will not be available to charge all and the others have to wait 
         .println("Charging completed for ", RobotName, " - Battery: 100%");
         .send(RobotName, tell, chargingCompleted);
         -charging_robot(RobotName);
-        -+available(true);  // Mark as available again
     } else {
         !!charge_incrementally(RobotName, NewBattery);
     }.
@@ -62,16 +59,15 @@ but the station will not be available to charge all and the others have to wait 
     .println("Could not get battery level from ", RobotName, ". Assuming 0%");
     !!charge_incrementally(RobotName, 0).
 
-/* Handle charging requests when busy - THIS NOW WORKS! */
-+chargingRequest(RobotName)[source(RobotName)] : available(false) <-
+/* Handle charging requests when busy */
++chargingRequest(RobotName)[source(RobotName)] <-
     .println("Charging station busy, cannot serve ", RobotName, " right now");
     .send(RobotName, tell, chargingStationBusy).
 
 /* Status inquiry */
-+?stationStatus(Requester)[source(Requester)] <-
-    ?available(Status);
++?stationLocation(Requester)[source(Requester)] <-
     ?location(X, Y);
-    .send(Requester, tell, stationInfo(X, Y, Status)).
+    .send(Requester, tell, stationInfo(X, Y, Location)).
 
 /* Handle robot battery level responses */
 +batteryLevel(Level)[source(RobotName)] : charging_robot(RobotName) <-

@@ -146,5 +146,4 @@ available(package, truck).
     .println("Charging station ", Station, " is busy. Will try again later.");
     .wait(10000);
     ?current_position(X, Y);
-    .println("Retrying charging request at station ", Station, " at position (", X, ", ", Y, ")");
     !request_charge(Station, X, Y).
