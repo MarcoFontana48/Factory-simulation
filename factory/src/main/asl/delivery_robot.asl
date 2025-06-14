@@ -1,14 +1,14 @@
 !start.
 
 /* Beliefs */
-available(package, truck).
+available(package, truck).  //TODO: rimuovimi
+batteryLevel(100).  // Initial battery level
 
 /* Plans */
 
 /* Main start-up plan */
 +!start <-
     utils.delivery_robot_init;
-    .belief(batteryLevel(BatteryLevel));
     .belief(current_position(X, Y));
     .belief(truck_position(TX, TY));
     .belief(delivery_position(DId, DX, DY));
@@ -16,24 +16,44 @@ available(package, truck).
     .println("Started with battery level: ", BatteryLevel, "% at location (", X, ", ", Y, ")");
     !step(TX, TY).
 
-/* Move towards target (unless already malfunctioning) */
-//TODO: creare una funzione STEP per muovere il robot un passo alla volta e ogni volta controllare se la batteria è sufficiente (la logica che è qui)
-+!step(X, Y) : not malfunctioning(_, yes) <-
-    ?current_position(X0, Y0);
+/* move one step towards target */
++!step(TargetX, TargetY) : not malfunctioning(_, yes) <-
+    ?current_position(CurrentX, CurrentY);
     ?batteryLevel(BatteryLevel);
-    .println("Moving towards target (", X, ", ", Y, ") from (", X0, ", ", Y0, ") with battery level ", BatteryLevel, "%");
-    .my_name(R);
+    .println("Current position: (", CurrentX, ", ", CurrentY, "), Target: (", TargetX, ", ", TargetY, "), Battery: ", BatteryLevel, "%");
+    
     if (BatteryLevel < 20) {
         .println("Battery level is low (", BatteryLevel, "%). Going to nearest charging station.");
+        //-moving_to_target(X, Y);
         !seekChargingStation;
     } else {
-        +moving_to_target(X, Y);              
-        !!start_malfunction_monitoring;       
-        .wait(2000);
-        .println("Reached destination (", X, ", ", Y, ")");
-        -moving_to_target(X, Y);              
-        !!stop_malfunction_monitoring;        
+        if (CurrentX == TargetX & CurrentY == TargetY) {
+            .println("Reached destination (", TargetX, ", ", TargetY, ")");
+            //!handleArrival(TargetX, TargetY);
+            -moving_to_target(TargetX, TargetY);
+            !!stop_malfunction_monitoring;
+        } else {
+            +moving_to_target(TargetX, TargetY);
+            !!start_malfunction_monitoring;
+            
+            // Move one step towards target using environment action (position is updated automatically)
+            move_towards_target(TargetX, TargetY, CurrentX, CurrentY);
+            
+            // Position will be automatically updated by environment
+            .println("Movement action executed towards (", TargetX, ", ", TargetY, ")");
+            ?current_position(NewX, NewY);
+            .println("New position after movement: (", NewX, ", ", NewY, ")");
+
+            //.wait(100); // Small delay for visualization/control
+            !step(TargetX, TargetY);
+        }
     }.
+
+/* Handle case when robot is malfunctioning */
+//+!step(X, Y) : malfunctioning(_, yes) <-
+//    .println("Cannot move - robot is malfunctioning");
+//    .wait(1000);
+//    !step(X, Y).
 
 /* Plan to start continuous malfunction monitoring */
 +!start_malfunction_monitoring : moving_to_target(_, _) <-
@@ -136,7 +156,7 @@ available(package, truck).
     -+charging(no);
     // Clean up charging station knowledge
     -knownChargingStation(_, _, _);
-    // After charging, continue with original mission
+    // After charging, continue with original mission (bring item to delivery or go to truck)
     !step(2, 2).
 
 /* Handle busy charging station */

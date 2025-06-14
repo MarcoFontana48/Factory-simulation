@@ -17,9 +17,10 @@ public class FactoryModel extends GridWorldModel {
     private final int deliveryLocation1Id = 1;
     private final int deliveryLocation2Id = 2;
     private final int deliveryLocation3Id = 3;
+    private final MovementManager movementManager = new MovementManager(this);
 
     public FactoryModel() {
-        super(FactoryModel.GSize, FactoryModel.GSize, 0);
+        super(FactoryModel.GSize, FactoryModel.GSize, 3);
     }
 
     public Location getTruckLocation() {
@@ -48,5 +49,9 @@ public class FactoryModel extends GridWorldModel {
 
     public int getDelivery3Id() {
         return deliveryLocation3Id;
+    }
+
+    public MovementManager getMovementManager() {
+        return movementManager;
     }
 }

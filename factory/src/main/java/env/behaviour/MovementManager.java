@@ -10,8 +10,7 @@ public class MovementManager {
         this.model = model;
     }
 
-    public boolean moveTowards(int agentId, Location destination) {
-        final Location agentLocation = this.model.getAgPos(agentId);
+    public boolean moveTowards(int agentId, Location destination, Location agentLocation) {
         final Location originalAgentPos = new Location(agentLocation.x, agentLocation.y); // Store original position
         java.util.Random random = new java.util.Random();
         
@@ -109,8 +108,8 @@ public class MovementManager {
         return horizontalMove;
     }
 
-    private boolean tryMove(int agentId, Location verticalMove) {
-        this.model.setAgPos(agentId, verticalMove);
+    private boolean tryMove(int agentId, Location move) {
+        this.model.setAgPos(agentId, move);
         //if (this.model.getView() != null) {
         //    this.model.getView().update(this.model.truckLocation.x, this.model.truckLocation.y);
         //    this.model.getView().update(this.model.deliveryLocation.x, this.model.deliveryLocation.y);

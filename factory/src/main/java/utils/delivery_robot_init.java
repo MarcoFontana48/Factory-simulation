@@ -12,8 +12,6 @@ import jason.environment.grid.Location;
 
 public class delivery_robot_init extends DefaultInternalAction {
     private static final FactoryModel FACTORY_MODEL = new FactoryModel();
-    private static final int MIN_BATTERY = 80;
-    private static final int MAX_BATTERY = 100;
     private int x;
     private int y;
 
@@ -21,7 +19,6 @@ public class delivery_robot_init extends DefaultInternalAction {
     public Object execute(TransitionSystem ts, Unifier un, Term[] args) throws Exception {
         Agent currentAgent = ts.getAg();
         
-        addBatteryLevelBelief(currentAgent);
         addCurrentPositionBelief(currentAgent);
         addTruckPositionBelief(currentAgent);
         addDeliveryPositionBelief(currentAgent);
@@ -42,11 +39,6 @@ public class delivery_robot_init extends DefaultInternalAction {
         } while (!FACTORY_MODEL.isFree(x, y));
         
         currentAgent.addBel(Literal.parseLiteral(String.format("current_position(%d, %d)", x, y)));
-    }
-
-    private void addBatteryLevelBelief(Agent currentAgent) throws RevisionFailedException {
-        int batteryLevel = (int) (Math.random() * (MAX_BATTERY - MIN_BATTERY + 1)) + MIN_BATTERY;
-        currentAgent.addBel(Literal.parseLiteral(String.format("batteryLevel(%d)", batteryLevel)));
     }
 
     private void addTruckPositionBelief(Agent currentAgent) throws RevisionFailedException {
