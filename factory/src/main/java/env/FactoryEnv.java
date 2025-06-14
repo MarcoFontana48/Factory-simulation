@@ -26,14 +26,7 @@ public class FactoryEnv extends Environment {
 
     @Override
     public void init(final String[] args) {
-        this.model = new FactoryModel();
 
-        if ((args.length == 1) && args[0].equals("gui")) {
-            final FactoryView view = new FactoryView(this.model);
-            this.model.setView(view);
-        }
-        // boot the agents' percepts
-        this.updatePercepts();
     }
 
     /**
@@ -41,36 +34,7 @@ public class FactoryEnv extends Environment {
      * (HouseModel)
      */
     void updatePercepts() {
-        // clear the percepts of the agents
-        this.clearPercepts("robot");
-        this.clearPercepts("deliveryA");
 
-        // get the robot location
-        final Location lRobot = this.model.getAgPos(0);
-
-        // the robot can perceive where it is
-        if (lRobot.equals(this.model.truckLocation)) {
-            this.addPercept("robot", FactoryEnv.atTruck);
-        }
-        if (lRobot.equals(this.model.deliveryLocation)) {
-            this.addPercept("robot", FactoryEnv.atDeliveryA);
-        }
-
-        // the robot can perceive the beer stock only when at the (open) fridge
-        if (this.model.truckOpen) {
-            this.addPercept(
-                    "robot",
-                    Literal.parseLiteral("stock(package,"
-                            + "\"" + this.model.availablePackage + "\"" + ")"
-                    )
-            );
-        }
-
-        // the robot can perceive if the owner has beer (the owner too)
-        if (this.model.itemCount > 0) {
-            this.addPercept("robot", FactoryEnv.hasDeliveryAPackage);
-            this.addPercept("deliveryA", FactoryEnv.hasDeliveryAPackage);
-        }
     }
 
     /**
@@ -80,56 +44,7 @@ public class FactoryEnv extends Environment {
     @Override
     public boolean executeAction(final String agentNameString, final Structure action) {
         System.out.println("[" + agentNameString + "] doing: " + action);
-        boolean result = false;
-        if (action.equals(FactoryEnv.openTruck)) { // of = open(fridge)
-            result = this.model.openTruck();
-        } else if (action.equals(FactoryEnv.closeTruck)) { // clf = close(fridge)
-            result = this.model.closeTruck();
-        } else if (action.getFunctor().equals("move_towards")) {
-            final String location = action.getTerm(0).toString(); // get where to move
-            Location dest = null;
-            if (location.equals("truck")) {
-                dest = this.model.truckLocation;
-            } else if (location.equals("deliveryA")) {
-                dest = this.model.deliveryLocation;
-            }
-            final int agId = this.getAgIdBasedOnName(agentNameString); // get the agent id based on its name
-            result = this.model.moveTowards(agId, dest);
-            if (agentNameString.contains("robot")) {
-                model.decreaseEnergy(agId);
-            }
-        } else if (action.equals(FactoryEnv.getPackage)) { // gb = get(beer)
-            result = this.model.getPackage();
-        } else if (action.equals(FactoryEnv.handInPackage)) { // hb = hand_in(beer)
-            result = this.model.deliverPackage();
-        } else if (action.equals(FactoryEnv.takePackage)) { // sb = sip(beer)
-            result = this.model.takeItem();
-        } else if (action.getFunctor().equals("deliver")) {
-            // simulate delivery time
-            try {
-                Thread.sleep(5_000);
-                // randomly generate a package
-                String packageType = action.getTerm(1).toString().replaceAll("\"", "");
-                String[] types = {"a"};
-                packageType = types[(int) (Math.random() * types.length)];  // currently, only one type of package
-                // add the package to the model
-                result = this.model.addPackage(packageType);
-                System.out.println("[" + agentNameString + "] added package: " + packageType);
-            } catch (final Exception e) {
-                FactoryEnv.logger.info("Failed to execute action deliver!" + e);
-            }
-        } else {
-            FactoryEnv.logger.info("Failed to execute action " + action);
-        }
-        // only if action completed successfully, update agents' percepts
-        if (result) {
-            this.updatePercepts();
-            try {
-                Thread.sleep(500);
-            } catch (final Exception e) {
-            }
-        }
-        return result;
+        return false;
     }
 
     public int getAgIdBasedOnName(String agName) {

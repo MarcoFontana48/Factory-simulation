@@ -10,13 +10,11 @@ available(package, truck).
     utils.delivery_robot_init;
     .belief(batteryLevel(BatteryLevel));
     .belief(current_position(X, Y));
+    .belief(truck_position(TX, TY));
+    .belief(delivery_position(DId, DX, DY));
     +charging(no);
     .println("Started with battery level: ", BatteryLevel, "% at location (", X, ", ", Y, ")");
-    !step.
-
-+!step <-
-    //tmp placeholder for initial step
-    !step(2, 5).
+    !step(TX, TY).
 
 /* Move towards target (unless already malfunctioning) */
 //TODO: creare una funzione STEP per muovere il robot un passo alla volta e ogni volta controllare se la batteria è sufficiente (la logica che è qui)

@@ -111,10 +111,10 @@ public class MovementManager {
 
     private boolean tryMove(int agentId, Location verticalMove) {
         this.model.setAgPos(agentId, verticalMove);
-        if (this.model.getView() != null) {
-            this.model.getView().update(this.model.truckLocation.x, this.model.truckLocation.y);
-            this.model.getView().update(this.model.deliveryLocation.x, this.model.deliveryLocation.y);
-        }
+        //if (this.model.getView() != null) {
+        //    this.model.getView().update(this.model.truckLocation.x, this.model.truckLocation.y);
+        //    this.model.getView().update(this.model.deliveryLocation.x, this.model.deliveryLocation.y);
+        //}
         return true;
     }
 
