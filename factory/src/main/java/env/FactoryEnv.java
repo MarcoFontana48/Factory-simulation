@@ -16,9 +16,9 @@ public class FactoryEnv extends Environment {
     public static final Literal takePackage = Literal.parseLiteral("take_item(package)");
 
     // belief literals
-    public static final Literal hasdeliveryPackage = Literal.parseLiteral("has(delivery,package)");
+    public static final Literal hasDeliveryAPackage = Literal.parseLiteral("has(deliveryA,package)");
     public static final Literal atTruck = Literal.parseLiteral("at(robot,truck)");
-    public static final Literal atdelivery = Literal.parseLiteral("at(robot,delivery)");
+    public static final Literal atDeliveryA = Literal.parseLiteral("at(robot,deliveryA)");
 
     static Logger logger = Logger.getLogger(FactoryEnv.class.getName());
 
@@ -43,7 +43,7 @@ public class FactoryEnv extends Environment {
     void updatePercepts() {
         // clear the percepts of the agents
         this.clearPercepts("robot");
-        this.clearPercepts("delivery");
+        this.clearPercepts("deliveryA");
 
         // get the robot location
         final Location lRobot = this.model.getAgPos(0);
@@ -53,7 +53,7 @@ public class FactoryEnv extends Environment {
             this.addPercept("robot", FactoryEnv.atTruck);
         }
         if (lRobot.equals(this.model.deliveryLocation)) {
-            this.addPercept("robot", FactoryEnv.atdelivery);
+            this.addPercept("robot", FactoryEnv.atDeliveryA);
         }
 
         // the robot can perceive the beer stock only when at the (open) fridge
@@ -68,8 +68,8 @@ public class FactoryEnv extends Environment {
 
         // the robot can perceive if the owner has beer (the owner too)
         if (this.model.itemCount > 0) {
-            this.addPercept("robot", FactoryEnv.hasdeliveryPackage);
-            this.addPercept("delivery", FactoryEnv.hasdeliveryPackage);
+            this.addPercept("robot", FactoryEnv.hasDeliveryAPackage);
+            this.addPercept("deliveryA", FactoryEnv.hasDeliveryAPackage);
         }
     }
 
@@ -90,7 +90,7 @@ public class FactoryEnv extends Environment {
             Location dest = null;
             if (location.equals("truck")) {
                 dest = this.model.truckLocation;
-            } else if (location.equals("delivery")) {
+            } else if (location.equals("deliveryA")) {
                 dest = this.model.deliveryLocation;
             }
             result = this.model.moveTowards(dest);
@@ -104,9 +104,9 @@ public class FactoryEnv extends Environment {
             // simulate delivery time
             try {
                 Thread.sleep(5_000);
-                // generate a package
+                // randomly generate a package type (it can either be a, b, or c)
                 String packageType = action.getTerm(1).toString().replaceAll("\"", "");
-                String[] types = {"a"};
+                String[] types = {"a", "b", "c"};
                 packageType = types[(int) (Math.random() * types.length)];
                 // add the package to the model
                 result = this.model.addPackage(packageType);

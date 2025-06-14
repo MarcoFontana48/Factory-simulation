@@ -16,7 +16,6 @@ public class FactoryModel extends GridWorldModel {
     String carriedPackageType = "";
     Location truckLocation = new Location(FactoryModel.GSize / 2, 0);
     Location deliveryLocation = new Location(FactoryModel.GSize / 2, FactoryModel.GSize - 1);
-    public static final java.util.Random RANDOM = new java.util.Random();
 
     public FactoryModel() {
         // create a grid with mobile agents (/*super(FactoryModel.GSize, FactoryModel.GSize, 3); */)
@@ -25,7 +24,6 @@ public class FactoryModel extends GridWorldModel {
         this.addTruckPosition();
         this.addDeliveryPosition();
         this.addWalls();
-        RANDOM.setSeed(12345);
     }
 
     private void addDeliveryPosition() {
@@ -39,8 +37,8 @@ public class FactoryModel extends GridWorldModel {
     private void addRobotsPosition() {
         int x, y;
         do {
-            x = (int) (RANDOM.nextDouble() * GSize);
-            y = (int) (RANDOM.nextDouble() * GSize);
+            x = (int) (Math.random() * GSize);
+            y = (int) (Math.random() * GSize);
         } while (!isFree(x, y));
         this.setAgPos(0, x, y);
     }
@@ -51,23 +49,23 @@ public class FactoryModel extends GridWorldModel {
         // second row
         this.addWall(0, 1, 0, 1); this.addWall(12, 1, 12, 1);
         // third row
-        this.addWall(0, 2, 0, 2); this.addWall(3, 2, 5, 2); this.addWall(9, 2, 9, 2); this.addWall(12, 2, 12, 2);
+        this.addWall(0, 2, 0, 2); this.addWall(12, 2, 12, 2);
         // fourth row
-        this.addWall(0, 3, 0, 3); this.addWall(5, 3, 5, 3); this.addWall(7,3,9,3); this.addWall(12,3,12,3);
+        this.addWall(0, 3, 0, 3); this.addWall(3, 3, 10, 3); this.addWall(12,3,12,3);
         // fifth row
-        this.addWall(0, 4, 2, 4); this.addWall(7, 4, 7, 4); this.addWall(11, 4, 12, 4);
+        this.addWall(0, 4, 0, 4); this.addWall(12, 4, 12, 4);
         // sixth row
-        this.addWall(0, 5, 0, 5); this.addWall(4, 5, 7, 5); this.addWall(9, 5, 9, 5); this.addWall(12, 5, 12, 5);
+        this.addWall(0, 5, 0, 5); this.addWall(12, 5, 12, 5);
         // seventh row
-        this.addWall(0, 6, 0, 6); this.addWall(9, 6, 12, 6);
+        this.addWall(0, 6, 0, 6); this.addWall(3, 6, 10, 6); this.addWall(12, 6, 12, 6);
         // eighth row
-        this.addWall(0, 7, 3, 7); this.addWall(5, 7, 6, 7); this.addWall(11, 7, 12, 7);
+        this.addWall(0, 7, 0, 7); this.addWall(12, 7, 12, 7);
         // ninth row
-        this.addWall(0, 8, 0, 8); this.addWall(3, 8, 3, 8); this.addWall(6, 8, 9, 8); this.addWall(12, 8, 12, 8);
+        this.addWall(0, 8, 0, 8); this.addWall(12, 8, 12, 8);
         // tenth row
-        this.addWall(0, 9, 0, 9); this.addWall(12, 9, 12, 9);
+        this.addWall(0, 9, 0, 9); this.addWall(3, 9, 10, 9); this.addWall(12, 9, 12, 9);
         // eleventh row
-        this.addWall(0, 10, 0, 10); this.addWall(2, 10, 3, 10); this.addWall(6, 10, 6, 10); this.addWall(9, 10, 12, 10);
+        this.addWall(0, 10, 0, 10); this.addWall(12, 10, 12, 10);
         // twelfth row
         this.addWall(0, 11, 0, 11); this.addWall(12, 11, 12, 11);
         // thirteenth row
@@ -99,10 +97,11 @@ public class FactoryModel extends GridWorldModel {
     boolean moveTowards(final Location dest) {
         final Location r1 = this.getAgPos(0);
         final Location originalPos = new Location(r1.x, r1.y); // Store original position
+        java.util.Random random = new java.util.Random();
 
         // decide probabilistically whether to move towards or away from the target
         // chance to move towards the target (in order to make the robot eventually reach the target and not get stuck)
-        boolean moveTowardsTarget = RANDOM.nextDouble() < 0.75;
+        boolean moveTowardsTarget = random.nextDouble() < 0.75;
 
         Location verticalMove = new Location(r1.x, r1.y);
         if (moveTowardsTarget) {
@@ -140,7 +139,7 @@ public class FactoryModel extends GridWorldModel {
             Location horizontalMove = new Location(originalPos.x, originalPos.y);
 
             // Randomly choose left or right
-            if (RANDOM.nextBoolean()) {
+            if (random.nextBoolean()) {
                 horizontalMove.x = (horizontalMove.x + 1) % this.getWidth();
             } else {
                 horizontalMove.x = (horizontalMove.x - 1 + this.getWidth()) % this.getWidth();
@@ -187,7 +186,7 @@ public class FactoryModel extends GridWorldModel {
 
     boolean deliverPackage() {
         if (this.isCarryingPackage) {
-            this.itemCount = RANDOM.nextInt(20) + 5; // randomly generate the number of items in the package
+            this.itemCount = new java.util.Random().nextInt(20) + 5; // randomly generate the number of items in the package
             this.isCarryingPackage = false;
             if (this.view != null) {
                 this.view.update(this.deliveryLocation.x, this.deliveryLocation.y);
