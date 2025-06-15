@@ -12,6 +12,7 @@ batteryLevel(100).  // Initial battery level
     .belief(current_position(X, Y));
     .belief(truck_position(TX, TY));
     .belief(delivery_position(DId, DX, DY));
+    ?batteryLevel(BatteryLevel);
     +charging(no);
     .println("Started with battery level: ", BatteryLevel, "% at location (", X, ", ", Y, ")");
     !step(TX, TY).
