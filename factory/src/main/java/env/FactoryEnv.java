@@ -102,7 +102,6 @@ public class FactoryEnv extends Environment {
                 // Simulate battery consumption
                 consumeBattery(agName, 1); // 1% per move
 
-                System.out.println(agName + " moved to (" + newPos.x + "," + newPos.y + ")");
                 return true;
             } else {
                 System.err.println("Move failed for " + agName + " - path might be blocked");
