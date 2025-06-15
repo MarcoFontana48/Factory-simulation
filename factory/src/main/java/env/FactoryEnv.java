@@ -1,5 +1,6 @@
 package env;
 
+import jason.NoValueException;
 import jason.asSyntax.Literal;
 import jason.asSyntax.NumberTerm;
 import jason.asSyntax.Structure;
@@ -47,7 +48,9 @@ public class FactoryEnv extends Environment {
 
         if (action.getFunctor().equals("move_towards_target")) {
             result = executeMoveTowardsTarget(agentNameString, action);
-        } 
+        } else if (action.getFunctor().equals("update_battery_level")) {
+            result = executeUpdateBatteryLevel(agentNameString, action);
+        }
 
         return result;
     }
@@ -115,6 +118,39 @@ public class FactoryEnv extends Environment {
     }
 
     /**
+     * Execute update_battery_level action
+     * Expected action format: update_battery_level(NewBatteryLevel)
+     */
+    private boolean executeUpdateBatteryLevel(String agName, Structure action) {
+        if (action.getArity() != 1) {
+            System.err.println("update_battery_level expects 1 argument: NewBatteryLevel");
+            return false;
+        }
+
+        Term newBatteryLevelTerm = action.getTerm(0);
+        if (!(newBatteryLevelTerm instanceof NumberTerm)) {
+            System.err.println("update_battery_level argument must be a number");
+            return false;
+        }
+
+        int newBatteryLevel;
+        try {
+            newBatteryLevel = (int) ((NumberTerm) newBatteryLevelTerm).solve();
+        } catch (NoValueException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        if (newBatteryLevel < 0 || newBatteryLevel > 100) {
+            System.err.println("Battery level must be between 0 and 100");
+            return false;
+        }
+
+        updateBatteryLevel(agName, newBatteryLevel);
+        return true;
+    }
+
+    /**
      * Update agent's position percepts
      */
     private void updateAgentPosition(String agName, Location newPos) {
@@ -126,45 +162,57 @@ public class FactoryEnv extends Environment {
     }
     
     /**
-     * Simulate battery consumption
-     */
+    * Update agent's battery level percepts (can be called from external sources like charging stations)
+    */
+    public void updateBatteryLevel(String agName, int newBatteryLevel) {
+        try {
+            // Remove old battery level percept
+            removePerceptsByUnif(agName, Literal.parseLiteral("batteryLevel(_)"));
+            
+            // Add new battery level percept
+            addPercept(agName, Literal.parseLiteral("batteryLevel(" + newBatteryLevel + ")"));
+        } catch (Exception e) {
+            System.err.println("Error updating battery level for " + agName + ": " + e.getMessage());
+        }
+    }
+
+    /**
+    * Simulate battery consumption (modified to use the new update method)
+    */
     private void consumeBattery(String agName, int consumption) {
         try {
             // Get current battery level from agent's percepts
             int currentBattery = getCurrentBatteryLevel(agName);
             int newBattery = Math.max(0, currentBattery - consumption);
             
-            // Update battery percept
-            removePerceptsByUnif(agName, Literal.parseLiteral("batteryLevel(_)"));
-            addPercept(agName, Literal.parseLiteral("batteryLevel(" + newBattery + ")"));
-            
-            // Add low battery warning if needed
-            if (newBattery < 20 && currentBattery >= 20) {
-                addPercept(agName, Literal.parseLiteral("low_battery_warning"));
-                System.err.println(agName + " battery is low: " + newBattery + "%");
-            }
+            // Use the centralized update method
+            updateBatteryLevel(agName, newBattery);
             
         } catch (Exception e) {
-            System.err.println("Error updating battery for " + agName + ": " + e.getMessage());
+            System.err.println("Error consuming battery for " + agName + ": " + e.getMessage());
         }
     }
-    
+
     /**
-     * Get current battery level for agent
-     */
+    * Get current battery level for agent (improved error handling)
+    */
     private int getCurrentBatteryLevel(String agName) {
-        for (Literal percept : getPercepts(agName)) {
-            if (percept.getFunctor().equals("batteryLevel") && percept.getArity() == 1) {
-                try {
-                    return (int) ((NumberTerm) percept.getTerm(0)).solve();
-                } catch (Exception e) {
-                    System.err.println("Error parsing battery level: " + e.getMessage());
+        try {
+            for (Literal percept : getPercepts(agName)) {
+                if (percept.getFunctor().equals("batteryLevel") && percept.getArity() == 1) {
+                    try {
+                        int batteryLevel = (int) ((NumberTerm) percept.getTerm(0)).solve();
+                        return batteryLevel;
+                    } catch (Exception e) {
+                        System.err.println("Error parsing battery level for " + agName + ": " + e.getMessage());
+                    }
                 }
             }
+        } catch (Exception e) {
+            System.err.println("Error getting percepts for " + agName + ": " + e.getMessage());
         }
         
-        // default battery level
-        return 100;
+        return 100; // initial value in case the belief is not yet set
     }
 
     public int getAgIdBasedOnName(String agName) {

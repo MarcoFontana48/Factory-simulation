@@ -7,7 +7,7 @@ MAS factory {
 
 	agents:
 		d_bot_1 delivery_robot;
-		d_bot_2 delivery_robot;
+		//d_bot_2 delivery_robot;
 		//d_bot_3 delivery_robot;
 		ch_st_1 charging_station;
 		//deliveryA delivery_place;

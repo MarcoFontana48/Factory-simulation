@@ -1,7 +1,7 @@
 !start.
 
 /* Beliefs */
-location(10, 15).  // Charging station location coordinates
+location(5, 8).  // Charging station location coordinates
 
 /* Plans */
 
