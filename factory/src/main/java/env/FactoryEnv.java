@@ -1,6 +1,7 @@
 package env;
 
 import jason.NoValueException;
+import jason.asSyntax.ListTerm;
 import jason.asSyntax.Literal;
 import jason.asSyntax.NumberTerm;
 import jason.asSyntax.Structure;
@@ -50,6 +51,11 @@ public class FactoryEnv extends Environment {
             result = executeMoveTowardsTarget(agentNameString, action);
         } else if (action.getFunctor().equals("update_battery_level")) {
             result = executeUpdateBatteryLevel(agentNameString, action);
+        } else if (action.getFunctor().equals("compute_closest_charging_station")) {
+            result = executeComputeClosestChargingStation(agentNameString, action);
+        } else {
+            System.err.println("Unknown action: " + action);
+            return false;
         }
 
         return result;
@@ -211,8 +217,78 @@ public class FactoryEnv extends Environment {
         } catch (Exception e) {
             System.err.println("Error getting percepts for " + agName + ": " + e.getMessage());
         }
-        
-        return 100; // initial value in case the belief is not yet set
+        return 100;
+    }
+
+    private boolean executeComputeClosestChargingStation(String agName, Structure action) {
+        try {
+            // Get the parameters from the Jason action
+            ListTerm stationList = (ListTerm) action.getTerm(0);  // StationList
+            NumberTerm robotX = (NumberTerm) action.getTerm(1);   // ThisRobotX
+            NumberTerm robotY = (NumberTerm) action.getTerm(2);   // ThisRobotY
+            
+            int currentX = (int) robotX.solve();
+            int currentY = (int) robotY.solve();
+            
+            String closestStationName = null;
+            int closestStationX = -1;
+            int closestStationY = -1;
+            double minDistance = Double.MAX_VALUE;
+            
+            // Iterate through all stations in the list
+            for (Term stationTerm : stationList) {
+                ListTerm station = (ListTerm) stationTerm;
+                
+                // Extract station data: [Station, X, Y]
+                String stationName = station.get(0).toString().replace("\"", ""); // Remove quotes
+                int stationX = (int) ((NumberTerm) station.get(1)).solve();
+                int stationY = (int) ((NumberTerm) station.get(2)).solve();
+                
+                // Calculate Euclidean distance
+                double distance = calculateEuclideanDistance(currentX, currentY, stationX, stationY);
+                
+                // Check if this is the closest station so far
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    closestStationName = stationName;
+                    closestStationX = stationX;
+                    closestStationY = stationY;
+                }
+            }
+            
+            // Add the closest station as a percept for the agent
+            if (closestStationName != null) {
+                // Remove any previous closestChargingStation percept
+                removePerceptsByUnif(agName, Literal.parseLiteral("closestChargingStation(_, _, _)"));
+                
+                // Add the new closest station percept
+                addPercept(agName, Literal.parseLiteral(
+                    "closestChargingStation(\"" + closestStationName + "\", " + 
+                    closestStationX + ", " + closestStationY + ")"
+                ));
+            }
+            
+            return true;
+            
+        } catch (Exception e) {
+            System.err.println("Error computing closest charging station for " + agName + ": " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+    * Calculate Euclidean distance between two points
+    * @param x1 X coordinate of first point (robot position)
+    * @param y1 Y coordinate of first point (robot position)
+    * @param x2 X coordinate of second point (station position)
+    * @param y2 Y coordinate of second point (station position)
+    * @return Euclidean distance between the two points
+    */
+    private double calculateEuclideanDistance(int x1, int y1, int x2, int y2) {
+        double deltaX = x2 - x1;
+        double deltaY = y2 - y1;
+        return Math.sqrt(deltaX * deltaX + deltaY * deltaY);
     }
 
     public int getAgIdBasedOnName(String agName) {
@@ -224,6 +300,7 @@ public class FactoryEnv extends Environment {
             case "ch_st_2" -> 4;
             case "truck_1" -> 5;
             case "deliv_A" -> 6;
+            case "deliv_B" -> 7;
             default -> -1;
         };
     }

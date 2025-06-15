@@ -128,8 +128,13 @@ there can be multiple reasons for this behaviour to occur:
     .wait(2000);
     ?found(Count);
     if (Count > 0) {
-        .println("Found ", Count, " charging station(s)!");
-        !move_towards_charging_station;
+        .findall([Station, X, Y], knownChargingStation(Station, X, Y), StationList);
+        .println("Found ", Count, " charging station(s): ", StationList); // calcolare la più vicina passando al metodo questa variabile
+        ?current_position(ThisRobotX, ThisRobotY);
+        compute_closest_charging_station(StationList, ThisRobotX, ThisRobotY);
+        ?closestChargingStation(ClosestStation, ClosestStationX, ClosestStationY);
+        .println("Closest charging station is ", ClosestStation, " at (", ClosestStationX, ", ", ClosestStationY, ")");
+        !move_towards_charging_station(ClosestStation, ClosestStationX, ClosestStationY);
     } else {
         .println("No charging stations found!");
     };
@@ -141,8 +146,7 @@ there can be multiple reasons for this behaviour to occur:
     +knownChargingStation(Station, X, Y);
     .println("Found charging station ", Station, " at (", X, ", ", Y, ")").
 
-+!move_towards_charging_station <-
-    ?knownChargingStation(Station, X, Y);
++!move_towards_charging_station(Station, X, Y) <-
     ?current_position(CX, CY);
     .println("Moving towards charging station ", Station, " at (", X, ", ", Y, ")");
     !step(X, Y).
@@ -177,10 +181,3 @@ there can be multiple reasons for this behaviour to occur:
     ?truck_position(TX, TY);
     ?delivery_position(DId, DX, DY);
     !step(TX, TY).
-
-/* Handle busy charging station */
-+chargingStationBusy[source(Station)] <-
-    .println("Charging station ", Station, " is busy. Will try again later.");
-    .wait(10000);
-    ?current_position(X, Y);
-    !request_charge(Station, X, Y).

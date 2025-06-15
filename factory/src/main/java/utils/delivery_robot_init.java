@@ -8,7 +8,6 @@ import jason.asSemantics.TransitionSystem;
 import jason.asSemantics.Unifier;
 import jason.asSyntax.Literal;
 import jason.asSyntax.Term;
-import jason.environment.grid.Location;
 
 public class delivery_robot_init extends DefaultInternalAction {
     private static final FactoryModel FACTORY_MODEL = new FactoryModel();

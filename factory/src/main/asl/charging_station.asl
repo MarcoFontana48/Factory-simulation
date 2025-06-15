@@ -1,13 +1,8 @@
 !start.
 
-/* Beliefs */
-location(5, 8).  // Charging station location coordinates
-
-/* Plans */
-
-/* Main start-up plan */
 +!start <-
-    .my_name(ChargingStationName);
+    utils.charging_station_init;
+    .belief(location(X, Y));
     ?location(X, Y);
     .println("Started at location: (", X, ", ", Y, ")").
 
