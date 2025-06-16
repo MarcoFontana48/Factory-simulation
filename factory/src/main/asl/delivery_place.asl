@@ -1,32 +1,28 @@
-/* Initial goals */
+!start.
 
-!get(package).   // I want beer
+delivery_id("A").               // unique identifier for this delivery location
+delivery_position(6, 12).       // coordinates of this delivery place
+packages_received(0).           // counter for received packages
 
-/* Plans Library (it's the owner's "know-how") */
++!start <-
+    ?delivery_id(Id);
+    ?delivery_position(X, Y);
+    .println("Delivery place ", Id, " started at position (", X, ", ", Y, ")").
 
-+!get(package) // How to get beer?
-	: true
-	<- .send(robot, achieve, has(deliveryA, package)). // "achieve" -> achievement-goal addition
+// Handle when package_delivery_request belief is added by robot's tell message
++package_delivery_request(PackageId, RobotId)[source(Robot)] <-
+    .println("Received package delivery request from robot ", RobotId, " for package ", PackageId);
+    !receive_package(PackageId, RobotId, Robot);
+    // Remove the request belief after handling it
+    -package_delivery_request(PackageId, RobotId)[source(Robot)].
 
-+has(deliveryA, package) // As soon as I perceive to have beer, drink it
-	: true
-	<- !deliverPackage(package). // sub-goal: if I have beer, drink it
-
--has(deliveryA, package) // As soon as I perceive NOT to have beer, I want it
-	: true
-	<- !get(package).
-
-/* Sub-plans */
-
-+!deliverPackage(package) // How to drink beer? (if I have it)
-	: has(deliveryA, package) // while I have beer...
-	<- take_item(package); !deliverPackage(package). // ...keep drinking (notice EXTERNAL action "sip", defined in "env.HouseEnv")
-
-+!deliverPackage(package) // How to drink beer? (if I do NOT have it)
-	: not has(deliveryA, package) // if I do NOT have beer...
-	<- true. // ...stop drinking (simply drop recursion)
- 
-+msg(M)[source(Ag)] // How to handle incoming messages? (notice annotation)
-	: true
-	<- .print("Message from ", Ag, ": ", M);
-		-msg(M). // notice belief deletion: what happens if we drop this?
++!receive_package(PackageId, RobotId, Robot) <-
+    ?packages_received(Count);
+    -packages_received(Count);
+    +packages_received(Count + 1);
+    +package_received(PackageId, RobotId);
+    
+    .println("Package ", PackageId, " successfully received from robot ", RobotId);
+    .println("Total packages received: ", Count + 1);
+    
+    .send(Robot, tell, delivery_confirmed(PackageId)).

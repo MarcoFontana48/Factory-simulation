@@ -9,10 +9,10 @@ MAS factory {
 		d_bot_1 delivery_robot;
 		//d_bot_2 delivery_robot;
 		//d_bot_3 delivery_robot;
-		//ch_st_1 charging_station;
+		ch_st_1 charging_station;
 		//ch_st_2 charging_station;
-		//deliveryA delivery_place;
-		//truck;
+		delivery_place;
+		truck;
 
 	aslSourcePath:
 		"src/main/asl";

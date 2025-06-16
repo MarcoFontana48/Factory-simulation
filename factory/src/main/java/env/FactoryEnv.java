@@ -13,18 +13,6 @@ import jason.environment.grid.Location;
 public class FactoryEnv extends Environment {
     private static final FactoryModel FACTORY_MODEL = new FactoryModel(); 
 
-    // action literals
-    public static final Literal openTruck = Literal.parseLiteral("open(truck)");
-    public static final Literal closeTruck = Literal.parseLiteral("close(truck)");
-    public static final Literal getPackage = Literal.parseLiteral("get(package)");
-    public static final Literal handInPackage = Literal.parseLiteral("hand_in(package)");
-    public static final Literal takePackage = Literal.parseLiteral("take_item(package)");
-
-    // belief literals
-    public static final Literal hasDeliveryAPackage = Literal.parseLiteral("has(deliveryA,package)");
-    public static final Literal atTruck = Literal.parseLiteral("at(robot,truck)");
-    public static final Literal atDeliveryA = Literal.parseLiteral("at(robot,deliveryA)");
-
     @Override
     public void init(final String[] args) {
 
