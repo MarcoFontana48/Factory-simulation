@@ -9,11 +9,11 @@ packages_received(0).           // counter for received packages
     ?delivery_position(X, Y);
     .println("Delivery place ", Id, " started at position (", X, ", ", Y, ")").
 
-// Handle when package_delivery_request belief is added by robot's tell message
+// handle when package_delivery_request belief is added by robot's tell message
 +package_delivery_request(PackageId, RobotId)[source(Robot)] <-
     .println("Received package delivery request from robot ", RobotId, " for package ", PackageId);
     !receive_package(PackageId, RobotId, Robot);
-    // Remove the request belief after handling it
+    // remove the request belief after handling it
     -package_delivery_request(PackageId, RobotId)[source(Robot)].
 
 +!receive_package(PackageId, RobotId, Robot) <-

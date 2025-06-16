@@ -110,12 +110,12 @@ askedChargingStationLocation(false).    // track if charging station location ha
         ?knownChargingStation(Station, X, Y);
         !request_charge(Station, X, Y); //TODO: 4
     }
-    // Handle arrival at truck position
+    // handle arrival at truck position
     if (truck_position(TargetX, TargetY) & not carrying_package(true)) {
         .println("arrived at truck location. Attempting to pick up package...");
         !pickup_package_from_truck;
     }
-    // Handle arrival at delivery position
+    // handle arrival at delivery position
     if (delivery_position(_, TargetX, TargetY) & carrying_package(true)) {
         .println("arrived at delivery location. delivering package...");
         !deliver_package;
@@ -171,7 +171,7 @@ askedChargingStationLocation(false).    // track if charging station location ha
         .println("ERROR: cannot deliver package - not at delivery location or not carrying package");
     }.
 
-/* Handle delivery confirmation */
+/* handle delivery confirmation */
 +delivery_confirmed(PackageId)[source(DeliveryPlace)] <-
     .println("delivery confirmed by delivery place for package: ", PackageId).
 
@@ -206,7 +206,6 @@ askedChargingStationLocation(false).    // track if charging station location ha
     .println("moving towards charging station ", Station, " at (", X, ", ", Y, ")");
     !step(X, Y).
 
-//TODO: 3
 +!request_charge(Station, X, Y) : knownChargingStation(Station, X, Y) & current_position(X, Y) <-
     .my_name(RobotName);
     .println("Requesting charging from station ", Station);
@@ -219,7 +218,7 @@ askedChargingStationLocation(false).    // track if charging station location ha
     .send(Station, tell, batteryLevel(CurrentLevel)).
 
 +updateBatteryLevel(NewLevel)[source(Station)] <-
-    -updateBatteryLevel(NewLevel)[source(Station)]; //TODO: this line makes it charge to 100% every time
+    -updateBatteryLevel(NewLevel)[source(Station)];
     +charging;
     -batteryLevel(_);
     +batteryLevel(NewLevel);
@@ -249,20 +248,3 @@ askedChargingStationLocation(false).    // track if charging station location ha
     
     // start moving again to previous target
     !step(SavedX, SavedY).
-
-//TODO: 2
-/* Enhanced: Better initial charging state management */
-//+!request_charge(Station, X, Y) : knownChargingStation(Station, X, Y) & current_position(X, Y) <-
-//    .my_name(RobotName);
-//    
-//    // clean up any previous charging state
-//    -charging;
-//    -charging_from(_);
-//    
-//    .println("requesting charging from station ", Station, " using achieve");
-//    
-//    // set charging state immediately to prevent duplicate requests
-//    +charging;
-//    +charging_from(Station);
-//    
-//    .send(Station, tell, chargingRequest(RobotName)).

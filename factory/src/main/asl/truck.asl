@@ -9,11 +9,11 @@ packages_handed(0).           // counter for handed packages
     ?truck_position(X, Y);
     .println("Truck ", Id, " started at position (", X, ", ", Y, ")").
 
-// Handle when request_package belief is added by robot's tell message
+// handle when request_package belief is added by robot's tell message
 +request_package[source(Robot)] <-
     .println("Received package request from robot ", Robot);
     !hand_package(Robot);
-    // Remove the request belief after handling it
+    // remove the request belief after handling it
     -request_package[source(Robot)].
 
 +!hand_package(Robot) <-
@@ -27,5 +27,5 @@ packages_handed(0).           // counter for handed packages
     .println("Handing package ", PackageId, " to robot ", Robot);
     .println("Total packages handed: ", Count + 1);
     
-    // Send the response that matches what the robot expects
+    // send the response that matches what the robot expects
     .send(Robot, tell, package_received).
