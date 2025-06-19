@@ -1,5 +1,7 @@
 package env;
 
+import java.util.Random;
+
 import jason.NoValueException;
 import jason.asSyntax.ListTerm;
 import jason.asSyntax.Literal;
@@ -31,21 +33,27 @@ public class FactoryEnv extends Environment {
      * (success/failure)
      */
     @Override
-    public boolean executeAction(final String agentNameString, final Structure action) {
-        System.out.println("[" + agentNameString + "] doing: " + action);
+    public boolean executeAction(String agentName, Structure action) {
+        System.out.println("[" + agentName + "] doing: " + action);
         boolean result = false;
 
-        if (action.getFunctor().equals("move_towards_target")) {
-            result = executeMoveTowardsTarget(agentNameString, action);
-        } else if (action.getFunctor().equals("update_battery_level")) {
-            result = executeUpdateBatteryLevel(agentNameString, action);
-        } else if (action.getFunctor().equals("compute_closest_charging_station")) {
-            result = executeComputeClosestChargingStation(agentNameString, action);
-        } else {
-            System.err.println("Unknown action: " + action);
-            return false;
+        switch (action.getFunctor()) {
+            case "move_towards_target":
+                result = executeMoveTowardsTarget(agentName, action);
+                break;
+            case "update_battery_level":
+                result = executeUpdateBatteryLevel(agentName, action);
+                break;
+            case "compute_closest_charging_station":
+                result = executeComputeClosestChargingStation(agentName, action);
+                break;
+            case "compute_closest_robot":
+                result = executeComputeClosestRobot(agentName, action);
+                break;
+            default:
+                System.err.println("Unknown action: " + action);
+                return false;
         }
-
         return result;
     }
 
@@ -175,6 +183,7 @@ public class FactoryEnv extends Environment {
     */
     private void consumeBattery(String agName, int consumption) {
         try {
+            // TODO: THE GET CURRENT BATTERY LEVEL NEEDS A PERCEPTION THAT IS NOT THERE YET, SO IT GOES TO THE END OF METHOD "getCurrentBatteryLevel"
             // Get current battery level from agent's percepts
             int currentBattery = getCurrentBatteryLevel(agName);
             int newBattery = Math.max(0, currentBattery - consumption);
@@ -188,7 +197,7 @@ public class FactoryEnv extends Environment {
     }
 
     /**
-    * Get current battery level for agent (improved error handling)
+    * Get current battery level for agent
     */
     private int getCurrentBatteryLevel(String agName) {
         try {
@@ -205,7 +214,8 @@ public class FactoryEnv extends Environment {
         } catch (Exception e) {
             System.err.println("Error getting percepts for " + agName + ": " + e.getMessage());
         }
-        return 100;
+        Random random = new Random();
+        return random.nextInt(21) + 25; //TODO: THIS IS TEMPORARY, REMOVE THIS ONCE FIXED
     }
 
     private boolean executeComputeClosestChargingStation(String agName, Structure action) {
@@ -260,6 +270,62 @@ public class FactoryEnv extends Environment {
             
         } catch (Exception e) {
             System.err.println("Error computing closest charging station for " + agName + ": " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private boolean executeComputeClosestRobot(String agName, Structure action) {
+        try {
+            // get the parameters from the Jason action
+            ListTerm robotList = (ListTerm)   action.getTerm(0);  // List of [Name, X, Y]
+            NumberTerm myXTerm = (NumberTerm) action.getTerm(1);  // ThisRobot’s X
+            NumberTerm myYTerm = (NumberTerm) action.getTerm(2);  // ThisRobot’s Y
+
+            int currentX = (int) myXTerm.solve();
+            int currentY = (int) myYTerm.solve();
+
+            String closestRobotName = null;
+            int    closestX         = -1;
+            int    closestY         = -1;
+            double minDistance      = Double.MAX_VALUE;
+
+            // iterate through all robots in the list
+            for (Term robotTerm : robotList) {
+                ListTerm entry = (ListTerm) robotTerm;
+                String    name = entry.get(0).toString().replace("\"", "");
+                int       x    = (int) ((NumberTerm) entry.get(1)).solve();
+                int       y    = (int) ((NumberTerm) entry.get(2)).solve();
+
+                double distance = calculateEuclideanDistance(currentX, currentY, x, y);
+
+                if (distance < minDistance) {
+                    minDistance         = distance;
+                    closestRobotName    = name;
+                    closestX            = x;
+                    closestY            = y;
+                }
+            }
+
+            if (closestRobotName != null) {
+                // remove any previous percept
+                removePerceptsByUnif(agName,
+                    Literal.parseLiteral("closestRobot(_, _, _)"));
+                // add the new closest-robot percept
+                addPercept(agName,
+                    Literal.parseLiteral(
+                        "closestRobot(\"" +
+                        closestRobotName + "\", " +
+                        closestX + ", " +
+                        closestY + ")"
+                    )
+                );
+            }
+            return true;
+
+        } catch (Exception e) {
+            System.err.println("Error computing closest robot for " + agName + ": " +
+                            e.getMessage());
             e.printStackTrace();
             return false;
         }

@@ -1,5 +1,7 @@
 package utils;
 
+import java.util.Random;
+
 import env.FactoryModel;
 import jason.RevisionFailedException;
 import jason.asSemantics.Agent;
@@ -10,6 +12,7 @@ import jason.asSyntax.Literal;
 import jason.asSyntax.Term;
 
 public class delivery_robot_init extends DefaultInternalAction {
+    private static Random random = new Random();
     private static final FactoryModel FACTORY_MODEL = new FactoryModel();
     private int x;
     private int y;
@@ -18,11 +21,16 @@ public class delivery_robot_init extends DefaultInternalAction {
     public Object execute(TransitionSystem ts, Unifier un, Term[] args) throws Exception {
         Agent currentAgent = ts.getAg();
         
+        addBatteryLevelBelief(currentAgent);
         addCurrentPositionBelief(currentAgent);
         addTruckPositionBelief(currentAgent);
         addDeliveryPositionBelief(currentAgent);
 
         return true;
+    }
+
+    private void addBatteryLevelBelief(Agent currentAgent) throws RevisionFailedException {
+        currentAgent.addBel(Literal.parseLiteral(String.format("batteryLevel(%d)", 80 + random.nextInt(21))));
     }
 
     private void addDeliveryPositionBelief(Agent currentAgent) throws RevisionFailedException {

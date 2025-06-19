@@ -13,6 +13,7 @@ public class FactoryModel extends GridWorldModel {
     private final Location truckLocation = new Location(GSize / 2, 0);
     private final Location delivery1Location = new Location(GSize / 2, GSize - 1);
     private final int deliveryLocationId = 1;
+    private final int truckId = 11;
     private final MovementManager movementManager = new MovementManager(this);
 
     public FactoryModel() {
@@ -21,6 +22,10 @@ public class FactoryModel extends GridWorldModel {
 
     public Location getTruckLocation() {
         return truckLocation;
+    }
+
+    public int getTruckId() {
+        return truckId;
     }
 
     public Location getDeliveryLocation() {
