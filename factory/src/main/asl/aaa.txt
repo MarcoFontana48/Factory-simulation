@@ -1,0 +1,573 @@
+Runtime Services (RTS) is running at 192.168.80.1:56123
+Agent mind inspector is running at http://192.168.80.1:3272
+[delivery_place] Delivery place A started at position (6, 12)
+[truck] Started at position (6, 0)
+[ch_st_1] Started at location: (12, 6)
+[human_1] Started at position (8, 6)
+[d_bot_1] started with battery level: 97% at location (9, 6)
+[d_bot_1] truck is at: (6, 0)
+[d_bot_1] delivery location is: (6, 12)
+[human_1] Current position: (8, 6)
+[d_bot_1] current position: (9, 6), Target: (6, 0), Battery: 97%
+[human_1] doing: move_randomly(8,6)
+[human_1] Robot d_bot_1 status: Position(9,6), Battery:97%, Package:false, Completed:false, Malfunction:false
+[d_bot_1] doing: move_towards_target(6,0,9,6)
+[d_bot_1] starting malfunction monitoring...
+[human_1] Current position: (8, 6)
+[human_1] doing: move_randomly(8,6)
+[d_bot_1] current position: (9, 5), Target: (6, 0), Battery: 34%
+[d_bot_1] doing: move_towards_target(6,0,9,5)
+[human_1] Current position: (9, 7)
+[human_1] doing: move_randomly(9,7)
+[d_bot_1] current position: (9, 4), Target: (6, 0), Battery: 33%
+[d_bot_1] doing: move_towards_target(6,0,9,4)
+[human_1] Current position: (9, 8)
+[human_1] doing: move_randomly(9,8)
+[d_bot_1] current position: (9, 3), Target: (6, 0), Battery: 32%
+[d_bot_1] doing: move_towards_target(6,0,9,3)
+[human_1] Current position: (10, 9)
+[human_1] doing: move_randomly(10,9)
+[d_bot_1] current position: (9, 2), Target: (6, 0), Battery: 31%
+[d_bot_1] doing: move_towards_target(6,0,9,2)
+[human_1] Current position: (10, 10)
+[human_1] doing: move_randomly(10,10)
+[d_bot_1] current position: (8, 2), Target: (6, 0), Battery: 30%
+[d_bot_1] doing: move_towards_target(6,0,8,2)
+[human_1] Current position: (11, 11)
+[human_1] doing: move_randomly(11,11)
+[d_bot_1] current position: (8, 1), Target: (6, 0), Battery: 29%
+[d_bot_1] doing: move_towards_target(6,0,8,1)
+[human_1] Current position: (11, 11)
+[human_1] doing: move_randomly(11,11)
+[d_bot_1] current position: (7, 1), Target: (6, 0), Battery: 28%
+[d_bot_1] doing: move_towards_target(6,0,7,1)
+[human_1] Current position: (12, 11)
+[human_1] doing: move_randomly(12,11)
+[d_bot_1] current position: (7, 0), Target: (6, 0), Battery: 27%
+[d_bot_1] doing: move_towards_target(6,0,7,0)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[d_bot_1] current position: (6, 0), Target: (6, 0), Battery: 26%
+[d_bot_1] reached destination (6, 0)
+[human_1] Robot d_bot_1 status: Position(6,0), Battery:26%, Package:false, Completed:false, Malfunction:false
+[d_bot_1] stopping malfunction monitoring...
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[d_bot_1] arrived at truck location. Attempting to pick up package...
+[d_bot_1] message sent to truck, waiting for response...
+[truck] Received package request from robot d_bot_1
+[truck] Handing package 1 to robot d_bot_1
+[truck] Total packages handed: 1
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[d_bot_1] received package_received message
+[d_bot_1] package successfully picked up from truck!
+[d_bot_1] now heading to delivery location (6, 12)
+[d_bot_1] current position: (6, 0), Target: (6, 12), Battery: 26%
+[d_bot_1] starting malfunction monitoring...
+[d_bot_1] doing: move_towards_target(6,12,6,0)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[d_bot_1] current position: (6, 1), Target: (6, 12), Battery: 25%
+[d_bot_1] doing: move_towards_target(6,12,6,1)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[d_bot_1] current position: (6, 2), Target: (6, 12), Battery: 24%
+[d_bot_1] doing: move_towards_target(6,12,6,2)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[d_bot_1] current position: (6, 1), Target: (6, 12), Battery: 23%
+[d_bot_1] doing: move_towards_target(6,12,6,1)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[d_bot_1] current position: (6, 2), Target: (6, 12), Battery: 22%
+[d_bot_1] doing: move_towards_target(6,12,6,2)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[d_bot_1] current position: (6, 3), Target: (6, 12), Battery: 21%
+[d_bot_1] doing: move_towards_target(6,12,6,3)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[d_bot_1] current position: (6, 4), Target: (6, 12), Battery: 20%
+[d_bot_1] doing: move_towards_target(6,12,6,4)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[d_bot_1] current position: (6, 5), Target: (6, 12), Battery: 19%
+[d_bot_1] battery level is low (19%). Going to nearest charging station.
+[d_bot_1] saved state - target: (6, 12), carrying: true
+[d_bot_1] searching for charging stations...
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging station ch_st_1 responding to location query from d_bot_1
+[d_bot_1] found charging station ch_st_1 at (12, 6)
+[d_bot_1] stopping malfunction monitoring...
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[human_1] Robot d_bot_1 status: Position(6,5), Battery:19%, Package:true, Completed:false, Malfunction:false
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[d_bot_1] found 1 charging station(s): [[ch_st_1,12,6]]
+[d_bot_1] doing: compute_closest_charging_station([[ch_st_1,12,6]],6,5)
+[d_bot_1] closest charging station is ch_st_1 at (12, 6)
+[d_bot_1] moving towards charging station ch_st_1 at (12, 6)
+[d_bot_1] current position: (6, 5), Target: (12, 6), Battery: 19%
+[d_bot_1] starting malfunction monitoring...
+[d_bot_1] doing: move_towards_target(12,6,6,5)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[d_bot_1] current position: (7, 5), Target: (12, 6), Battery: 18%
+[d_bot_1] doing: move_towards_target(12,6,7,5)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[d_bot_1] current position: (8, 5), Target: (12, 6), Battery: 17%
+[d_bot_1] doing: move_towards_target(12,6,8,5)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[human_1] Robot d_bot_1 status: Position(9,5), Battery:16%, Package:true, Completed:false, Malfunction:false
+[d_bot_1] current position: (9, 5), Target: (12, 6), Battery: 16%
+[d_bot_1] doing: move_towards_target(12,6,9,5)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[d_bot_1] current position: (10, 5), Target: (12, 6), Battery: 15%
+[d_bot_1] doing: move_towards_target(12,6,10,5)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[d_bot_1] current position: (9, 5), Target: (12, 6), Battery: 14%
+[d_bot_1] doing: move_towards_target(12,6,9,5)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[d_bot_1] current position: (8, 5), Target: (12, 6), Battery: 13%
+[d_bot_1] doing: move_towards_target(12,6,8,5)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[d_bot_1] current position: (9, 5), Target: (12, 6), Battery: 12%
+[d_bot_1] doing: move_towards_target(12,6,9,5)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[d_bot_1] current position: (10, 5), Target: (12, 6), Battery: 11%
+[d_bot_1] doing: move_towards_target(12,6,10,5)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[d_bot_1] current position: (11, 5), Target: (12, 6), Battery: 10%
+[d_bot_1] doing: move_towards_target(12,6,11,5)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[d_bot_1] current position: (11, 6), Target: (12, 6), Battery: 9%
+[d_bot_1] doing: move_towards_target(12,6,11,6)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[d_bot_1] current position: (10, 6), Target: (12, 6), Battery: 8%
+[d_bot_1] doing: move_towards_target(12,6,10,6)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[d_bot_1] current position: (11, 6), Target: (12, 6), Battery: 7%
+[d_bot_1] doing: move_towards_target(12,6,11,6)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[human_1] Robot d_bot_1 status: Position(12,6), Battery:6%, Package:true, Completed:false, Malfunction:false
+[d_bot_1] current position: (12, 6), Target: (12, 6), Battery: 6%
+[d_bot_1] reached destination (12, 6)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[d_bot_1] stopping malfunction monitoring...
+[d_bot_1] arrived at charging station location (12, 6)
+[d_bot_1] Requesting charging from station ch_st_1
+[ch_st_1] Received charging request from d_bot_1
+[d_bot_1] current position: (12, 6), Target: (6, 12), Battery: 6%
+[ch_st_1] Received battery level 6% from d_bot_1
+[d_bot_1] battery level is low (6%). Going to nearest charging station.
+[d_bot_1] saved state - target: (6, 12), carrying: true
+[d_bot_1] searching for charging stations...
+[ch_st_1] Charging station ch_st_1 responding to location query from d_bot_1
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 7%
+[d_bot_1] doing: update_battery_level(7)
+[d_bot_1] battery updated to: 7%
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 8%
+[d_bot_1] doing: update_battery_level(8)
+[d_bot_1] battery updated to: 8%
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 9%
+[d_bot_1] doing: update_battery_level(9)
+[d_bot_1] battery updated to: 9%
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 10%
+[d_bot_1] doing: update_battery_level(10)
+[d_bot_1] battery updated to: 10%
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 11%
+[d_bot_1] doing: update_battery_level(11)
+[d_bot_1] battery updated to: 11%
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 12%
+[d_bot_1] doing: update_battery_level(12)
+[d_bot_1] battery updated to: 12%
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 13%
+[d_bot_1] doing: update_battery_level(13)
+[d_bot_1] battery updated to: 13%
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 14%
+[d_bot_1] doing: update_battery_level(14)
+[d_bot_1] battery updated to: 14%
+[human_1] Robot d_bot_1 status: Position(12,6), Battery:14%, Package:true, Completed:false, Malfunction:false
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 15%
+[d_bot_1] doing: update_battery_level(15)
+[d_bot_1] battery updated to: 15%
+[d_bot_1] found 1 charging station(s): [[ch_st_1,12,6]]
+[d_bot_1] doing: compute_closest_charging_station([[ch_st_1,12,6]],12,6)
+[d_bot_1] closest charging station is ch_st_1 at (12, 6)
+[d_bot_1] moving towards charging station ch_st_1 at (12, 6)
+[d_bot_1] current position: (12, 6), Target: (12, 6), Battery: 15%
+[d_bot_1] reached destination (12, 6)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 16%
+[d_bot_1] doing: update_battery_level(16)
+[d_bot_1] battery updated to: 16%
+[d_bot_1] arrived at charging station location (12, 6)
+[d_bot_1] Requesting charging from station ch_st_1
+[d_bot_1] current position: (12, 6), Target: (6, 12), Battery: 16%
+[d_bot_1] starting malfunction monitoring...
+[d_bot_1] doing: move_towards_target(6,12,12,6)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 17%
+[d_bot_1] doing: update_battery_level(17)
+[d_bot_1] battery updated to: 17%
+[d_bot_1] current position: (12, 7), Target: (6, 12), Battery: 17%
+[d_bot_1] doing: move_towards_target(6,12,12,7)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 18%
+[d_bot_1] doing: update_battery_level(18)
+[d_bot_1] battery updated to: 18%
+[d_bot_1] current position: (11, 7), Target: (6, 12), Battery: 18%
+[d_bot_1] doing: move_towards_target(6,12,11,7)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 19%
+[d_bot_1] doing: update_battery_level(19)
+[d_bot_1] battery updated to: 19%
+[d_bot_1] current position: (11, 8), Target: (6, 12), Battery: 19%
+[d_bot_1] doing: move_towards_target(6,12,11,8)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 20%
+[d_bot_1] doing: update_battery_level(20)
+[d_bot_1] battery updated to: 20%
+[d_bot_1] current position: (10, 8), Target: (6, 12), Battery: 20%
+[d_bot_1] doing: move_towards_target(6,12,10,8)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 21%
+[d_bot_1] doing: update_battery_level(21)
+[d_bot_1] battery updated to: 21%
+[d_bot_1] current position: (10, 9), Target: (6, 12), Battery: 21%
+[d_bot_1] doing: move_towards_target(6,12,10,9)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 22%
+[d_bot_1] doing: update_battery_level(22)
+[d_bot_1] battery updated to: 22%
+[d_bot_1] current position: (9, 9), Target: (6, 12), Battery: 22%
+[d_bot_1] doing: move_towards_target(6,12,9,9)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 23%
+[d_bot_1] doing: update_battery_level(23)
+[d_bot_1] battery updated to: 23%
+[d_bot_1] current position: (9, 10), Target: (6, 12), Battery: 23%
+[d_bot_1] doing: move_towards_target(6,12,9,10)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 24%
+[d_bot_1] doing: update_battery_level(24)
+[d_bot_1] battery updated to: 24%
+[human_1] Robot d_bot_1 status: Position(8,10), Battery:24%, Package:true, Completed:false, Malfunction:false
+[d_bot_1] current position: (8, 10), Target: (6, 12), Battery: 24%
+[d_bot_1] doing: move_towards_target(6,12,8,10)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 25%
+[d_bot_1] doing: update_battery_level(25)
+[d_bot_1] battery updated to: 25%
+[d_bot_1] current position: (8, 11), Target: (6, 12), Battery: 25%
+[d_bot_1] doing: move_towards_target(6,12,8,11)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 26%
+[d_bot_1] doing: update_battery_level(26)
+[d_bot_1] battery updated to: 26%
+[d_bot_1] current position: (7, 11), Target: (6, 12), Battery: 26%
+[d_bot_1] doing: move_towards_target(6,12,7,11)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 27%
+[d_bot_1] doing: update_battery_level(27)
+[d_bot_1] battery updated to: 27%
+[d_bot_1] current position: (7, 12), Target: (6, 12), Battery: 27%
+[d_bot_1] doing: move_towards_target(6,12,7,12)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 28%
+[d_bot_1] doing: update_battery_level(28)
+[d_bot_1] battery updated to: 28%
+[d_bot_1] current position: (8, 12), Target: (6, 12), Battery: 28%
+[d_bot_1] doing: move_towards_target(6,12,8,12)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 29%
+[d_bot_1] doing: update_battery_level(29)
+[d_bot_1] battery updated to: 29%
+[d_bot_1] current position: (7, 12), Target: (6, 12), Battery: 29%
+[d_bot_1] doing: move_towards_target(6,12,7,12)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 30%
+[d_bot_1] doing: update_battery_level(30)
+[d_bot_1] battery updated to: 30%
+[d_bot_1] current position: (6, 12), Target: (6, 12), Battery: 30%
+[d_bot_1] reached destination (6, 12)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 31%
+[d_bot_1] doing: update_battery_level(31)
+[d_bot_1] battery updated to: 31%
+[d_bot_1] stopping malfunction monitoring...
+[d_bot_1] arrived at delivery location. delivering package...
+[d_bot_1] at delivery location - requesting package delivery
+[delivery_place] Received package delivery request from robot d_bot_1 for package PKG001
+[delivery_place] Package PKG001 successfully received from robot d_bot_1
+[delivery_place] Total packages received: 1
+[d_bot_1] delivery confirmed by delivery place for package: PKG001
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 32%
+[d_bot_1] doing: update_battery_level(32)
+[d_bot_1] battery updated to: 32%
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 33%
+[d_bot_1] doing: update_battery_level(33)
+[d_bot_1] battery updated to: 33%
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 34%
+[d_bot_1] doing: update_battery_level(34)
+[d_bot_1] battery updated to: 34%
+[human_1] Robot d_bot_1 status: Position(6,12), Battery:34%, Package:true, Completed:false, Malfunction:false
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 35%
+[d_bot_1] doing: update_battery_level(35)
+[d_bot_1] battery updated to: 35%
+[d_bot_1] package delivery process completed
+[d_bot_1] delivery completed! Now returning to truck at (6, 0) for next package
+[d_bot_1] current position: (6, 12), Target: (6, 0), Battery: 35%
+[d_bot_1] starting malfunction monitoring...
+[d_bot_1] doing: move_towards_target(6,0,6,12)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 36%
+[d_bot_1] doing: update_battery_level(36)
+[d_bot_1] battery updated to: 36%
+[d_bot_1] current position: (6, 11), Target: (6, 0), Battery: 36%
+[d_bot_1] doing: move_towards_target(6,0,6,11)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 37%
+[d_bot_1] doing: update_battery_level(37)
+[d_bot_1] battery updated to: 37%
+[d_bot_1] current position: (6, 10), Target: (6, 0), Battery: 37%
+[d_bot_1] doing: move_towards_target(6,0,6,10)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 38%
+[d_bot_1] doing: update_battery_level(38)
+[d_bot_1] battery updated to: 38%
+[d_bot_1] current position: (6, 9), Target: (6, 0), Battery: 38%
+[d_bot_1] doing: move_towards_target(6,0,6,9)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 39%
+[d_bot_1] doing: update_battery_level(39)
+[d_bot_1] battery updated to: 39%
+[d_bot_1] current position: (6, 8), Target: (6, 0), Battery: 39%
+[d_bot_1] doing: move_towards_target(6,0,6,8)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 40%
+[d_bot_1] doing: update_battery_level(40)
+[d_bot_1] battery updated to: 40%
+[d_bot_1] current position: (6, 7), Target: (6, 0), Battery: 40%
+[d_bot_1] doing: move_towards_target(6,0,6,7)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 41%
+[d_bot_1] doing: update_battery_level(41)
+[d_bot_1] battery updated to: 41%
+[d_bot_1] current position: (6, 6), Target: (6, 0), Battery: 41%
+[d_bot_1] doing: move_towards_target(6,0,6,6)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 42%
+[d_bot_1] doing: update_battery_level(42)
+[d_bot_1] battery updated to: 42%
+[d_bot_1] current position: (6, 5), Target: (6, 0), Battery: 42%
+[d_bot_1] doing: move_towards_target(6,0,6,5)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 43%
+[d_bot_1] doing: update_battery_level(43)
+[d_bot_1] battery updated to: 43%
+[d_bot_1] current position: (6, 4), Target: (6, 0), Battery: 43%
+[d_bot_1] doing: move_towards_target(6,0,6,4)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 44%
+[d_bot_1] doing: update_battery_level(44)
+[d_bot_1] battery updated to: 44%
+[human_1] Robot d_bot_1 status: Position(6,3), Battery:44%, Package:false, Completed:true, Malfunction:false
+[d_bot_1] current position: (6, 3), Target: (6, 0), Battery: 44%
+[d_bot_1] doing: move_towards_target(6,0,6,3)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 45%
+[d_bot_1] doing: update_battery_level(45)
+[d_bot_1] battery updated to: 45%
+[d_bot_1] current position: (6, 2), Target: (6, 0), Battery: 45%
+[d_bot_1] doing: move_towards_target(6,0,6,2)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 46%
+[d_bot_1] doing: update_battery_level(46)
+[d_bot_1] battery updated to: 46%
+[d_bot_1] current position: (6, 1), Target: (6, 0), Battery: 46%
+[d_bot_1] doing: move_towards_target(6,0,6,1)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 47%
+[d_bot_1] doing: update_battery_level(47)
+[d_bot_1] battery updated to: 47%
+[d_bot_1] current position: (6, 2), Target: (6, 0), Battery: 47%
+[d_bot_1] doing: move_towards_target(6,0,6,2)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 48%
+[d_bot_1] doing: update_battery_level(48)
+[d_bot_1] battery updated to: 48%
+[d_bot_1] current position: (6, 1), Target: (6, 0), Battery: 48%
+[d_bot_1] doing: move_towards_target(6,0,6,1)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 49%
+[d_bot_1] doing: update_battery_level(49)
+[d_bot_1] battery updated to: 49%
+[d_bot_1] current position: (6, 0), Target: (6, 0), Battery: 49%
+[d_bot_1] reached destination (6, 0)
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 50%
+[d_bot_1] doing: update_battery_level(50)
+[d_bot_1] battery updated to: 50%
+[d_bot_1] stopping malfunction monitoring...
+[d_bot_1] arrived at truck location. Attempting to pick up package...
+[d_bot_1] message sent to truck, waiting for response...
+[truck] Received package request from robot d_bot_1
+[truck] Handing package 2 to robot d_bot_1
+[truck] Total packages handed: 2
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 51%
+[d_bot_1] doing: update_battery_level(51)
+[d_bot_1] battery updated to: 51%
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 52%
+[d_bot_1] doing: update_battery_level(52)
+[d_bot_1] battery updated to: 52%
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 53%
+[d_bot_1] doing: update_battery_level(53)
+[d_bot_1] battery updated to: 53%
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 54%
+[d_bot_1] doing: update_battery_level(54)
+[d_bot_1] battery updated to: 54%
+[human_1] Robot d_bot_1 status: Position(6,0), Battery:54%, Package:false, Completed:true, Malfunction:false
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 55%
+[d_bot_1] doing: update_battery_level(55)
+[d_bot_1] battery updated to: 55%
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 56%
+[d_bot_1] doing: update_battery_level(56)
+[d_bot_1] battery updated to: 56%
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 57%
+[d_bot_1] doing: update_battery_level(57)
+[d_bot_1] battery updated to: 57%
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 58%
+[d_bot_1] doing: update_battery_level(58)
+[d_bot_1] battery updated to: 58%
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 59%
+[d_bot_1] doing: update_battery_level(59)
+[d_bot_1] battery updated to: 59%
+[human_1] Current position: (12, 12)
+[human_1] doing: move_randomly(12,12)
+[ch_st_1] Charging d_bot_1 - battery: 60%
+[d_bot_1] doing: update_battery_level(60)
+[d_bot_1] battery updated to: 60%

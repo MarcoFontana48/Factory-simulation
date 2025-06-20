@@ -17,7 +17,7 @@ public class FactoryModel extends GridWorldModel {
     private final MovementManager movementManager = new MovementManager(this);
 
     public FactoryModel() {
-        super(FactoryModel.GSize, FactoryModel.GSize, 3);
+        super(FactoryModel.GSize, FactoryModel.GSize, 8);
     }
 
     public Location getTruckLocation() {

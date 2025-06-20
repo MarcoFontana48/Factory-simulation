@@ -48,6 +48,9 @@ public class FactoryEnv extends Environment {
             case "move_towards_target":
                 result = executeMoveTowardsTarget(agentName, action);
                 break;
+            case "move_randomly":
+                result = executeMoveRandomly(agentName, action);
+                break;
             case "update_battery_level":
                 result = executeUpdateBatteryLevel(agentName, action);
                 break;
@@ -62,6 +65,55 @@ public class FactoryEnv extends Environment {
                 return false;
         }
         return result;
+    }
+
+    private boolean executeMoveRandomly(String agentName, Structure action) {
+        try {
+            // Parse target coordinates from action parameters
+            if (action.getArity() != 2) {
+                System.err.println("move_towards_target expects 2 arguments: AgentLocationX, AgentLocationY");
+                return false;
+            }
+
+            Term agLocationXTerm = action.getTerm(0);
+            Term agLocationYTerm = action.getTerm(1);
+
+            if (!(agLocationXTerm instanceof NumberTerm) || !(agLocationYTerm instanceof NumberTerm)) {
+                System.err.println("move_towards_target arguments must be numbers");
+                return false;
+            }
+
+            int agLocationX = (int) ((NumberTerm) agLocationXTerm).solve();
+            int agLocationY = (int) ((NumberTerm) agLocationYTerm).solve();
+            Location agentLocation = new Location(agLocationX, agLocationY);
+
+            // Get agent ID from name
+            int agentId = this.getAgIdBasedOnName(agentName);
+            if (agentId == -1) {
+                System.err.println("Unknown agent: " + agentName);
+                return false;
+            }
+
+            // Execute one step movement using MovementManager
+            boolean moveSuccess = model.getMovementManager().moveRandomly(agentId, agentLocation);
+
+            if (moveSuccess) {
+                // Get new position after move
+                Location newPos = model.getAgPos(agentId);
+                
+                // Update agent percepts with new position
+                updateAgentPosition(agentName, newPos);
+
+                return true;
+            } else {
+                System.err.println("Move failed for " + agentName + " - path might be blocked");
+                return false;
+            }
+        } catch (Exception e) {
+            System.err.println("Error executing move_randomly for " + agentName + ": " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
     }
 
     /**
@@ -81,8 +133,7 @@ public class FactoryEnv extends Environment {
             Term agLocationXTerm = action.getTerm(2);
             Term agLocationYTerm = action.getTerm(3);
             
-            if (!(targetXTerm instanceof NumberTerm) || !(targetYTerm instanceof NumberTerm) 
-                    || !(agLocationXTerm instanceof NumberTerm) || !(agLocationYTerm instanceof NumberTerm)) {
+            if (!(targetXTerm instanceof NumberTerm) || !(targetYTerm instanceof NumberTerm) || !(agLocationXTerm instanceof NumberTerm) || !(agLocationYTerm instanceof NumberTerm)) {
                 System.err.println("move_towards_target arguments must be numbers");
                 return false;
             }
@@ -361,7 +412,7 @@ public class FactoryEnv extends Environment {
             case "ch_st_2" -> 4;
             case "truck_1" -> 5;
             case "deliv_A" -> 6;
-            case "deliv_B" -> 7;
+            case "human_1" -> 7;
             default -> -1;
         };
     }

@@ -5,14 +5,22 @@ import jason.environment.grid.Location;
 
 public class MovementManager {
     private FactoryModel model;
+    private java.util.Random random = new java.util.Random();
 
     public MovementManager(FactoryModel model) {
         this.model = model;
     }
 
+    public boolean moveRandomly(int agentId, Location agentLocation) {
+        Location randomMove = new Location(agentLocation.x + random.nextInt(2), agentLocation.y + random.nextInt(2));
+        if (this.model.isFree(randomMove.x, randomMove.y)) {
+            return tryMove(agentId, randomMove);
+        }
+        return true;
+    }
+
     public boolean moveTowards(int agentId, Location destination, Location agentLocation) {
         final Location originalAgentPos = new Location(agentLocation.x, agentLocation.y); // Store original position
-        java.util.Random random = new java.util.Random();
         
         boolean prioritizeVertical = shouldPrioritizeVertical(destination, agentLocation);
         
