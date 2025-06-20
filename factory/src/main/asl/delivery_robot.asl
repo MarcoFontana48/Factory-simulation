@@ -104,7 +104,7 @@ askedChargingStationLocation(false).    // track if charging station location ha
 +!monitor_malfunction_loop : monitoring_active & moving_to_target(_, _) & not malfunctioning <-
     utils.rand_malfunction(Value);  // using custom internal action
     // slim chance of malfunctioning
-    if (Value >= 0.999) {
+    if (Value > 10) {
         .println("malfunction detected! (Random malfunction value: ", Value, ")");
         +malfunctioning;
     } else {

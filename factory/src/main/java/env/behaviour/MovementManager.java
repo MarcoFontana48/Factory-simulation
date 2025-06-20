@@ -12,7 +12,16 @@ public class MovementManager {
     }
 
     public boolean moveRandomly(int agentId, Location agentLocation) {
-        Location randomMove = new Location(agentLocation.x + random.nextInt(2), agentLocation.y + random.nextInt(2));
+        int dx = 0, dy = 0;
+        // Ensure at least one coordinate moves
+        while (dx == 0 && dy == 0) {
+            dx = random.nextBoolean() ? 1 : -1;
+            dy = random.nextBoolean() ? 1 : -1;
+            // Randomly decide to move only in one direction sometimes
+            if (random.nextBoolean()) dx = 0;
+            else dy = 0;
+        }
+        Location randomMove = new Location(agentLocation.x + dx, agentLocation.y + dy);
         if (this.model.isFree(randomMove.x, randomMove.y)) {
             return tryMove(agentId, randomMove);
         }

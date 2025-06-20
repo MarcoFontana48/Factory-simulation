@@ -28,7 +28,7 @@
     .println("Robot ", RobotId, " status: Position(", X, ",", Y, "), Battery:", Battery, "%, Package:", Carrying, ", Completed:", Completed, ", Malfunction:", Malfunctioning).
 
 /* handle malfunction reports from robots */
-+?robotMalfunctioning(RobotName, X, Y) : not malfunctioning & not helping_robot & not seekingChargingStation <-
++?robotMalfunctioning(RobotName, X, Y) <-
     .my_name(MyName);
     ?current_position(MyX, MyY);
     .println("received malfunction report from robot ", RobotName, " at (", X, ", ", Y, "), my position is (", MyX, ", ", MyY, "), responding with acknowledgment");
@@ -37,11 +37,10 @@
 
 +!redirect_to_help(R, X, Y) <-
     .println("i have been requested to help robot ", R, " at (", X, ", ", Y, ")");
-    +helping_robot(R);
     .println("starting to remotely repair and recharge robot ", RobotName);
     !repair_loop(RobotName).
 
-+!repair_loop(RobotName) : helping_robot(RobotName) <-
++!repair_loop(RobotName) <-
     .wait(500);
     ?robot_status(RobotName, X, Y, Battery, Carrying, Completed, Malfunctioning)[source(RobotName)];
     // if robot's battery is above 50%, repair it remotely and send confirmation
