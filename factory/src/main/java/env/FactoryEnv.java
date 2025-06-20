@@ -13,16 +13,23 @@ import jason.environment.grid.Location;
 
 //TODO: refactor to become FACTORY
 public class FactoryEnv extends Environment {
-    private static final FactoryModel FACTORY_MODEL = new FactoryModel(); 
+    private FactoryModel model = new FactoryModel();
 
-    @Override
-    public void init(final String[] args) {
-
-    }
+//    @Override
+//    public void init(final String[] args) {
+//        this.model = new FactoryModel();
+//
+//        if ((args.length == 1) && args[0].equals("gui")) {
+//            final FactoryView view = new FactoryView(this.model);
+//            this.model.setView(view);
+//        }
+//        // boot the agents' percepts
+//        this.updatePercepts();
+//    }
 
     /**
      * Update the agents' percepts based on current state of the environment
-     * (HouseModel)
+     * (FactoryModel)
      */
     void updatePercepts() {
 
@@ -95,11 +102,11 @@ public class FactoryEnv extends Environment {
             }
 
             // Execute one step movement using MovementManager
-            boolean moveSuccess = FACTORY_MODEL.getMovementManager().moveTowards(agentId, destination, agentLocation);
+            boolean moveSuccess = model.getMovementManager().moveTowards(agentId, destination, agentLocation);
 
             if (moveSuccess) {
                 // Get new position after move
-                Location newPos = FACTORY_MODEL.getAgPos(agentId);
+                Location newPos = model.getAgPos(agentId);
                 
                 // Update agent percepts with new position
                 updateAgentPosition(agName, newPos);

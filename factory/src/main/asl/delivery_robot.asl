@@ -85,7 +85,7 @@ askedChargingStationLocation(false).    // track if charging station location ha
 /* handle case when robot is malfunctioning */
 +!step(TargetX, TargetY) : malfunctioning <-
     ?current_position(CurrentX, CurrentY);
-    .println("cannot move due to malfunctions, stopped at (", CurrentX, ", ", CurrentY, ") and willing to move to target (", TargetX, ", ", TargetY, "), waiting for repair to arrive");
+    .println("cannot move due to malfunctioning at (", CurrentX, ", ", CurrentY, ")");
     .wait(1000);
     !step(TargetX, TargetY).
 
@@ -143,14 +143,15 @@ askedChargingStationLocation(false).    // track if charging station location ha
     compute_closest_robot(RobotList, ThisRobotX, ThisRobotY);   //the list is composed of: [["name1", X, Y], ["name2", X2, Y2], ...]
     ?closestRobot(ClosestName, CX, CY);
     .println("closest robot to me, is ", ClosestName, " at (", CX, ", ", CY, "), sending help request to it");
-    .send(ClosestName, achieve, redirect_to_help(ClosestName, ThisRobotX, ThisRobotY)).
+    .my_name(MyName);
+    .send(ClosestName, achieve, redirect_to_help(MyName, ThisRobotX, ThisRobotY)).
 
 /* handle malfunction reports from other robots */
 +?robotMalfunctioning(RobotName, X, Y) : not malfunctioning & not helping_robot & not seekingChargingStation <-
     .my_name(MyName);
     if (RobotName \== MyName) {
         ?current_position(MyX, MyY);
-        .println("received malfunction report from robot ", RobotName, " at (", X, ", ", Y, "), my position is (", MyX, ", ", MyY, ")");
+        .println("received malfunction report from robot ", RobotName, " at (", X, ", ", Y, "), my position is (", MyX, ", ", MyY, "), responding with acknowledgment");
 
         .send(RobotName, tell, malfunction_ack(MyName, MyX, MyY));
     }.
@@ -158,7 +159,9 @@ askedChargingStationLocation(false).    // track if charging station location ha
 +malfunction_ack(ThatRobotName, ThatRobotX, ThatRobotY)[source(ThatRobotName)] <-
     .println("acknowledged malfunction report from robot ", ThatRobotName, " at (", ThatRobotX, ", ", ThatRobotY, ")").
 
-+!redirect_to_help(RobotName, X, Y) <-
++!redirect_to_help(R, X, Y) <-
+    .println("i have been requested to help robot ", R, " at (", X, ", ", Y, ")");
+
     // save current state before going to help
     ?current_position(CurrentX, CurrentY);
     
@@ -185,10 +188,10 @@ askedChargingStationLocation(false).    // track if charging station location ha
     +saved_carrying_status_before_help(CarryingStatus);
     
     // mark that we're helping another robot and redirect current step execution
-    +helping_robot(RobotName, X, Y);
+    +helping_robot(R, X, Y);
     +redirect_to_help(X, Y);
     
-    .println("redirecting to help robot ", RobotName, " at (", X, ", ", Y, ")").
+    .println("redirecting to help robot ", R, " at (", X, ", ", Y, ")").
 
 /* ignore malfunction reports when we're already malfunctioning or helping someone */
 +?robotMalfunctioning(RobotName, X, Y) : malfunctioning | helping_robot | seekingChargingStation <-
@@ -202,6 +205,7 @@ askedChargingStationLocation(false).    // track if charging station location ha
         .println("ignoring malfunction report from robot ", RobotName, " at (", X, ", ", Y, ") because I'm currently busy");
     }.
 
+// Modified section for handling arrival near malfunctioning robot with battery sharing
 +!handleArrival(TargetX, TargetY) <-
     .println("reached destination (", TargetX, ", ", TargetY, ")");
     -moving_to_target(TargetX, TargetY);
@@ -223,10 +227,17 @@ askedChargingStationLocation(false).    // track if charging station location ha
         ?current_position(MyX, MyY);
         EuclideanDistanceFromMalfunctioningRobot = math.sqrt((MyX - MalfunctionX) * (MyX - MalfunctionX) + (MyY - MalfunctionY) * (MyY - MalfunctionY));
         if (EuclideanDistanceFromMalfunctioningRobot <= 1.5) { // allowing for diagonal adjacency (sqrt(2) == 1.41)
-            .println("arrived near malfunctioning robot ", RobotName, " (adiacent to it)");
+            .println("arrived near malfunctioning robot ", RobotName, " (adjacent to it)");
             .println("current position: (", MyX, ", ", MyY, "), robot to help at: (", MalfunctionX, ", ", MalfunctionY, ")");
-            .println("simulating repair assistance...");
-            .wait(2000); // TODO: currently simulate time needed to help repair, will be replaced with something more realistic like sharing battery and repairing
+            
+            // Verify we're not trying to help ourselves
+            .my_name(MyName);
+            if (RobotName \== MyName) {
+                // Start battery sharing process with the correct robot
+                !start_battery_sharing(RobotName);
+            } else {
+                .println("ERROR: cannot help myself! Something went wrong with robot identification.");
+            }
             
             .println("finished helping robot ", RobotName, ". Returning to previous task.");
             
@@ -246,7 +257,8 @@ askedChargingStationLocation(false).    // track if charging station location ha
             // resume previous task
             !step(SavedX, SavedY);
         } else {
-            .println("not close enough to robot ", RobotName, " (distance: ", Distance, "), continuing to approach...");
+            .println("not close enough to robot ", RobotName, " (distance: ", EuclideanDistanceFromMalfunctioningRobot, "), i will be continuing to approach it...");
+            !step(MalfunctionX, MalfunctionY);
         }
     }
     
@@ -261,6 +273,109 @@ askedChargingStationLocation(false).    // track if charging station location ha
         .println("arrived at delivery location. delivering package...");
         !deliver_package;
     }.
+
+// Battery sharing plan
++!start_battery_sharing(RobotName) <-
+    .println("starting battery sharing with robot ", RobotName);
+    ?batteryLevel(MyBattery);
+    .println("my current battery level: ", MyBattery, "%");
+    
+    // Request the malfunctioning robot's battery level
+    //.send(RobotName, askOne, batteryLevel(Level));
+    //.wait(1000);
+    
+    +battery_sharing_active(RobotName);
+    +battery_shared_amount(0);
+    !battery_sharing_loop(RobotName).
+
+// Battery sharing loop
++!battery_sharing_loop(RobotName) : battery_sharing_active(RobotName) <-
+    ?batteryLevel(MyBattery);
+    ?battery_shared_amount(SharedSoFar);
+    
+    .println("battery sharing status - my battery: ", MyBattery, "%, shared so far: ", SharedSoFar, " units");
+    
+    // Check if we can continue sharing (my battery > 25 and haven't shared 25 units yet)
+    if (MyBattery > 25 & SharedSoFar < 25) {
+        // Check if the target robot actually needs more battery (ask for its current level)
+        //.send(RobotName, askOne, batteryLevel(TargetBattery));
+        //.wait(500);
+        
+            .println("sharing 1 unit of battery with robot ", RobotName);
+            
+            // Send 1 unit of battery
+            .send(RobotName, achieve, receive_battery_unit(1));
+            
+            // Update our battery level
+            NewMyBattery = MyBattery - 1;
+            -batteryLevel(MyBattery);
+            +batteryLevel(NewMyBattery);
+            update_battery_level(NewMyBattery);
+            
+            // Update shared amount
+            NewSharedAmount = SharedSoFar + 1;
+            -battery_shared_amount(SharedSoFar);
+            +battery_shared_amount(NewSharedAmount);
+            
+            .println("updated my battery to: ", NewMyBattery, "%, total shared: ", NewSharedAmount, " units");
+            
+            .wait(500); // Wait before next sharing cycle
+            !battery_sharing_loop(RobotName);
+    } else {
+        if (MyBattery <= 25) {
+            .println("stopping battery sharing - my battery level is too low (", MyBattery, "%)");
+        } elif (SharedSoFar >= 25) {
+            .println("stopping battery sharing - maximum sharing limit reached (", SharedSoFar, " units)");
+        }
+        !stop_battery_sharing(RobotName);
+    }.
+
+// Stop battery sharing
++!stop_battery_sharing(RobotName) <-
+    ?battery_shared_amount(TotalShared);
+    .println("battery sharing completed with robot ", RobotName, ". Total shared: ", TotalShared, " units");
+    
+    // Notify the other robot that sharing is complete
+    .send(RobotName, tell, battery_sharing_completed(TotalShared));
+    
+    // Clean up battery sharing state
+    -battery_sharing_active(RobotName);
+    -battery_shared_amount(TotalShared).
+
+// Handle receiving battery from another robot (for the malfunctioning robot)
++!receive_battery_unit(Amount)[source(HelperRobot)] <-
+    ?batteryLevel(CurrentBattery);
+    NewBattery = CurrentBattery + Amount;
+    
+    // Ensure battery doesn't exceed maximum of 100%
+    if (NewBattery > 100) {
+        NewBattery = 100;
+        .println("battery would exceed 100%, capping at maximum level");
+    }
+    
+    -batteryLevel(CurrentBattery);
+    +batteryLevel(NewBattery);
+    update_battery_level(NewBattery);
+    
+    .println("received ", Amount, " unit of battery from robot ", HelperRobot, ". Battery now: ", NewBattery, "%").
+
+// Handle battery sharing completion notification
++battery_sharing_completed(TotalReceived)[source(HelperRobot)] <-
+    .println("battery sharing completed. Received total of ", TotalReceived, " units from robot ", HelperRobot);
+    ?batteryLevel(FinalBattery);
+    .println("final battery level after sharing: ", FinalBattery, "%");
+    
+    // Check if we have enough battery to resume operation
+    if (FinalBattery > 0 & malfunctioning) {
+        -malfunctioning;
+        .println("malfunction status cleared. Ready to resume normal operation");
+    }.
+
+// Handle battery level queries from other robots
++?batteryLevel(Level)[source(RequesterRobot)] <-
+    ?batteryLevel(CurrentLevel);
+    .println("robot ", RequesterRobot, " is asking for my battery level: ", CurrentLevel, "%");
+    .send(RequesterRobot, tell, batteryLevel(CurrentLevel)).
 
 /* plan to pick up package from truck with better debugging */
 +!pickup_package_from_truck <-

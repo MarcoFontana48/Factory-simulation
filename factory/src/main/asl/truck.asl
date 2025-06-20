@@ -1,13 +1,11 @@
 !start.
 
-truck_id("TRUCK1").           // unique identifier for this truck
 truck_position(6, 0).         // coordinates of this truck
 packages_handed(0).           // counter for handed packages
 
 +!start <-
-    ?truck_id(Id);
     ?truck_position(X, Y);
-    .println("Truck ", Id, " started at position (", X, ", ", Y, ")").
+    .println("Started at position (", X, ", ", Y, ")").
 
 // handle when request_package belief is added by robot's tell message
 +request_package[source(Robot)] <-
