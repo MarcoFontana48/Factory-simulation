@@ -100,17 +100,21 @@ askedChargingStationLocation(false).    // track if charging station location ha
 +!start_malfunction_monitoring : not (moving_to_target(_, _) & not monitoring_active) <-
     .println("malfunction monitoring already active, skipping new monitoring.").
 
-/* continuous monitoring loop using custom rand_malfunction action */
-+!monitor_malfunction_loop : monitoring_active & moving_to_target(_, _) & not malfunctioning <-
-    utils.rand_malfunction(Value);  // using custom internal action
-    // slim chance of malfunctioning
-    if (Value > 10) {
-        .println("malfunction detected! (Random malfunction value: ", Value, ")");
-        +malfunctioning;
-    } else {
-        .wait(500);
-        !monitor_malfunction_loop;
-    }.
+/* 
+EDIT: the random chance of malfunctioning was removed, because even though it was a 
+slim chance, eventually the simulation would stop with all robots malfunctioning simultaneously.
+It is possible to uncomment the following code to reintroduce it in order to prove this point.
+*/
+//+!monitor_malfunction_loop : monitoring_active & moving_to_target(_, _) & not malfunctioning <-
+//    utils.rand_malfunction(Value);  // using custom internal action
+//    // slim chance of malfunctioning
+//    if (Value > 10) {
+//        .println("malfunction detected! (Random malfunction value: ", Value, ")");
+//        +malfunctioning;
+//    } else {
+//        .wait(500);
+//        !monitor_malfunction_loop;
+//    }.
 
 +!monitor_malfunction_loop : not ( monitoring_active & moving_to_target(_,_) & not malfunctioning) <-
     !!stop_malfunction_monitoring.
