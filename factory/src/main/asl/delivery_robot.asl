@@ -14,7 +14,22 @@ askedChargingStationLocation(false).    // track if charging station location ha
     .println("started with battery level: ", BatteryLevel, "% at location (", X, ", ", Y, ")");
     .println("truck is at: (", TX, ", ", TY, ")");
     .println("delivery location is: (", DX, ", ", DY, ")");
+    !!show_status_periodically;
     !step(TX, TY).
+
+// show status periodically
++!show_status_periodically <-
+    .wait(5000);
+    ?current_position(X, Y);
+    ?batteryLevel(BatteryLevel);
+    ?carrying_package(CarryingStatus);
+    ?delivery_completed(DeliveryCompleted);
+    if (malfunctioning) {
+        .println("Current position: (", X, ", ", Y, "), Battery: ", BatteryLevel, "%, Carrying package: ", CarryingStatus, ", Delivery completed: ", DeliveryCompleted, " Malfunctioning: ",  true);
+    } else {
+        .println("Current position: (", X, ", ", Y, "), Battery: ", BatteryLevel, "%, Carrying package: ", CarryingStatus, ", Delivery completed: ", DeliveryCompleted, " Malfunctioning: ",  false);
+    }
+    !show_status_periodically.
 
 +!step(TargetX, TargetY) : not malfunctioning <-
     ?current_position(CurrentX, CurrentY);
@@ -23,6 +38,8 @@ askedChargingStationLocation(false).    // track if charging station location ha
     // check if we need to redirect to help another robot (a redirect is checked parallelly, so that this 'step' can change its target if suddenly a help request arrives)
     if (redirect_to_help(HelpX, HelpY)) {
         -redirect_to_help(HelpX, HelpY);
+        +saved_target_before_help(TargetX, TargetY);
+        +saved_carrying_status_before_help(CarryingStatus);
         .println("redirecting step to help location: (", HelpX, ", ", HelpY, ")");
         !step(HelpX, HelpY);
     } else {
@@ -86,7 +103,7 @@ askedChargingStationLocation(false).    // track if charging station location ha
 +!step(TargetX, TargetY) : malfunctioning <-
     ?current_position(CurrentX, CurrentY);
     .println("cannot move due to malfunctioning at (", CurrentX, ", ", CurrentY, ")");
-    .wait(1000);
+    .wait(500);
     !step(TargetX, TargetY).
 
 /* plan to start continuous malfunction monitoring */
@@ -101,7 +118,8 @@ askedChargingStationLocation(false).    // track if charging station location ha
 /* continuous monitoring loop using custom rand_malfunction action */
 +!monitor_malfunction_loop : monitoring_active & moving_to_target(_, _) & not malfunctioning <-
     utils.rand_malfunction(Value);  // using custom internal action
-    if (Value >= 0.99) {
+    // slim chance of malfunctioning
+    if (Value >= 0.999) {
         .println("malfunction detected! (Random malfunction value: ", Value, ")");
         +malfunctioning;
     } else {
@@ -213,7 +231,7 @@ askedChargingStationLocation(false).    // track if charging station location ha
     .wait(500);
    
     // handle arrival at charging station
-    if (seekingChargingStation) {
+    if (seekingChargingStation & knownChargingStation(Station, X, Y)) {
         .println("arrived at charging station location (", X, ", ", Y, ")");
         -seekingChargingStation;
 
@@ -272,6 +290,14 @@ askedChargingStationLocation(false).    // track if charging station location ha
     if (delivery_position(_, TargetX, TargetY) & carrying_package(true)) {
         .println("arrived at delivery location. delivering package...");
         !deliver_package;
+    } else {
+        if (carrying_package(false)) {
+            ?truck_position(TX, TY);
+            !step(TX, TY);
+        } else {
+            ?delivery_position(DId, DX, DY);
+            !step(DX, DY);
+        }
     }.
 
 // Battery sharing plan
@@ -282,7 +308,7 @@ askedChargingStationLocation(false).    // track if charging station location ha
     
     // Request the malfunctioning robot's battery level
     //.send(RobotName, askOne, batteryLevel(Level));
-    //.wait(1000);
+    //.wait(500);
     
     +battery_sharing_active(RobotName);
     +battery_shared_amount(0);
@@ -295,8 +321,8 @@ askedChargingStationLocation(false).    // track if charging station location ha
     
     .println("battery sharing status - my battery: ", MyBattery, "%, shared so far: ", SharedSoFar, " units");
     
-    // Check if we can continue sharing (my battery > 25 and haven't shared 25 units yet)
-    if (MyBattery > 25 & SharedSoFar < 25) {
+    // Check if we can continue sharing (my battery > N and haven't shared U units yet)
+    if (MyBattery > 30 & SharedSoFar < 25) {
         // Check if the target robot actually needs more battery (ask for its current level)
         //.send(RobotName, askOne, batteryLevel(TargetBattery));
         //.wait(500);
@@ -319,13 +345,13 @@ askedChargingStationLocation(false).    // track if charging station location ha
             
             .println("updated my battery to: ", NewMyBattery, "%, total shared: ", NewSharedAmount, " units");
             
-            .wait(500); // Wait before next sharing cycle
+            .wait(500); // wait before next sharing cycle
             !battery_sharing_loop(RobotName);
     } else {
-        if (MyBattery <= 25) {
-            .println("stopping battery sharing - my battery level is too low (", MyBattery, "%)");
+        if (MyBattery <= 30) {
+            .println("stopping battery sharing, my battery level is too low to be shared (", MyBattery, "%)");
         } elif (SharedSoFar >= 25) {
-            .println("stopping battery sharing - maximum sharing limit reached (", SharedSoFar, " units)");
+            .println("stopping battery sharing, maximum sharing limit reached (", SharedSoFar, " units)");
         }
         !stop_battery_sharing(RobotName);
     }.
@@ -383,9 +409,9 @@ askedChargingStationLocation(false).    // track if charging station location ha
     ?current_position(X, Y);
     
     if (X == TX & Y == TY) {
-        .send(truck, tell, request_package);
+        .send(truck, achieve, request_package);
         .println("message sent to truck, waiting for response...");
-        .wait(2000);
+        .wait(5000);
 
         if (package_received) {
             .println("received package_received message");
@@ -412,8 +438,8 @@ askedChargingStationLocation(false).    // track if charging station location ha
     if (X == DX & Y == DY & carrying_package(true)) {
         .my_name(RobotName);
         .println("at delivery location - requesting package delivery");
-        .send(delivery_place, tell, package_delivery_request("PKG001", RobotName));
-        .wait(1000);
+        .send(delivery_place, achieve, package_delivery_request("PKG001", RobotName));
+        .wait(2000);
         -carrying_package(true);
         +carrying_package(false);
         +delivery_completed(true);
@@ -439,7 +465,7 @@ askedChargingStationLocation(false).    // track if charging station location ha
     if (askedChargingStationLocation(false)) {
         +askedChargingStationLocation(true);
         .broadcast(askOne, whereIsChargingStation(_));
-        .wait(2000);
+        .wait(5000);
     }
     .findall([Station, X, Y], knownChargingStation(Station, X, Y), StationList);
     .length(StationList, Count);

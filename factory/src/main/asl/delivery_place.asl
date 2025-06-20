@@ -10,13 +10,9 @@ packages_received(0).           // counter for received packages
     .println("Delivery place ", Id, " started at position (", X, ", ", Y, ")").
 
 // handle when package_delivery_request belief is added by robot's tell message
-+package_delivery_request(PackageId, RobotId)[source(Robot)] <-
++!package_delivery_request(PackageId, RobotId)[source(Robot)] <-
     .println("Received package delivery request from robot ", RobotId, " for package ", PackageId);
-    !receive_package(PackageId, RobotId, Robot);
-    // remove the request belief after handling it
-    -package_delivery_request(PackageId, RobotId)[source(Robot)].
 
-+!receive_package(PackageId, RobotId, Robot) <-
     ?packages_received(Count);
     -packages_received(Count);
     +packages_received(Count + 1);

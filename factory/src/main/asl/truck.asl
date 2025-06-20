@@ -8,13 +8,9 @@ packages_handed(0).           // counter for handed packages
     .println("Started at position (", X, ", ", Y, ")").
 
 // handle when request_package belief is added by robot's tell message
-+request_package[source(Robot)] <-
++!request_package[source(Robot)] <-
     .println("Received package request from robot ", Robot);
-    !hand_package(Robot);
-    // remove the request belief after handling it
-    -request_package[source(Robot)].
 
-+!hand_package(Robot) <-
     ?packages_handed(Count);
     -packages_handed(Count);
     +packages_handed(Count + 1);
