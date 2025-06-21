@@ -1,3 +1,12 @@
+/* 
+NOTE: the random chance of malfunctioning was removed, because even though it was a 
+slim chance, eventually the simulation would stop with all robots malfunctioning simultaneously.
+It is possible to uncomment the commented code sections about malfunction monitoring to reintroduce 
+it and have a more dynamic behavior, but it will eventually lead to the same issue of all robots
+malfunctioning at the same time.
+*/
+
+
 !start.
 
 carrying_package(false).                // track if robot is carrying a package
@@ -16,73 +25,77 @@ askedChargingStationLocation(false).    // track if charging station location ha
     .println("delivery location is: (", DX, ", ", DY, ")");
     !step(TX, TY).
 
-+!step(TargetX, TargetY) : not malfunctioning <-
+/* multiple plans to handle different possible scenarios */
+// Plan 1: Handle redirect to help another robot
++!step(TargetX, TargetY) : not malfunctioning & redirect_to_help(HelpX, HelpY) <-
     ?current_position(CurrentX, CurrentY);
     ?batteryLevel(BatteryLevel);
-    
-    // check if we need to redirect to help another robot (a redirect is checked parallelly, so that this 'step' can change its target if suddenly a help request arrives)
-    if (redirect_to_help(HelpX, HelpY)) {
-        -redirect_to_help(HelpX, HelpY);
-        +saved_target_before_help(TargetX, TargetY);
-        +saved_carrying_status_before_help(CarryingStatus);
-        .println("redirecting step to help location: (", HelpX, ", ", HelpY, ")");
-        !step(HelpX, HelpY);
-    } else {
-        .println("current position: (", CurrentX, ", ", CurrentY, "), Target: (", TargetX, ", ", TargetY, "), Battery: ", BatteryLevel, "%");
-        
-        if(BatteryLevel <= 0) {
-            +malfunctioning;
-            !step(TargetX, TargetY);
-        }
+    -redirect_to_help(HelpX, HelpY);
+    +saved_target_before_help(TargetX, TargetY);
+    ?carrying_package(CarryingStatus);
+    +saved_carrying_status_before_help(CarryingStatus);
+    .println("redirecting step to help location: (", HelpX, ", ", HelpY, ")");
+    !step(HelpX, HelpY).
 
-        if (BatteryLevel < 20 & not seekingChargingStation & not charging) {
-            .println("battery level is low (", BatteryLevel, "%). Going to nearest charging station.");
-            
-            // save current state before seeking charging station
-            +saved_target(TargetX, TargetY);
-            ?carrying_package(CarryingStatus);
-            +saved_carrying_status(CarryingStatus);
-            .println("saved state - target: (", TargetX, ", ", TargetY, "), carrying: ", CarryingStatus);
-            
-            -moving_to_target(X, Y);
-            !seekChargingStation;
-        } else {
-            if (CurrentX == TargetX & CurrentY == TargetY) {
-                !handleArrival(TargetX, TargetY);
-                !!stop_malfunction_monitoring;
-            } elif (helping_robot(_, HelpX, HelpY) & TargetX == HelpX & TargetY == HelpY) {
-                // special case: when helping a robot, check if we're adjacent (within 1.5 distance)
-                if (math.sqrt((CurrentX - TargetX) * (CurrentX - TargetX) + (CurrentY - TargetY) * (CurrentY - TargetY)) <= 1.5) {
-                    !handleArrival(TargetX, TargetY);
-                    !!stop_malfunction_monitoring;
-                } else {
-                    +moving_to_target(TargetX, TargetY);
+// Plan 2: Handle battery depletion (malfunction case)
++!step(TargetX, TargetY) : not malfunctioning & not redirect_to_help(_, _) & batteryLevel(BatteryLevel) & BatteryLevel <= 0 <-
+    ?current_position(CurrentX, CurrentY);
+    .println("current position: (", CurrentX, ", ", CurrentY, "), Target: (", TargetX, ", ", TargetY, "), Battery: ", BatteryLevel, "%");
+    +malfunctioning;
+    !step(TargetX, TargetY).
 
-                    if (not monitoring_active) {
-                        !!start_malfunction_monitoring;
-                    }
-                    
-                    // moves one step towards target avoiding obstacles and updating battery level
-                    move_towards_target(TargetX, TargetY, CurrentX, CurrentY);
-                    .wait(500);
+// Plan 3: Handle low battery (seek charging station)
++!step(TargetX, TargetY) : not malfunctioning & not redirect_to_help(_, _) & batteryLevel(BatteryLevel) & BatteryLevel < 20 & not seekingChargingStation & not charging <-
+    ?current_position(CurrentX, CurrentY);
+    .println("current position: (", CurrentX, ", ", CurrentY, "), Target: (", TargetX, ", ", TargetY, "), Battery: ", BatteryLevel, "%");
+    .println("battery level is low (", BatteryLevel, "%). Going to nearest charging station.");
+    // save current state before seeking charging station
+    +saved_target(TargetX, TargetY);
+    ?carrying_package(CarryingStatus);
+    +saved_carrying_status(CarryingStatus);
+    .println("saved state - target: (", TargetX, ", ", TargetY, "), carrying: ", CarryingStatus);
+    -moving_to_target(X, Y);
+    !seekChargingStation.
 
-                    !step(TargetX, TargetY);
-                }
-            } else {
-                +moving_to_target(TargetX, TargetY);
+// Plan 4: Handle arrival at regular target
++!step(TargetX, TargetY) : not malfunctioning & not redirect_to_help(_, _) & current_position(CurrentX, CurrentY) & CurrentX == TargetX & CurrentY == TargetY & not helping_robot(_, TargetX, TargetY) <-
+    ?batteryLevel(BatteryLevel);
+    .println("current position: (", CurrentX, ", ", CurrentY, "), Target: (", TargetX, ", ", TargetY, "), Battery: ", BatteryLevel, "%");
+    !!stop_malfunction_monitoring;
+    !handleArrival(TargetX, TargetY).
 
-                if (not monitoring_active) {
-                    !!start_malfunction_monitoring;
-                }
-                
-                // moves one step towards target avoiding obstacles and updating battery level
-                move_towards_target(TargetX, TargetY, CurrentX, CurrentY);
-                .wait(500);
+// Plan 5: Handle arrival when helping a robot (adjacent check)
++!step(TargetX, TargetY) : not malfunctioning & not redirect_to_help(_, _) & helping_robot(_, HelpX, HelpY) & TargetX == HelpX & TargetY == HelpY & current_position(CurrentX, CurrentY) & math.sqrt((CurrentX - TargetX) * (CurrentX - TargetX) + (CurrentY - TargetY) * (CurrentY - TargetY)) <= 1.5 <-
+    ?batteryLevel(BatteryLevel);
+    .println("current position: (", CurrentX, ", ", CurrentY, "), Target: (", TargetX, ", ", TargetY, "), Battery: ", BatteryLevel, "%");
+    !!stop_malfunction_monitoring;
+    !handleArrival(TargetX, TargetY).
 
-                !step(TargetX, TargetY);
-            }
-        }
-    }.
+// Plan 6: Continue moving when helping a robot (not yet adjacent)
++!step(TargetX, TargetY) : not malfunctioning & not redirect_to_help(_, _) & helping_robot(_, HelpX, HelpY) & TargetX == HelpX & TargetY == HelpY & current_position(CurrentX, CurrentY) & math.sqrt((CurrentX - TargetX) * (CurrentX - TargetX) + (CurrentY - TargetY) * (CurrentY - TargetY)) > 1.5 <-
+    ?batteryLevel(BatteryLevel);
+    .println("current position: (", CurrentX, ", ", CurrentY, "), Target: (", TargetX, ", ", TargetY, "), Battery: ", BatteryLevel, "%");
+    +moving_to_target(TargetX, TargetY);
+    if (not monitoring_active) {
+        !!start_malfunction_monitoring;
+    }
+    // moves one step towards target avoiding obstacles and updating battery level
+    move_towards_target(TargetX, TargetY, CurrentX, CurrentY);
+    .wait(500);
+    !step(TargetX, TargetY).
+
+// Plan 7: Continue moving towards regular target
++!step(TargetX, TargetY) : not malfunctioning & not redirect_to_help(_, _) & current_position(CurrentX, CurrentY) & (CurrentX \== TargetX | CurrentY \== TargetY) & not helping_robot(_, TargetX, TargetY) <-
+    ?batteryLevel(BatteryLevel);
+    .println("current position: (", CurrentX, ", ", CurrentY, "), Target: (", TargetX, ", ", TargetY, "), Battery: ", BatteryLevel, "%");
+    +moving_to_target(TargetX, TargetY);
+    if (not monitoring_active) {
+        !!start_malfunction_monitoring;
+    }
+    // moves one step towards target avoiding obstacles and updating battery level
+    move_towards_target(TargetX, TargetY, CurrentX, CurrentY);
+    .wait(500);
+    !step(TargetX, TargetY).
 
 /* handle case when robot is malfunctioning */
 +!step(TargetX, TargetY) : malfunctioning <-
@@ -100,21 +113,16 @@ askedChargingStationLocation(false).    // track if charging station location ha
 +!start_malfunction_monitoring : not (moving_to_target(_, _) & not monitoring_active) <-
     .println("malfunction monitoring already active, skipping new monitoring.").
 
-/* 
-EDIT: the random chance of malfunctioning was removed, because even though it was a 
-slim chance, eventually the simulation would stop with all robots malfunctioning simultaneously.
-It is possible to uncomment the following code to reintroduce it in order to prove this point.
-*/
-//+!monitor_malfunction_loop : monitoring_active & moving_to_target(_, _) & not malfunctioning <-
-//    utils.rand_malfunction(Value);  // using custom internal action
-//    // slim chance of malfunctioning
-//    if (Value > 10) {
-//        .println("malfunction detected! (Random malfunction value: ", Value, ")");
-//        +malfunctioning;
-//    } else {
-//        .wait(500);
-//        !monitor_malfunction_loop;
-//    }.
++!monitor_malfunction_loop : monitoring_active & moving_to_target(_, _) & not malfunctioning <-
+    utils.rand_malfunction(Value);  // using custom internal action
+    // slim chance of malfunctioning
+    if (Value >= 0.99) {
+        .println("malfunction detected! (Random malfunction value: ", Value, ")");
+        +malfunctioning;
+    } else {
+        .wait(500);
+        !monitor_malfunction_loop;
+    }.
 
 +!monitor_malfunction_loop : not ( monitoring_active & moving_to_target(_,_) & not malfunctioning) <-
     !!stop_malfunction_monitoring.
@@ -154,13 +162,19 @@ It is possible to uncomment the following code to reintroduce it in order to pro
     .send(ClosestName, achieve, redirect_to_help(MyName, ThisRobotX, ThisRobotY)).
 
 /* handle malfunction reports from other robots */
-+?robotMalfunctioning(RobotName, X, Y) : not malfunctioning & not helping_robot & not seekingChargingStation <-
++?robotMalfunctioning(RobotName, X, Y) : not malfunctioning & not helping_robot & not seekingChargingStation & not about_to_help_robot <-
     .my_name(MyName);
     if (RobotName \== MyName) {
         ?current_position(MyX, MyY);
-        .println("received malfunction report from robot ", RobotName, " at (", X, ", ", Y, "), my position is (", MyX, ", ", MyY, "), responding with acknowledgment");
-
-        .send(RobotName, tell, malfunction_ack(MyName, MyX, MyY));
+        .println("received malfunction report from robot ", RobotName, " at (", X, ", ", Y, "), my position is (", MyX, ", ", MyY, "), evaluating distance before responding with acknowledgment...");
+        // a distance is evaluated to prevent a single robot from trying to help >1 malfunctioning robot simultaneously if all of them are all adjacent w.r.t. each other at the same time
+        if (math.sqrt((MyX - X) * (MyX - X) + (MyY - Y) * (MyY - Y)) > 1.5) {
+            +about_to_help_robot;   // this is helpful to prevent the robot from trying to help multiple robots while i.e. charging and has already planned to help another robot
+            .println("i'm not adjacent to the malfunctioning robot: responding with acknowledgment...");
+            .send(RobotName, tell, malfunction_ack(MyName, MyX, MyY));
+        } else {
+            .println("i'm adjacent to the malfunctioning robot: the robot is too close to me and i cannot help it, ignoring the report...");
+        }
     }.
 
 +malfunction_ack(ThatRobotName, ThatRobotX, ThatRobotY)[source(ThatRobotName)] <-
@@ -201,13 +215,15 @@ It is possible to uncomment the following code to reintroduce it in order to pro
     .println("redirecting to help robot ", R, " at (", X, ", ", Y, ")").
 
 /* ignore malfunction reports when we're already malfunctioning or helping someone */
-+?robotMalfunctioning(RobotName, X, Y) : malfunctioning | helping_robot | seekingChargingStation <-
++?robotMalfunctioning(RobotName, X, Y) : malfunctioning | helping_robot | seekingChargingStation | about_to_help_robot <-
     if (malfunctioning) {
         .println("ignoring malfunction report from robot ", RobotName, " at (", X, ", ", Y, ") because I'm already malfunctioning");
     } elif (helping_robot(RobotName, _, _)) {
         .println("ignoring malfunction report from robot ", RobotName, " because I'm already helping another robot");
     } elif (seekingChargingStation) {
         .println("ignoring malfunction report from robot ", RobotName, " because I'm currently seeking a charging station to recharge");
+    } elif (about_to_help_robot) {
+        .println("ignoring malfunction report from robot ", RobotName, " because I'm about to go helping another robot");
     } else {
         .println("ignoring malfunction report from robot ", RobotName, " at (", X, ", ", Y, ") because I'm currently busy");
     }.
@@ -246,12 +262,19 @@ It is possible to uncomment the following code to reintroduce it in order to pro
             .println("finished helping robot ", RobotName, ". Returning to previous task.");
             
             // clean up helping state
+            -about_to_help_robot;
             -helping_robot(RobotName, MalfunctionX, MalfunctionY);
-            
+
             // restore previous state
             ?saved_target_before_help(SavedX, SavedY);
-            ?saved_carrying_status_before_help(WasCarrying);
-            
+            if (saved_carrying_status_before_help) {
+                ?saved_carrying_status_before_help(WasCarrying);
+                .println("restoring previous carrying status: ", WasCarrying);
+            } else {
+                +saved_carrying_status_before_help(false);
+                ?saved_carrying_status_before_help(WasCarrying);
+            }
+
             .println("restoring previous state - target: (", SavedX, ", ", SavedY, "), was carrying: ", WasCarrying);
             
             // clean up saved state
@@ -285,11 +308,6 @@ It is possible to uncomment the following code to reintroduce it in order to pro
     .println("starting battery sharing with robot ", RobotName);
     ?batteryLevel(MyBattery);
     .println("my current battery level: ", MyBattery, "%");
-    
-    // Request the malfunctioning robot's battery level
-    //.send(RobotName, askOne, batteryLevel(Level));
-    //.wait(500);
-    
     +battery_sharing_active(RobotName);
     +battery_shared_amount(0);
     !battery_sharing_loop(RobotName).
@@ -348,22 +366,23 @@ It is possible to uncomment the following code to reintroduce it in order to pro
 // Handle receiving battery from another robot (for the malfunctioning robot)
 +!receive_battery_unit(Amount)[source(Helper)] <-
     ?batteryLevel(CurrentBattery);
-    NewBattery = CurrentBattery + Amount;
+    PotentialNewBattery = CurrentBattery + Amount;
     
-    // Ensure battery doesn't exceed maximum of 100%
-    if (NewBattery > 100) {
+    if (PotentialNewBattery > 100) {
         NewBattery = 100;
         .println("battery would exceed 100%, capping at maximum level");
+    } else {
+        NewBattery = PotentialNewBattery;
     }
     
     -batteryLevel(CurrentBattery);
     +batteryLevel(NewBattery);
     update_battery_level(NewBattery);
-    
     .println("received ", Amount, " unit of battery from ", Helper, ". Battery now: ", NewBattery, "%").
 
 // Handle battery sharing completion notification
 +battery_sharing_completed(TotalReceived)[source(Helper)] <-
+    -battery_sharing_completed(TotalReceived)[source(Helper)];
     .println("battery sharing completed. Received total of ", TotalReceived, " units from ", Helper);
     ?batteryLevel(FinalBattery);
     .println("final battery level after sharing: ", FinalBattery, "%");
@@ -525,13 +544,16 @@ It is possible to uncomment the following code to reintroduce it in order to pro
 
 // Handle status request from human agent
 +?request_status[source(HumanId)] <-
+    .println("received status request from human agent ", HumanId);
     ?current_position(X, Y);
     ?batteryLevel(BatteryLevel);
     ?carrying_package(CarryingStatus);
-    ?delivery_completed(DeliveryCompleted);
     .my_name(RobotName);
+    .date(YY, MM, DD);
+    .time(HH, NN, SS);
+    
     if (malfunctioning) {
-        .send(HumanId, tell, robot_status(RobotName, X, Y, BatteryLevel, CarryingStatus, DeliveryCompleted, true));
+        .send(HumanId, tell, robot_status(RobotName, X, Y, BatteryLevel, CarryingStatus, true, YY, MM, DD, HH, NN, SS));
     } else {
-        .send(HumanId, tell, robot_status(RobotName, X, Y, BatteryLevel, CarryingStatus, DeliveryCompleted, false));
+        .send(HumanId, tell, robot_status(RobotName, X, Y, BatteryLevel, CarryingStatus, false, YY, MM, DD, HH, NN, SS));
     }.

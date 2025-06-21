@@ -412,7 +412,7 @@ public class FactoryEnv extends Environment {
             case "ch_st_2" -> 4;
             case "truck_1" -> 5;
             case "deliv_A" -> 6;
-            case "human_1" -> 7;
+            case "humn_1" -> 7;
             default -> -1;
         };
     }

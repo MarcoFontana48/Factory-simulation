@@ -13,7 +13,7 @@ MAS factory {
 		ch_st_2 charging_station;
 		delivery_place;
 		truck;
-	    //human_1 human;
+	    humn_1 human;
 
 	aslSourcePath:
 		"src/main/asl";
