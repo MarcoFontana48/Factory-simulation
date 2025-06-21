@@ -1,12 +1,3 @@
-/* 
-NOTE: the random chance of malfunctioning was removed, because even though it was a 
-slim chance, eventually the simulation would stop with all robots malfunctioning simultaneously.
-It is possible to uncomment the commented code sections about malfunction monitoring to reintroduce 
-it and have a more dynamic behavior, but it will eventually lead to the same issue of all robots
-malfunctioning at the same time.
-*/
-
-
 !start.
 
 carrying_package(false).                // track if robot is carrying a package
@@ -27,7 +18,8 @@ askedChargingStationLocation(false).    // track if charging station location ha
 
 /* multiple plans to handle different possible scenarios */
 // Plan 1: Handle redirect to help another robot
-+!step(TargetX, TargetY) : not malfunctioning & redirect_to_help(HelpX, HelpY) <-
++!step(TargetX, TargetY) : not malfunctioning & redirect_to_help(HelpX, HelpY) & not seekingChargingStation & batteryLevel(BatteryLevel) & BatteryLevel > 20 <-
+    .println("DEBUG: P1");
     ?current_position(CurrentX, CurrentY);
     ?batteryLevel(BatteryLevel);
     -redirect_to_help(HelpX, HelpY);
@@ -37,8 +29,23 @@ askedChargingStationLocation(false).    // track if charging station location ha
     .println("redirecting step to help location: (", HelpX, ", ", HelpY, ")");
     !step(HelpX, HelpY).
 
+// Plan 1a: Handle redirect to help another robot if seeking a charging station when asked to redirect to the malfunctioning robot (go to the charging station first)
++!step(TargetX, TargetY) : not malfunctioning & redirect_to_help(_, _) & current_position(CurrentX, CurrentY) & (CurrentX \== TargetX | CurrentY \== TargetY) & not helping_robot(_, TargetX, TargetY) & seekingChargingStation & batteryLevel(BatteryLevel) & BatteryLevel > 0 & BatteryLevel < 20 <-
+    .println("DEBUG: P1a");
+    ?batteryLevel(BatteryLevel);
+    .println("current position: (", CurrentX, ", ", CurrentY, "), Target: (", TargetX, ", ", TargetY, "), Battery: ", BatteryLevel, "%");
+    +moving_to_target(TargetX, TargetY);
+    if (not monitoring_active) {
+        !!start_malfunction_monitoring;
+    }
+    // moves one step towards target avoiding obstacles and updating battery level
+    move_towards_target(TargetX, TargetY, CurrentX, CurrentY);
+    .wait(500);
+    !step(TargetX, TargetY).
+
 // Plan 2: Handle battery depletion (malfunction case)
 +!step(TargetX, TargetY) : not malfunctioning & not redirect_to_help(_, _) & batteryLevel(BatteryLevel) & BatteryLevel <= 0 <-
+    .println("DEBUG: P2");
     ?current_position(CurrentX, CurrentY);
     .println("current position: (", CurrentX, ", ", CurrentY, "), Target: (", TargetX, ", ", TargetY, "), Battery: ", BatteryLevel, "%");
     +malfunctioning;
@@ -46,6 +53,7 @@ askedChargingStationLocation(false).    // track if charging station location ha
 
 // Plan 3: Handle low battery (seek charging station)
 +!step(TargetX, TargetY) : not malfunctioning & not redirect_to_help(_, _) & batteryLevel(BatteryLevel) & BatteryLevel < 20 & not seekingChargingStation & not charging <-
+    .println("DEBUG: P3");
     ?current_position(CurrentX, CurrentY);
     .println("current position: (", CurrentX, ", ", CurrentY, "), Target: (", TargetX, ", ", TargetY, "), Battery: ", BatteryLevel, "%");
     .println("battery level is low (", BatteryLevel, "%). Going to nearest charging station.");
@@ -59,6 +67,7 @@ askedChargingStationLocation(false).    // track if charging station location ha
 
 // Plan 4: Handle arrival at regular target
 +!step(TargetX, TargetY) : not malfunctioning & not redirect_to_help(_, _) & current_position(CurrentX, CurrentY) & CurrentX == TargetX & CurrentY == TargetY & not helping_robot(_, TargetX, TargetY) <-
+    .println("DEBUG: P4");
     ?batteryLevel(BatteryLevel);
     .println("current position: (", CurrentX, ", ", CurrentY, "), Target: (", TargetX, ", ", TargetY, "), Battery: ", BatteryLevel, "%");
     !!stop_malfunction_monitoring;
@@ -66,6 +75,7 @@ askedChargingStationLocation(false).    // track if charging station location ha
 
 // Plan 5: Handle arrival when helping a robot (adjacent check)
 +!step(TargetX, TargetY) : not malfunctioning & not redirect_to_help(_, _) & helping_robot(_, HelpX, HelpY) & TargetX == HelpX & TargetY == HelpY & current_position(CurrentX, CurrentY) & math.sqrt((CurrentX - TargetX) * (CurrentX - TargetX) + (CurrentY - TargetY) * (CurrentY - TargetY)) <= 1.5 <-
+    .println("DEBUG: P5");
     ?batteryLevel(BatteryLevel);
     .println("current position: (", CurrentX, ", ", CurrentY, "), Target: (", TargetX, ", ", TargetY, "), Battery: ", BatteryLevel, "%");
     !!stop_malfunction_monitoring;
@@ -73,6 +83,7 @@ askedChargingStationLocation(false).    // track if charging station location ha
 
 // Plan 6: Continue moving when helping a robot (not yet adjacent)
 +!step(TargetX, TargetY) : not malfunctioning & not redirect_to_help(_, _) & helping_robot(_, HelpX, HelpY) & TargetX == HelpX & TargetY == HelpY & current_position(CurrentX, CurrentY) & math.sqrt((CurrentX - TargetX) * (CurrentX - TargetX) + (CurrentY - TargetY) * (CurrentY - TargetY)) > 1.5 <-
+    .println("DEBUG: P6");
     ?batteryLevel(BatteryLevel);
     .println("current position: (", CurrentX, ", ", CurrentY, "), Target: (", TargetX, ", ", TargetY, "), Battery: ", BatteryLevel, "%");
     +moving_to_target(TargetX, TargetY);
@@ -86,6 +97,7 @@ askedChargingStationLocation(false).    // track if charging station location ha
 
 // Plan 7: Continue moving towards regular target
 +!step(TargetX, TargetY) : not malfunctioning & not redirect_to_help(_, _) & current_position(CurrentX, CurrentY) & (CurrentX \== TargetX | CurrentY \== TargetY) & not helping_robot(_, TargetX, TargetY) <-
+    .println("DEBUG: P7");
     ?batteryLevel(BatteryLevel);
     .println("current position: (", CurrentX, ", ", CurrentY, "), Target: (", TargetX, ", ", TargetY, "), Battery: ", BatteryLevel, "%");
     +moving_to_target(TargetX, TargetY);
@@ -97,10 +109,75 @@ askedChargingStationLocation(false).    // track if charging station location ha
     .wait(500);
     !step(TargetX, TargetY).
 
+// Plan 8: Continue moving towards charging station when seeking charging station
+//+!step(TargetX, TargetY) : not malfunctioning & seekingChargingStation <-
+//    .println("DEBUG: P8");
+//    ?batteryLevel(BatteryLevel);
+//    ?current_position(CurrentX, CurrentY);
+//    .println("current position: (", CurrentX, ", ", CurrentY, "), moving to charging station at: (", TargetX, ", ", TargetY, "), Battery: ", BatteryLevel, "%");
+//    +moving_to_target(TargetX, TargetY);
+//    if (not monitoring_active) {
+//        !!start_malfunction_monitoring;
+//    }
+//    // moves one step towards target avoiding obstacles and updating battery level
+//    move_towards_target(TargetX, TargetY, CurrentX, CurrentY);
+//    .wait(500);
+//    !step(TargetX, TargetY).
+
+// Plan 9: Handle arrival at charging station
++!step(TargetX, TargetY) : not malfunctioning & seekingChargingStation & current_position(CurrentX, CurrentY) & CurrentX == TargetX & CurrentY == TargetY <-
+    .println("DEBUG: P9");
+    ?batteryLevel(BatteryLevel);
+    .println("arrived at charging station at (", CurrentX, ", ", CurrentY, "), Battery: ", BatteryLevel, "%");
+    !!stop_malfunction_monitoring;
+    !handleArrival(TargetX, TargetY, CurrentX, CurrentY).
+
+// Plan 10: Handle redirect while seeking charging station but should prioritize charging
++!step(TargetX, TargetY) : not malfunctioning & redirect_to_help(_, _) & seekingChargingStation & batteryLevel(BatteryLevel) & BatteryLevel <= 20 <-
+    .println("DEBUG: P10");
+    ?batteryLevel(BatteryLevel);
+    ?current_position(CurrentX, CurrentY);
+    .println("ignoring redirect request - battery too low (", BatteryLevel, "%), continuing to charging station at: (", TargetX, ", ", TargetY, ")");
+    if (BatteryLevel == 0) {
+        +malfunctioning;
+    } else {
+        .abolish(moving_to_target(_, _));  
+        +moving_to_target(TargetX, TargetY);
+        move_towards_target(TargetX, TargetY, CurrentX, CurrentY);
+        .wait(500);
+        !step(TargetX, TargetY);
+    }.
+
 /* handle case when robot is malfunctioning */
 +!step(TargetX, TargetY) : malfunctioning <-
     ?current_position(CurrentX, CurrentY);
-    .println("cannot move due to malfunctioning at (", CurrentX, ", ", CurrentY, ")");
+    if (waiting_to_retry_asking_for_help_after_unsuccessful_repair) {
+        .println("cannot move due to malfunctioning at (", CurrentX, ", ", CurrentY, "), will soon retry asking for help after previous unsuccessful repair");
+    } else {
+        .println("cannot move due to malfunctioning at (", CurrentX, ", ", CurrentY, "), waiting for repair");
+        
+        // Increment the else counter
+        if (rebroadcast_counter(Count)) {
+            -rebroadcast_counter(Count);
+            +rebroadcast_counter(Count + 1);
+            .println("rebroadcast_counter incremented to: ", Count + 1);
+
+            // Check if counter exceeds 240 (2 minutes)
+            if (Count + 1 > 240) {
+                .println("rebroadcast_counter exceeded 240, broadcasting malfunction");
+                .abolish(malfunction_ack(_,_,_)); // ensure not to have previous confirmations before asking for a new one
+                ?current_position(X, Y);
+                .my_name(RobotName);
+                !broadcast_malfunction(X, Y, RobotName);
+                -rebroadcast_counter(_); // Reset counter after broadcasting
+                +rebroadcast_counter(0);
+            }
+        } else {
+            // Initialize counter if it doesn't exist
+            .println("rebroadcast_counter not found, initializing to 1");
+            +rebroadcast_counter(1);
+        }
+    }
     .wait(500);
     !step(TargetX, TargetY).
 
@@ -115,10 +192,18 @@ askedChargingStationLocation(false).    // track if charging station location ha
 
 +!monitor_malfunction_loop : monitoring_active & moving_to_target(_, _) & not malfunctioning <-
     utils.rand_malfunction(Value);  // using custom internal action
+    ?current_position(X, Y);
     // slim chance of malfunctioning
-    if (Value >= 0.99) {
-        .println("malfunction detected! (Random malfunction value: ", Value, ")");
-        +malfunctioning;
+    if (Value >= 0.999) {
+        .println("random malfunction check currently disabled, skipping it for now...");
+        if ((X == DX & Y == DY) | (X == TX & Y == TY)) {
+            .println("skipping malfunctioning at delivery/truck position (", X, ", ", Y, ")");
+            .wait(500);
+            !monitor_malfunction_loop;
+        } else {
+            .println("malfunction detected at (", X, ", ", Y, ")");
+            +malfunctioning;
+        }
     } else {
         .wait(500);
         !monitor_malfunction_loop;
@@ -138,7 +223,7 @@ askedChargingStationLocation(false).    // track if charging station location ha
     ?current_position(X, Y);
     .my_name(RobotName);
     .println("stopped due to malfunction at (", X, ", ", Y, ")");
-    -malfunction_ack(_, _, _);  // ensure not to have a previous confirmation before asking for a new one
+    .abolish(malfunction_ack(_,_,_));  // ensure not to have previous confirmations before asking for a new one
     !broadcast_malfunction(X, Y, RobotName).
 
 /* broadcast malfunction to other robots */
@@ -162,14 +247,14 @@ askedChargingStationLocation(false).    // track if charging station location ha
     .send(ClosestName, achieve, redirect_to_help(MyName, ThisRobotX, ThisRobotY)).
 
 /* handle malfunction reports from other robots */
-+?robotMalfunctioning(RobotName, X, Y) : not malfunctioning & not helping_robot & not seekingChargingStation & not about_to_help_robot <-
++?robotMalfunctioning(RobotName, X, Y) : not malfunctioning & not helping_robot & not seekingChargingStation & not about_to_help_robot(_, _, _) <-
     .my_name(MyName);
     if (RobotName \== MyName) {
         ?current_position(MyX, MyY);
         .println("received malfunction report from robot ", RobotName, " at (", X, ", ", Y, "), my position is (", MyX, ", ", MyY, "), evaluating distance before responding with acknowledgment...");
         // a distance is evaluated to prevent a single robot from trying to help >1 malfunctioning robot simultaneously if all of them are all adjacent w.r.t. each other at the same time
         if (math.sqrt((MyX - X) * (MyX - X) + (MyY - Y) * (MyY - Y)) > 1.5) {
-            +about_to_help_robot;   // this is helpful to prevent the robot from trying to help multiple robots while i.e. charging and has already planned to help another robot
+            +about_to_help_robot(RobotName, X, Y);   // this is helpful to prevent the robot from trying to help multiple robots while i.e. charging and has already planned to help another robot
             .println("i'm not adjacent to the malfunctioning robot: responding with acknowledgment...");
             .send(RobotName, tell, malfunction_ack(MyName, MyX, MyY));
         } else {
@@ -215,93 +300,122 @@ askedChargingStationLocation(false).    // track if charging station location ha
     .println("redirecting to help robot ", R, " at (", X, ", ", Y, ")").
 
 /* ignore malfunction reports when we're already malfunctioning or helping someone */
-+?robotMalfunctioning(RobotName, X, Y) : malfunctioning | helping_robot | seekingChargingStation | about_to_help_robot <-
++?robotMalfunctioning(RobotName, X, Y) : malfunctioning | helping_robot | seekingChargingStation | about_to_help_robot(_, _, _) <-
     if (malfunctioning) {
         .println("ignoring malfunction report from robot ", RobotName, " at (", X, ", ", Y, ") because I'm already malfunctioning");
     } elif (helping_robot(RobotName, _, _)) {
         .println("ignoring malfunction report from robot ", RobotName, " because I'm already helping another robot");
     } elif (seekingChargingStation) {
         .println("ignoring malfunction report from robot ", RobotName, " because I'm currently seeking a charging station to recharge");
-    } elif (about_to_help_robot) {
+    } elif (about_to_help_robot(_, _, _)) {
         .println("ignoring malfunction report from robot ", RobotName, " because I'm about to go helping another robot");
     } else {
         .println("ignoring malfunction report from robot ", RobotName, " at (", X, ", ", Y, ") because I'm currently busy");
     }.
 
-// Modified section for handling arrival near malfunctioning robot with battery sharing
-+!handleArrival(TargetX, TargetY) <-
+// Plan for handling arrival at charging station
++!handleArrival(TargetX, TargetY) : seekingChargingStation & knownChargingStation(Station, TargetX, TargetY) <-
     .println("reached destination (", TargetX, ", ", TargetY, ")");
     -moving_to_target(TargetX, TargetY);
-    ?current_position(X, Y);
+    ?current_position(CurrentX, CurrentY);
     .wait(500);
-   
-    // handle arrival at charging station
-    if (seekingChargingStation & knownChargingStation(Station, X, Y)) {
-        .println("arrived at charging station location (", X, ", ", Y, ")");
-        -seekingChargingStation;
+    .println("arrived at charging station location (", CurrentX, ", ", CurrentY, ")");
+    -seekingChargingStation;
+    ?knownChargingStation(Station, CurrentX, CurrentY);
+    !request_charge(Station, CurrentX, CurrentY).
 
-        ?knownChargingStation(Station, X, Y);
-        !request_charge(Station, X, Y);
-    } elif (helping_robot(RobotName, MalfunctionX, MalfunctionY)) {
-        // check if we're within 1 position of the malfunctioning robot
-        ?current_position(MyX, MyY);
-        EuclideanDistanceFromMalfunctioningRobot = math.sqrt((MyX - MalfunctionX) * (MyX - MalfunctionX) + (MyY - MalfunctionY) * (MyY - MalfunctionY));
-        if (EuclideanDistanceFromMalfunctioningRobot <= 1.5) { // allowing for diagonal adjacency (sqrt(2) == 1.41)
-            .println("arrived near malfunctioning robot ", RobotName, " (adjacent to it)");
-            .println("current position: (", MyX, ", ", MyY, "), robot to help at: (", MalfunctionX, ", ", MalfunctionY, ")");
-            
-            // Verify we're not trying to help ourselves
-            .my_name(MyName);
-            if (RobotName \== MyName) {
-                // Start battery sharing process with the correct robot
-                !start_battery_sharing(RobotName);
-            } else {
-                .println("ERROR: cannot help myself! Something went wrong with robot identification.");
-            }
-            
-            .println("finished helping robot ", RobotName, ". Returning to previous task.");
-            
-            // clean up helping state
-            -about_to_help_robot;
-            -helping_robot(RobotName, MalfunctionX, MalfunctionY);
+// Plan for handling arrival when helping a robot and close enough
++!handleArrival(TargetX, TargetY) : helping_robot(RobotName, MalfunctionX, MalfunctionY) & current_position(CurrentX, CurrentY) & math.sqrt((CurrentX - MalfunctionX) * (CurrentX - MalfunctionX) + (CurrentY - MalfunctionY) * (CurrentY - MalfunctionY)) <= 1.5 <-
+    .println("reached destination (", TargetX, ", ", TargetY, ")");
+    -moving_to_target(TargetX, TargetY);
+    ?current_position(CurrentX, CurrentY);
+    .wait(500);
+    EuclideanDistanceFromMalfunctioningRobot = math.sqrt((CurrentX - MalfunctionX) * (CurrentX - MalfunctionX) + (CurrentY - MalfunctionY) * (CurrentY - MalfunctionY));
+    .println("arrived near malfunctioning robot ", RobotName, " (adjacent to it)");
+    .println("current position: (", CurrentX, ", ", CurrentY, "), robot to help at: (", MalfunctionX, ", ", MalfunctionY, ")");
+    .my_name(MyName);
+    !handle_robot_help(RobotName, MyName, MalfunctionX, MalfunctionY).
 
-            // restore previous state
-            ?saved_target_before_help(SavedX, SavedY);
-            if (saved_carrying_status_before_help) {
-                ?saved_carrying_status_before_help(WasCarrying);
-                .println("restoring previous carrying status: ", WasCarrying);
-            } else {
-                +saved_carrying_status_before_help(false);
-                ?saved_carrying_status_before_help(WasCarrying);
-            }
+// Sub-plan for handling robot help when it's not ourselves
++!handle_robot_help(RobotName, MyName, MalfunctionX, MalfunctionY) : RobotName \== MyName <-
+    !start_battery_sharing(RobotName);
+    .println("finished helping robot ", RobotName, ". Returning to previous task.");
+    -about_to_help_robot(RobotName, MalfunctionX, MalfunctionY);
+    -helping_robot(RobotName, MalfunctionX, MalfunctionY);
+    ?saved_target_before_help(SavedX, SavedY);
+    !restore_carrying_status;
+    -saved_target_before_help(SavedX, SavedY);
+    !step(SavedX, SavedY).
 
-            .println("restoring previous state - target: (", SavedX, ", ", SavedY, "), was carrying: ", WasCarrying);
-            
-            // clean up saved state
-            -saved_target_before_help(SavedX, SavedY);
-            -saved_carrying_status_before_help(WasCarrying);
-            
-            // resume previous task
-            !step(SavedX, SavedY);
-        } else {
-            .println("not close enough to robot ", RobotName, " (distance: ", EuclideanDistanceFromMalfunctioningRobot, "), i will be continuing to approach it...");
-            !step(MalfunctionX, MalfunctionY);
-        }
-    } elif (truck_position(TargetX, TargetY) & not carrying_package(true)) {
-        .println("arrived at truck location. Attempting to pick up package...");
-        !pickup_package_from_truck;
-    } elif (delivery_position(_, TargetX, TargetY) & carrying_package(true)) {
-        .println("arrived at delivery location. delivering package...");
-        !deliver_package;
-    } else {
-        if (carrying_package(false)) {
-            ?truck_position(TX, TY);
-            !step(TX, TY);
-        } else {
-            ?delivery_position(DId, DX, DY);
-            !step(DX, DY);
-        }
-    }.
+// Sub-plan for handling robot help when it's ourselves (error case)
++!handle_robot_help(RobotName, MyName, MalfunctionX, MalfunctionY) : RobotName == MyName <-
+    .println("ERROR: cannot help myself! Something went wrong with robot identification.").
+
+// Sub-plan for restoring carrying status when it was saved
++!restore_carrying_status : saved_carrying_status_before_help(WasCarrying) <-
+    .println("restoring previous carrying status: ", WasCarrying);
+    -saved_carrying_status_before_help(WasCarrying).
+
+// Sub-plan for restoring carrying status when it wasn't saved
++!restore_carrying_status : not saved_carrying_status_before_help(_) <-
+    +saved_carrying_status_before_help(false);
+    ?saved_carrying_status_before_help(WasCarrying);
+    .println("restoring previous state - was carrying: ", WasCarrying);
+    -saved_carrying_status_before_help(WasCarrying).
+
+// Plan for handling arrival when helping a robot but not close enough
++!handleArrival(TargetX, TargetY) : helping_robot(RobotName, MalfunctionX, MalfunctionY) & current_position(CurrentX, CurrentY) & math.sqrt((CurrentX - MalfunctionX) * (CurrentX - MalfunctionX) + (CurrentY - MalfunctionY) * (CurrentY - MalfunctionY)) > 1.5 <-
+    .println("reached destination (", TargetX, ", ", TargetY, ")");
+    -moving_to_target(TargetX, TargetY);
+    ?current_position(CurrentX, CurrentY);
+    .wait(500);
+    EuclideanDistanceFromMalfunctioningRobot = math.sqrt((CurrentX - MalfunctionX) * (CurrentX - MalfunctionX) + (CurrentY - MalfunctionY) * (CurrentY - MalfunctionY));
+    .println("not close enough to robot ", RobotName, " (distance: ", EuclideanDistanceFromMalfunctioningRobot, "), i will be continuing to approach it...");
+    !step(TargetX, TargetY).
+
+// Plan for handling arrival at truck when not carrying package
++!handleArrival(TargetX, TargetY) : truck_position(TargetX, TargetY) & not carrying_package(true) <-
+    .println("reached destination (", TargetX, ", ", TargetY, ")");
+    -moving_to_target(TargetX, TargetY);
+    ?current_position(CurrentX, CurrentY);
+    .wait(500);
+    .println("arrived at truck location. Attempting to pick up package...");
+    !pickup_package_from_truck.
+
+// Plan for handling arrival at delivery location when carrying package
++!handleArrival(TargetX, TargetY) : delivery_position(_, TargetX, TargetY) & carrying_package(true) <-
+    .println("reached destination (", TargetX, ", ", TargetY, ")");
+    -moving_to_target(TargetX, TargetY);
+    ?current_position(CurrentX, CurrentY);
+    .wait(500);
+    .println("arrived at delivery location. delivering package...");
+    !deliver_package.
+
+// Plan for handling arrival when not carrying package (go to truck)
++!handleArrival(TargetX, TargetY) : carrying_package(false) <-
+    .println("reached destination (", TargetX, ", ", TargetY, ")");
+    -moving_to_target(TargetX, TargetY);
+    ?current_position(CurrentX, CurrentY);
+    .wait(500);
+    ?truck_position(TX, TY);
+    if (about_to_help_robot(_, _, _)) {
+        ?about_to_help_robot(RobotName, HelpX, HelpY);
+        !redirect_to_help(HelpX, HelpY);
+    }
+    !step(TX, TY).
+
+// Plan for handling arrival when carrying package (go to delivery)
++!handleArrival(TargetX, TargetY) : carrying_package(true) <-
+    .println("reached destination (", TargetX, ", ", TargetY, ")");
+    -moving_to_target(TargetX, TargetY);
+    ?current_position(CurrentX, CurrentY);
+    .wait(500);
+    ?delivery_position(DId, DX, DY);
+    if (about_to_help_robot(_, _, _)) {
+        ?about_to_help_robot(RobotName, HelpX, HelpY);
+        !redirect_to_help(HelpX, HelpY);
+    }
+    !step(DX, DY).
 
 // Battery sharing plan
 +!start_battery_sharing(RobotName) <-
@@ -387,11 +501,28 @@ askedChargingStationLocation(false).    // track if charging station location ha
     ?batteryLevel(FinalBattery);
     .println("final battery level after sharing: ", FinalBattery, "%");
     
-    // Check if we have enough battery to resume operation
+    // check if we have enough battery to resume operation. It may happen that the robot has not enough battery to resume operation even after receiving battery from another robot or the other robot has not enough battery to share
     if (FinalBattery > 0 & malfunctioning) {
         -malfunctioning;
         .println("malfunction status cleared. Ready to resume normal operation");
+    } else {
+        .println("still not enough battery to resume operation, about to ask again for help in 30 seconds...");
+        +waiting_to_retry_asking_for_help_after_unsuccessful_repair;
+        !!countdown(30, 5);  // start countdown of 30 seconds to retry asking for help
+        -waiting_to_retry_asking_for_help_after_unsuccessful_repair;
+        .abolish(malfunction_ack(_,_,_));  // ensure not to have previous confirmations before asking for a new one
+        ?current_position(X, Y);
+        !broadcast_malfunction(X, Y, RobotName);
     }.
+
++!countdown(T, Step) : T > 0 & Step <= T <-
+     .println("countdown: ", T, " seconds remaining");
+    .wait(Step * 1000);  // wait for Step seconds
+    T1 = T - Step;
+    !countdown(T1, Step).
+
++!countdown(T, Step) : T <= 0 <-
+    .println("countdown completed").
 
 +remotely_repaired[source(Helper)] <-
     -malfunctioning;
@@ -542,9 +673,9 @@ askedChargingStationLocation(false).    // track if charging station location ha
     // start moving again to previous target
     !step(SavedX, SavedY).
 
-// Handle status request from human agent
-+?request_status[source(HumanId)] <-
-    .println("received status request from human agent ", HumanId);
+// Handle status request from agent
++?request_status[source(AgentId)] <-
+    .println("received status request from agent ", AgentId);
     ?current_position(X, Y);
     ?batteryLevel(BatteryLevel);
     ?carrying_package(CarryingStatus);
@@ -553,7 +684,7 @@ askedChargingStationLocation(false).    // track if charging station location ha
     .time(HH, NN, SS);
     
     if (malfunctioning) {
-        .send(HumanId, tell, robot_status(RobotName, X, Y, BatteryLevel, CarryingStatus, true, YY, MM, DD, HH, NN, SS));
+        .send(AgentId, tell, robot_status(RobotName, X, Y, BatteryLevel, CarryingStatus, true, YY, MM, DD, HH, NN, SS));
     } else {
-        .send(HumanId, tell, robot_status(RobotName, X, Y, BatteryLevel, CarryingStatus, false, YY, MM, DD, HH, NN, SS));
+        .send(AgentId, tell, robot_status(RobotName, X, Y, BatteryLevel, CarryingStatus, false, YY, MM, DD, HH, NN, SS));
     }.
