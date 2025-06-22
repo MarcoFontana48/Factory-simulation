@@ -9,8 +9,14 @@ MAS factory {
 		d_bot_1 delivery_robot;
 		d_bot_2 delivery_robot;
 		d_bot_3 delivery_robot;
+		//d_bot_4 delivery_robot;
+		//d_bot_5 delivery_robot;
+		//d_bot_6 delivery_robot;
+		//d_bot_7 delivery_robot;
 		ch_st_1 charging_station;
 		ch_st_2 charging_station;
+		//ch_st_3 charging_station;
+		//ch_st_4 charging_station;
 		delivery_place;
 		truck;
 	    humn_1 human;

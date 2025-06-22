@@ -19,7 +19,6 @@ askedChargingStationLocation(false).    // track if charging station location ha
 /* multiple plans to handle different possible scenarios */
 // Plan 1: Handle redirect to help another robot
 +!step(TargetX, TargetY) : not malfunctioning & redirect_to_help(HelpX, HelpY) & not seekingChargingStation & batteryLevel(BatteryLevel) & BatteryLevel > 20 <-
-    .println("DEBUG: P1");
     ?current_position(CurrentX, CurrentY);
     ?batteryLevel(BatteryLevel);
     -redirect_to_help(HelpX, HelpY);
@@ -31,7 +30,6 @@ askedChargingStationLocation(false).    // track if charging station location ha
 
 // Plan 1a: Handle redirect to help another robot if seeking a charging station when asked to redirect to the malfunctioning robot (go to the charging station first)
 +!step(TargetX, TargetY) : not malfunctioning & redirect_to_help(_, _) & current_position(CurrentX, CurrentY) & (CurrentX \== TargetX | CurrentY \== TargetY) & not helping_robot(_, TargetX, TargetY) & seekingChargingStation & batteryLevel(BatteryLevel) & BatteryLevel > 0 & BatteryLevel < 20 <-
-    .println("DEBUG: P1a");
     ?batteryLevel(BatteryLevel);
     .println("current position: (", CurrentX, ", ", CurrentY, "), Target: (", TargetX, ", ", TargetY, "), Battery: ", BatteryLevel, "%");
     +moving_to_target(TargetX, TargetY);
@@ -45,7 +43,6 @@ askedChargingStationLocation(false).    // track if charging station location ha
 
 // Plan 2: Handle battery depletion (malfunction case)
 +!step(TargetX, TargetY) : not malfunctioning & not redirect_to_help(_, _) & batteryLevel(BatteryLevel) & BatteryLevel <= 0 <-
-    .println("DEBUG: P2");
     ?current_position(CurrentX, CurrentY);
     .println("current position: (", CurrentX, ", ", CurrentY, "), Target: (", TargetX, ", ", TargetY, "), Battery: ", BatteryLevel, "%");
     +malfunctioning;
@@ -53,7 +50,6 @@ askedChargingStationLocation(false).    // track if charging station location ha
 
 // Plan 3: Handle low battery (seek charging station)
 +!step(TargetX, TargetY) : not malfunctioning & not redirect_to_help(_, _) & batteryLevel(BatteryLevel) & BatteryLevel < 20 & not seekingChargingStation & not charging <-
-    .println("DEBUG: P3");
     ?current_position(CurrentX, CurrentY);
     .println("current position: (", CurrentX, ", ", CurrentY, "), Target: (", TargetX, ", ", TargetY, "), Battery: ", BatteryLevel, "%");
     .println("battery level is low (", BatteryLevel, "%). Going to nearest charging station.");
@@ -67,7 +63,6 @@ askedChargingStationLocation(false).    // track if charging station location ha
 
 // Plan 4: Handle arrival at regular target
 +!step(TargetX, TargetY) : not malfunctioning & not redirect_to_help(_, _) & current_position(CurrentX, CurrentY) & CurrentX == TargetX & CurrentY == TargetY & not helping_robot(_, TargetX, TargetY) <-
-    .println("DEBUG: P4");
     ?batteryLevel(BatteryLevel);
     .println("current position: (", CurrentX, ", ", CurrentY, "), Target: (", TargetX, ", ", TargetY, "), Battery: ", BatteryLevel, "%");
     !!stop_malfunction_monitoring;
@@ -75,7 +70,6 @@ askedChargingStationLocation(false).    // track if charging station location ha
 
 // Plan 5: Handle arrival when helping a robot (adjacent check)
 +!step(TargetX, TargetY) : not malfunctioning & not redirect_to_help(_, _) & helping_robot(_, HelpX, HelpY) & TargetX == HelpX & TargetY == HelpY & current_position(CurrentX, CurrentY) & math.sqrt((CurrentX - TargetX) * (CurrentX - TargetX) + (CurrentY - TargetY) * (CurrentY - TargetY)) <= 1.5 <-
-    .println("DEBUG: P5");
     ?batteryLevel(BatteryLevel);
     .println("current position: (", CurrentX, ", ", CurrentY, "), Target: (", TargetX, ", ", TargetY, "), Battery: ", BatteryLevel, "%");
     !!stop_malfunction_monitoring;
@@ -83,7 +77,6 @@ askedChargingStationLocation(false).    // track if charging station location ha
 
 // Plan 6: Continue moving when helping a robot (not yet adjacent)
 +!step(TargetX, TargetY) : not malfunctioning & not redirect_to_help(_, _) & helping_robot(_, HelpX, HelpY) & TargetX == HelpX & TargetY == HelpY & current_position(CurrentX, CurrentY) & math.sqrt((CurrentX - TargetX) * (CurrentX - TargetX) + (CurrentY - TargetY) * (CurrentY - TargetY)) > 1.5 <-
-    .println("DEBUG: P6");
     ?batteryLevel(BatteryLevel);
     .println("current position: (", CurrentX, ", ", CurrentY, "), Target: (", TargetX, ", ", TargetY, "), Battery: ", BatteryLevel, "%");
     +moving_to_target(TargetX, TargetY);
@@ -97,7 +90,6 @@ askedChargingStationLocation(false).    // track if charging station location ha
 
 // Plan 7: Continue moving towards regular target
 +!step(TargetX, TargetY) : not malfunctioning & not redirect_to_help(_, _) & current_position(CurrentX, CurrentY) & (CurrentX \== TargetX | CurrentY \== TargetY) & not helping_robot(_, TargetX, TargetY) <-
-    .println("DEBUG: P7");
     ?batteryLevel(BatteryLevel);
     .println("current position: (", CurrentX, ", ", CurrentY, "), Target: (", TargetX, ", ", TargetY, "), Battery: ", BatteryLevel, "%");
     +moving_to_target(TargetX, TargetY);
@@ -109,32 +101,15 @@ askedChargingStationLocation(false).    // track if charging station location ha
     .wait(500);
     !step(TargetX, TargetY).
 
-// Plan 8: Continue moving towards charging station when seeking charging station
-//+!step(TargetX, TargetY) : not malfunctioning & seekingChargingStation <-
-//    .println("DEBUG: P8");
-//    ?batteryLevel(BatteryLevel);
-//    ?current_position(CurrentX, CurrentY);
-//    .println("current position: (", CurrentX, ", ", CurrentY, "), moving to charging station at: (", TargetX, ", ", TargetY, "), Battery: ", BatteryLevel, "%");
-//    +moving_to_target(TargetX, TargetY);
-//    if (not monitoring_active) {
-//        !!start_malfunction_monitoring;
-//    }
-//    // moves one step towards target avoiding obstacles and updating battery level
-//    move_towards_target(TargetX, TargetY, CurrentX, CurrentY);
-//    .wait(500);
-//    !step(TargetX, TargetY).
-
-// Plan 9: Handle arrival at charging station
+// Plan 8: Handle arrival at charging station
 +!step(TargetX, TargetY) : not malfunctioning & seekingChargingStation & current_position(CurrentX, CurrentY) & CurrentX == TargetX & CurrentY == TargetY <-
-    .println("DEBUG: P9");
     ?batteryLevel(BatteryLevel);
     .println("arrived at charging station at (", CurrentX, ", ", CurrentY, "), Battery: ", BatteryLevel, "%");
     !!stop_malfunction_monitoring;
     !handleArrival(TargetX, TargetY, CurrentX, CurrentY).
 
-// Plan 10: Handle redirect while seeking charging station but should prioritize charging
+// Plan 9: Handle redirect while seeking charging station but should prioritize charging
 +!step(TargetX, TargetY) : not malfunctioning & redirect_to_help(_, _) & seekingChargingStation & batteryLevel(BatteryLevel) & BatteryLevel <= 20 <-
-    .println("DEBUG: P10");
     ?batteryLevel(BatteryLevel);
     ?current_position(CurrentX, CurrentY);
     .println("ignoring redirect request - battery too low (", BatteryLevel, "%), continuing to charging station at: (", TargetX, ", ", TargetY, ")");

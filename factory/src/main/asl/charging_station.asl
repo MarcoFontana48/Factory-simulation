@@ -4,7 +4,13 @@
     utils.charging_station_init;
     .belief(location(X, Y));
     ?location(X, Y);
-    .println("Started at location: (", X, ", ", Y, ")").
+    .println("Started at location: (", X, ", ", Y, ")");
+    !setup_charging_station(X, Y);
+    .println("Registered with environment at location: (", X, ", ", Y, ")").
+
++!setup_charging_station(X,Y)  <-
+    .print("registering station at ",X,",",Y);
+    register_charging_station(X,Y).
 
 // handle location queries from robots
 +?whereIsChargingStation(Requester)[source(Requester)] <-
@@ -30,12 +36,12 @@
     NewBattery = CurrentBattery + 1;
     .println("Charging ", RobotName, " - battery: ", NewBattery, "%");
     .send(RobotName, tell, updateBatteryLevel(NewBattery));
-    
+   
     if (NewBattery >= 100) {
         .println("Charging completed for ", RobotName, " - battery: 100%");
         .send(RobotName, tell, chargingCompleted);
         -charging_robot(RobotName);
-        -chargingRequest(RobotName)[source(RobotName)]; // TODO: 1
+        -chargingRequest(RobotName)[source(RobotName)];
     } else {
         !!charge_incrementally(RobotName, NewBattery);
     }.

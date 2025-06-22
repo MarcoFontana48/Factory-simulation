@@ -1,6 +1,6 @@
 !start.
 
-truck_position(6, 0).         // coordinates of this truck
+truck_position(4, 0).         // coordinates of this truck
 packages_handed(0).           // counter for handed packages
 
 +!start <-

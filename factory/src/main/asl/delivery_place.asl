@@ -1,7 +1,7 @@
 !start.
 
 delivery_id("A").               // unique identifier for this delivery location
-delivery_position(6, 12).       // coordinates of this delivery place
+delivery_position(8, 12).       // coordinates of this delivery place
 packages_received(0).           // counter for received packages
 
 +!start <-

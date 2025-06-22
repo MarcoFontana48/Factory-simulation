@@ -1,5 +1,6 @@
 package env;
 
+import java.util.Map;
 import java.util.Random;
 
 import jason.NoValueException;
@@ -15,17 +16,22 @@ import jason.environment.grid.Location;
 public class FactoryEnv extends Environment {
     private FactoryModel model = new FactoryModel();
 
-//    @Override
-//    public void init(final String[] args) {
-//        this.model = new FactoryModel();
-//
-//        if ((args.length == 1) && args[0].equals("gui")) {
-//            final FactoryView view = new FactoryView(this.model);
-//            this.model.setView(view);
-//        }
-//        // boot the agents' percepts
-//        this.updatePercepts();
-//    }
+    @Override
+    public void init(final String[] args) {
+        this.model = new FactoryModel();
+
+        // Initialize GUI if requested
+        if ((args.length == 1) && args[0].equals("gui")) {
+            final FactoryView view = new FactoryView(this.model);
+            this.model.setView(view);
+        }
+        
+        // Initialize robot percepts
+        //initializeRobotPercepts();
+        
+        // Boot the agents' percepts
+        this.updatePercepts();
+    }
 
     /**
      * Update the agents' percepts based on current state of the environment
@@ -60,11 +66,48 @@ public class FactoryEnv extends Environment {
             case "compute_closest_robot":
                 result = executeComputeClosestRobot(agentName, action);
                 break;
+            case "register_charging_station":
+                result = executeRegisterChargingStation(agentName, action);
+                break;
             default:
                 System.err.println("Unknown action: " + action);
                 return false;
         }
         return result;
+    }
+
+    /**
+    * Execute register_charging_station action
+    * Expected action format: register_charging_station(X, Y)
+    */
+    private boolean executeRegisterChargingStation(String agName, Structure action) {
+        try {
+            if (action.getArity() != 2) {
+                System.err.println("register_charging_station expects 2 arguments: X, Y");
+                return false;
+            }
+            Term xT = action.getTerm(0);
+            Term yT = action.getTerm(1);
+            if (!(xT instanceof NumberTerm) || !(yT instanceof NumberTerm)) {
+                System.err.println("register_charging_station arguments must be numbers");
+                return false;
+            }
+            int x = (int) ((NumberTerm) xT).solve();
+            int y = (int) ((NumberTerm) yT).solve();
+
+            // register in the model
+            Location loc = new Location(x, y);
+            model.addChargingStation(agName, loc);
+            System.out.println("Registered charging station '" + agName + "' at (" + x + "," + y + ")");
+
+            // optionally, inform the agent
+            addPercept(agName, Structure.parse("station_registered(" + x + "," + y + ")"));
+            return true;
+        } catch (Exception e) {
+            System.err.println("Error registering charging station for " + agName + ": " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
     }
 
     private boolean executeMoveRandomly(String agentName, Structure action) {
@@ -401,6 +444,31 @@ public class FactoryEnv extends Environment {
         double deltaX = x2 - x1;
         double deltaY = y2 - y1;
         return Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    }
+
+    /**
+    * Register a charging station at a specific location
+    * This method should be called when a charging station initializes
+    */
+    public void registerChargingStation(String stationName, int x, int y) {
+        Location location = new Location(x, y);
+        model.addChargingStation(stationName, location);
+        System.out.println("Registered charging station " + stationName + " at location (" + x + ", " + y + ")");
+    }
+
+    /**
+    * Unregister a charging station
+    */
+    public void unregisterChargingStation(String stationName) {
+        model.removeChargingStation(stationName);
+        System.out.println("Unregistered charging station " + stationName);
+    }
+
+    /**
+    * Get all registered charging station locations
+    */
+    public Map<String, Location> getChargingStationLocations() {
+        return model.getChargingStationLocations();
     }
 
     public int getAgIdBasedOnName(String agName) {
