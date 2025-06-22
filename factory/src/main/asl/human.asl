@@ -14,7 +14,7 @@
     ?current_position(X, Y);
     .println("Current position: (", X, ", ", Y, ")");
     move_randomly(X, Y);    // may move randomly or not move at all at each step
-    .wait(500);
+    .wait(1500);
     !step(X, Y).
 
 // periodic status checking

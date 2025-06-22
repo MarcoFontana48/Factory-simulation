@@ -28,8 +28,8 @@ public class charging_station_init extends DefaultInternalAction {
         do {
             x = (int) (Math.random() * FactoryModel.GSize);
             y = (int) (Math.random() * FactoryModel.GSize);
-        } while (!FACTORY_MODEL.isFree(x, y));
-        
+        } while (!(FACTORY_MODEL.isFree(x,y) && !FACTORY_MODEL.isAdjacentToKeyLocation(x,y)));
+
         currentAgent.addBel(Literal.parseLiteral(String.format("location(%d, %d)", x, y)));
     }
 }

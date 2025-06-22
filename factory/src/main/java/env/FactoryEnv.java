@@ -316,7 +316,7 @@ public class FactoryEnv extends Environment {
             System.err.println("Error getting percepts for " + agName + ": " + e.getMessage());
         }
         Random random = new Random();
-        return random.nextInt(21) + 25; //TODO: THIS IS TEMPORARY, REMOVE THIS ONCE FIXED
+        return random.nextInt(21) + 80; //TODO: THIS IS TEMPORARY, REMOVE THIS ONCE FIXED
     }
 
     private boolean executeComputeClosestChargingStation(String agName, Structure action) {
@@ -476,11 +476,14 @@ public class FactoryEnv extends Environment {
             case "d_bot_1" -> 0;
             case "d_bot_2" -> 1;
             case "d_bot_3" -> 2;
-            case "ch_st_1" -> 3;
-            case "ch_st_2" -> 4;
-            case "truck_1" -> 5;
-            case "deliv_A" -> 6;
-            case "humn_1" -> 7;
+            case "d_bot_4" -> 3;
+            case "d_bot_5" -> 4;
+            case "ch_st_1" -> 5;
+            case "ch_st_2" -> 6;
+            case "ch_st_3" -> 7;
+            case "truck_1" -> 8;
+            case "deliv_A" -> 9;
+            case "humn_1" -> 10;
             default -> -1;
         };
     }

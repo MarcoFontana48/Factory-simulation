@@ -205,7 +205,7 @@ askedChargingStationLocation(false).    // track if charging station location ha
 +!broadcast_malfunction(X, Y, RobotName) : not malfunction_ack(_, _, _) <-
     .println("broadcasting malfunction at (", X, ", ", Y, ")");
     .broadcast(askOne, robotMalfunctioning(RobotName, X, Y));
-    .wait(5000);  // wait N second before retrying if no acknowledgment is received, otherwise it will evaluate the distances from the other robots and choose the closest one
+    .wait(2000);  // wait N second before retrying if no acknowledgment is received, otherwise it will evaluate the distances from the other robots and choose the closest one
     !broadcast_malfunction(X, Y, RobotName).
 
 +!broadcast_malfunction(ThisRobotX, ThisRobotY, _) : malfunction_ack(_, _, _) <-
@@ -429,7 +429,7 @@ askedChargingStationLocation(false).    // track if charging station location ha
             
             .println("updated my battery to: ", NewMyBattery, "%, total shared: ", NewSharedAmount, " units");
             
-            .wait(500); // wait before next sharing cycle
+            .wait(100); // wait before next sharing cycle
             !battery_sharing_loop(RobotName);
     } else {
         if (MyBattery <= 30) {
@@ -518,7 +518,7 @@ askedChargingStationLocation(false).    // track if charging station location ha
     if (X == TX & Y == TY) {
         .send(truck, achieve, request_package);
         .println("message sent to truck, waiting for response...");
-        .wait(5000);
+        .wait(1000);
 
         if (package_received) {
             .println("received package_received message");
@@ -572,7 +572,7 @@ askedChargingStationLocation(false).    // track if charging station location ha
     if (askedChargingStationLocation(false)) {
         +askedChargingStationLocation(true);
         .broadcast(askOne, whereIsChargingStation(_));
-        .wait(5000);
+        .wait(2000);
     }
     .findall([Station, X, Y], knownChargingStation(Station, X, Y), StationList);
     .length(StationList, Count);

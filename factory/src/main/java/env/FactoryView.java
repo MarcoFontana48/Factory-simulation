@@ -56,7 +56,7 @@ public class FactoryView extends GridWorldView {
         String agentText = "";
 
         switch (id) {
-            case 7:     // human
+            case 10:     // human
                 color = Color.gray;
                 agentText = "H";
                 break;

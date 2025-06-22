@@ -32,7 +32,7 @@
     !!charge_incrementally(RobotName, CurrentBattery).
 
 +!charge_incrementally(RobotName, CurrentBattery) : charging_robot(RobotName) & CurrentBattery < 100 <-
-    .wait(500);
+    .wait(100);
     NewBattery = CurrentBattery + 1;
     .println("Charging ", RobotName, " - battery: ", NewBattery, "%");
     .send(RobotName, tell, updateBatteryLevel(NewBattery));
