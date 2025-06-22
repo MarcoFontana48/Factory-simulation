@@ -22,12 +22,12 @@
     .println("About to request status from all robots...");
     .abolish(robot_status(_, _, _, _, _, _, _, _, _, _, _, _));  // clear previous status
     .broadcast(askOne, request_status);
-    .wait(10000);  // wait n seconds for responses
-    !check_all_robots_malfunction;
+    .wait(20000);  // wait n seconds for responses
+    !check_malfunctioning_robots;
     !periodic_status_check.
 
-// Check if all robots are malfunctioning
-+!check_all_robots_malfunction <-
+// Check for any malfunctioning robots and repair one randomly
++!check_malfunctioning_robots <-
     .findall(RobotName, robot_status(RobotName, _, _, _, _, true, _, _, _, _, _, _), MalfunctioningRobots);
     .findall(RobotName, robot_status(RobotName, _, _, _, _, _, _, _, _, _, _, _), AllRobots);
     .length(MalfunctioningRobots, MalfunctionCount);
@@ -35,15 +35,11 @@
     
     .println("status check: ", MalfunctionCount, " out of ", TotalCount, " robots are malfunctioning");
     
-    if (MalfunctionCount > 0 & MalfunctionCount == TotalCount & TotalCount > 0) {
-        .println("all robots are malfunctioning, selecting one for emergency repair...");
+    if (MalfunctionCount > 0) {
+        .println("Found ", MalfunctionCount, " malfunctioning robot(s), selecting one for repair...");
         !select_random_robot_for_repair(MalfunctioningRobots);
     } else {
-        if (MalfunctionCount > 0) {
-            .println("some robots are malfunctioning, not all of them");
-        } else {
-            .println("all robots are operational");
-        }
+        .println("All robots are operational");
     }.
 
 // Select a random robot from the malfunctioning list for repair
@@ -54,7 +50,7 @@
         .nth(RandomNumber, MalfunctioningRobots, SelectedRobot);
 
         ?robot_status(SelectedRobot, X, Y, Battery, Carrying, true, _, _, _, _, _, _);
-        .println("Randomly selected robot ", SelectedRobot, " at position (", X, ", ", Y, ") with ", Battery, "% battery for emergency repair");
+        .println("Randomly selected robot ", SelectedRobot, " at position (", X, ", ", Y, ") with ", Battery, "% battery for repair");
         
         !remotely_recharge_robot(SelectedRobot, X, Y);
     } else {
@@ -71,27 +67,27 @@
     !repair_loop(R).
 
 +!repair_loop(RobotName) <-
-    .wait(500);
+    .wait(100);
     
     // Check if we still have status for this robot
     if (robot_status(RobotName, X, Y, Battery, Carrying, Malfunctioning, _, _, _, _, _, _)) {
         .println("Current status of ", RobotName, ": Battery ", Battery, "%, Malfunctioning: ", Malfunctioning);
         
-        // if robot's battery is above 50%, repair it remotely and send confirmation
-        if (Battery > 50) {
+        // if robot's battery is above 80%, repair it remotely and send confirmation
+        if (Battery > 80) {
             .println("Robot ", RobotName, " has sufficient battery (", Battery, "%). Sending repair confirmation...");
             .send(RobotName, tell, remotely_repaired);
-            .println("Emergency repair completed for robot ", RobotName);
-        // else if battery is below 50%, send a battery unit remotely, and repeat repair loop
+            .println("Repair completed for robot ", RobotName);
+        // else if battery is below 80%, send a battery unit remotely, and repeat repair loop
         } else {
             .println("Robot ", RobotName, " battery too low (", Battery, "%). Sending remote battery unit...");
             .send(RobotName, achieve, receive_battery_unit(1));
-            .wait(250);  // wait a bit for the battery update to process
+            .wait(100);  // wait a bit for the battery update to process
             
             // Request updated status before continuing
             .send(RobotName, askOne, request_status);
-            .wait(250);  // wait for status response
-            
+            .wait(100);  // wait for status response
+
             !repair_loop(RobotName);
         }
     } else {

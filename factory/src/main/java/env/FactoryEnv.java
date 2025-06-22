@@ -196,15 +196,19 @@ public class FactoryEnv extends Environment {
             }
 
             // Execute one step movement using MovementManager
+            System.out.println("about to move towards target " + destination.x + " " + destination.y + " from " + agentLocation.x + " " + agentLocation.y);
             boolean moveSuccess = model.getMovementManager().moveTowards(agentId, destination, agentLocation);
+            System.out.println("move towards target " + destination.x + " " + destination.y + " from " + agentLocation.x + " " + agentLocation.y + " success: " + moveSuccess);
 
             if (moveSuccess) {
                 // Get new position after move
                 Location newPos = model.getAgPos(agentId);
                 
                 // Update agent percepts with new position
+                System.out.println("Updating position for " + agName + " from " + agentLocation.x + ", " + agentLocation.y + " to " + newPos.x + ", " + newPos.y);
                 updateAgentPosition(agName, newPos);
-                
+                System.out.println("Position updated for " + agName + " from " + agentLocation.x + ", " + agentLocation.y + " to " + newPos.x + ", " + newPos.y);
+
                 // Simulate battery consumption
                 consumeBattery(agName, 1); // 1% per move
 
