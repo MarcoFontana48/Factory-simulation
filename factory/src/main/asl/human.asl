@@ -35,11 +35,18 @@
     
     .println("status check: ", MalfunctionCount, " out of ", TotalCount, " robots are malfunctioning");
     
-    if (MalfunctionCount > 0) {
-        .println("Found ", MalfunctionCount, " malfunctioning robot(s), selecting one for repair...");
+    /*
+    if all robots are malfunctioning simultaneously (it may happen because all robots have a random 
+    change of malfunctioning every 1/2 seconds), in order not to stop the simulation, choose one
+    randomly for repair, recharge it partially, and let it resume working. This robot will then be
+    able to repair other robots that will eventually resume the simulation entirely as if it were
+    starting again from the beginning
+    */
+    if (MalfunctionCount == TotalCount) {
+        .println("all robots are malfunctioning, selecting one for repair...");
         !select_random_robot_for_repair(MalfunctioningRobots);
     } else {
-        .println("All robots are operational");
+        .println("not all robots are malfunctioning, skipping repair selection...");
     }.
 
 // Select a random robot from the malfunctioning list for repair
