@@ -1,5 +1,6 @@
 package env;
 
+import env.agent.DeliveryRobot;
 import env.behaviour.MovementManager;
 import jason.environment.grid.GridWorldModel;
 import jason.environment.grid.Location;
@@ -7,6 +8,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class FactoryModel extends GridWorldModel {
+    private Map<String, DeliveryRobot> deliveryRobots = new HashMap<>();
+
     public static final int GSize = 13;
     public static final int OBSTACLE = 4;
     public static final int TRUCK = 16;
@@ -103,5 +106,56 @@ public class FactoryModel extends GridWorldModel {
     
     public MovementManager getMovementManager() {
         return movementManager;
+    }
+
+    public void addDeliveryRobot(DeliveryRobot robot) {
+        deliveryRobots.put(robot.getName(), robot);
+    }
+
+    public DeliveryRobot getDeliveryRobotById(int agentId) {
+        return deliveryRobots.get(this.getAgNameBasedOnId(agentId));
+    }
+
+    public DeliveryRobot getDeliveryRobotByLocation(Location location) {
+        for (DeliveryRobot robot : deliveryRobots.values()) {
+            if (robot.getLocation().equals(location)) {
+                return robot;
+            }
+        }
+        return null;
+    }
+
+    public int getAgIdBasedOnName(String agName) {
+        return switch (agName) {
+            case "d_bot_1" -> 0;
+            case "d_bot_2" -> 1;
+            case "d_bot_3" -> 2;
+            case "d_bot_4" -> 3;
+            case "d_bot_5" -> 4;
+            case "ch_st_1" -> 5;
+            case "ch_st_2" -> 6;
+            case "ch_st_3" -> 7;
+            case "truck_1" -> 8;
+            case "deliv_A" -> 9;
+            case "humn_1" -> 10;
+            default -> -1;
+        };
+    }
+
+    public String getAgNameBasedOnId(int agentId) {
+        return switch (agentId) {
+            case 0 -> "d_bot_1";
+            case 1 -> "d_bot_2";
+            case 2 -> "d_bot_3";
+            case 3 -> "d_bot_4";
+            case 4 -> "d_bot_5";
+            case 5 -> "ch_st_1";
+            case 6 -> "ch_st_2";
+            case 7 -> "ch_st_3";
+            case 8 -> "truck_1";
+            case 9 -> "deliv_A";
+            case 10 -> "humn_1";
+            default -> "unknown";
+        };
     }
 }

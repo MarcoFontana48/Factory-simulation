@@ -80,12 +80,12 @@
     if (robot_status(RobotName, X, Y, Battery, Carrying, Malfunctioning, _, _, _, _, _, _)) {
         .println("Current status of ", RobotName, ": Battery ", Battery, "%, Malfunctioning: ", Malfunctioning);
         
-        // if robot's battery is above 80%, repair it remotely and send confirmation
-        if (Battery > 80) {
+        // if robot's battery is above 99%, repair it remotely and send confirmation
+        if (Battery > 99) {
             .println("Robot ", RobotName, " has sufficient battery (", Battery, "%). Sending repair confirmation...");
             .send(RobotName, tell, remotely_repaired);
             .println("Repair completed for robot ", RobotName);
-        // else if battery is below 80%, send a battery unit remotely, and repeat repair loop
+        // else if battery is below 99%, send a battery unit remotely, and repeat repair loop
         } else {
             .println("Robot ", RobotName, " battery too low (", Battery, "%). Sending remote battery unit...");
             .send(RobotName, achieve, receive_battery_unit(1));

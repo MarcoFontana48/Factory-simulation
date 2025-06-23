@@ -3,10 +3,13 @@ package env;
 import java.util.Map;
 import java.util.Random;
 
+import env.agent.DeliveryRobot;
 import jason.NoValueException;
+import jason.asSyntax.Atom;
 import jason.asSyntax.ListTerm;
 import jason.asSyntax.Literal;
 import jason.asSyntax.NumberTerm;
+import jason.asSyntax.StringTerm;
 import jason.asSyntax.Structure;
 import jason.asSyntax.Term;
 import jason.environment.Environment;
@@ -15,6 +18,7 @@ import jason.environment.grid.Location;
 //TODO: refactor to become FACTORY
 public class FactoryEnv extends Environment {
     private FactoryModel model = new FactoryModel();
+    private FactoryView view;
 
     @Override
     public void init(final String[] args) {
@@ -22,7 +26,8 @@ public class FactoryEnv extends Environment {
 
         // Initialize GUI if requested
         if ((args.length == 1) && args[0].equals("gui")) {
-            final FactoryView view = new FactoryView(this.model);
+            this.view = new FactoryView(this.model);
+            view.setEnvironment(this);
             this.model.setView(view);
         }
         
@@ -51,6 +56,9 @@ public class FactoryEnv extends Environment {
         boolean result = false;
 
         switch (action.getFunctor()) {
+            case "init_dbot":
+                result = executeInitDeliveryRobot(agentName, action);
+                break;
             case "move_towards_target":
                 result = executeMoveTowardsTarget(agentName, action);
                 break;
@@ -59,6 +67,18 @@ public class FactoryEnv extends Environment {
                 break;
             case "update_battery_level":
                 result = executeUpdateBatteryLevel(agentName, action);
+                break;
+            case "update_malfunctioning_status":
+                result = executeUpdateMalfunctioningStatus(agentName, action);
+                break;
+            case "update_seeking_charging_station":
+                result = executeUpdateSeekingChargingStation(agentName, action);
+                break;
+            case "update_charging":
+                result = executeUpdateCharging(agentName, action);
+                break;
+            case "update_helping_robot":
+                result = executeUpdateHelpingRobot(agentName, action);
                 break;
             case "compute_closest_charging_station":
                 result = executeComputeClosestChargingStation(agentName, action);
@@ -69,11 +89,214 @@ public class FactoryEnv extends Environment {
             case "register_charging_station":
                 result = executeRegisterChargingStation(agentName, action);
                 break;
+            case "update_battery_sharing_active":
+                result = executeUpdateBatterySharingActive(agentName, action);
+                break;
+            case "update_carrying_package":
+                result = executeUpdateCarryingPackage(agentName, action);
+                break;
             default:
                 System.err.println("Unknown action: " + action);
                 return false;
         }
         return result;
+    }
+
+    private boolean executeUpdateCarryingPackage(String agentName, Structure action) {
+        try {
+            if (action.getArity() != 1) {
+                System.err.println("update_carrying_package expects 1 argument: Status");
+                return false;
+            }
+            Term statusT = action.getTerm(0);
+            if (!(statusT instanceof Atom)) {
+                System.err.println("update_carrying_package argument must be: Status (Atom) but got: " + (statusT.getClass().getSimpleName()));
+                return false;
+            }
+            String status = ((Atom) statusT).toString();
+            DeliveryRobot robot = model.getDeliveryRobotById(this.getAgIdBasedOnName(agentName));
+            if (robot == null) {
+                System.err.println("Unknown robot: " + agentName);
+                return false;
+            }
+            robot.setCarryingPackage(status.equals("true"));
+            view.repaint();
+            return true;
+        } catch (Exception e) {
+            System.err.println("Error updating carrying package status for " + agentName + ": " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private boolean executeUpdateHelpingRobot(String agentName, Structure action) {
+        try {
+            if (action.getArity() != 1) {
+                System.err.println("update_helping_robot expects 1 argument: Status");
+                return false;
+            }
+            Term statusT = action.getTerm(0);
+            if (!(statusT instanceof Atom)) {
+                System.err.println("update_helping_robot argument must be: Status (Atom) but got: " + (statusT.getClass().getSimpleName()));
+                return false;
+            }
+            String status = ((Atom) statusT).toString();
+            DeliveryRobot robot = model.getDeliveryRobotById(this.getAgIdBasedOnName(agentName));
+            if (robot == null) {
+                System.err.println("Unknown robot: " + agentName);
+                return false;
+            }
+            robot.setHelpingRobot(status.equals("true"));
+            view.repaint();
+            return true;
+        } catch (Exception e) {
+            System.err.println("Error updating about to help robot status for " + agentName + ": " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private boolean executeUpdateBatterySharingActive(String agentName, Structure action) {
+        try {
+            if (action.getArity() != 1) {
+                System.err.println("update_battery_sharing_active expects 1 argument: Status");
+                return false;
+            }
+            Term statusT = action.getTerm(0);
+            if (!(statusT instanceof Atom)) {
+                System.err.println("update_battery_sharing_active argument must be: Status (Atom) but got: " + (statusT.getClass().getSimpleName()));
+                return false;
+            }
+            String status = ((Atom) statusT).toString();
+            DeliveryRobot robot = model.getDeliveryRobotById(this.getAgIdBasedOnName(agentName));
+            if (robot == null) {
+                System.err.println("Unknown robot: " + agentName);
+                return false;
+            }
+            robot.setBatterySharingActive(status.equals("true"));
+            view.repaint();
+            return true;
+        } catch (Exception e) {
+            System.err.println("Error updating battery sharing active status for " + agentName + ": " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private boolean executeUpdateCharging(String agentName, Structure action) {
+        try {
+            if (action.getArity() != 1) {
+                System.err.println("update_charging expects 1 argument: Status");
+                return false;
+            }
+            Term statusT = action.getTerm(0);
+            if (!(statusT instanceof Atom)) {
+                System.err.println("update_charging argument must be: Status (Atom) but got: " + (statusT.getClass().getSimpleName()));
+                return false;
+            }
+            String status = ((Atom) statusT).toString();
+            DeliveryRobot robot = model.getDeliveryRobotById(this.getAgIdBasedOnName(agentName));
+            if (robot == null) {
+                System.err.println("Unknown robot: " + agentName);
+                return false;
+            }
+            robot.setCharging(status.equals("true"));
+            view.repaint();
+            return true;
+        } catch (Exception e) {
+            System.err.println("Error updating charging status for " + agentName + ": " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private boolean executeUpdateSeekingChargingStation(String agentName, Structure action) {
+        try {
+            if (action.getArity() != 1) {
+                System.err.println("update_seeking_charging_station expects 1 argument: Status");
+                return false;
+            }
+            Term statusT = action.getTerm(0);
+            if (!(statusT instanceof Atom)) {
+                System.err.println("update_seeking_charging_station argument must be: Status (Atom) but got: " + (statusT.getClass().getSimpleName()));
+                return false;
+            }
+            String status = ((Atom) statusT).toString();
+            DeliveryRobot robot = model.getDeliveryRobotById(this.getAgIdBasedOnName(agentName));
+            if (robot == null) {
+                System.err.println("Unknown robot: " + agentName);
+                return false;
+            }
+            robot.setSeekingChargingStation(status.equals("true"));
+            view.repaint();
+            return true;
+        } catch (Exception e) {
+            System.err.println("Error updating seeking charging station status for " + agentName + ": " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private boolean executeUpdateMalfunctioningStatus(String agentName, Structure action) {
+        try {
+            if (action.getArity() != 1) {
+                System.err.println("update_malfunctioning_status expects 1 argument: Status");
+                return false;
+            }
+            Term statusT = action.getTerm(0);
+            if (!(statusT instanceof Atom)) {
+                System.err.println("update_malfunctioning_status argument must be: Status (Atom) but got: " + (statusT.getClass().getSimpleName()));
+                return false;
+            }
+            String status = ((Atom) statusT).toString();
+            DeliveryRobot robot = model.getDeliveryRobotById(this.getAgIdBasedOnName(agentName));
+            if (robot == null) {
+                System.err.println("Unknown robot: " + agentName);
+                return false;
+            }
+            robot.setMalfunctioning(status.equals("true"));
+            view.repaint();
+            return true;
+        } catch (Exception e) {
+            System.err.println("Error updating malfunctioning status for " + agentName + ": " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private boolean executeInitDeliveryRobot(String agentName, Structure action) {
+        try {
+            if (action.getArity() != 4) {
+                System.err.println("init_dbot expects 4 arguments: Name, X, Y, BatteryLevel");
+                return false;
+            }
+            Term nameT = action.getTerm(0);
+            Term xT = action.getTerm(1);
+            Term yT = action.getTerm(2);
+            Term batteryT = action.getTerm(3);
+            if (!(xT instanceof NumberTerm) || !(yT instanceof NumberTerm) || !(batteryT instanceof NumberTerm) || !(nameT instanceof Atom)) {
+                System.err.println("init_dbot arguments must be: Name (Atom), X (Number), Y (Number), BatteryLevel (Number) but got: " + (nameT.getClass().getSimpleName()) + ", " + (xT.getClass().getSimpleName()) + ", " + (yT.getClass().getSimpleName()) + ", " + (batteryT.getClass().getSimpleName()));
+                return false;
+            }
+            String name = ((Atom) nameT).toString();
+            int x = (int) ((NumberTerm) xT).solve();
+            int y = (int) ((NumberTerm) yT).solve();
+            int batteryLevel = (int) ((NumberTerm) batteryT).solve();
+
+            // register in the model
+            Location loc = new Location(x, y);
+            DeliveryRobot robot = new DeliveryRobot(name, batteryLevel, loc);
+            model.addDeliveryRobot(robot);
+            System.out.println("Initialized delivery robot '" + name + "' at (" + x + "," + y + ") with battery " + batteryLevel);
+
+            // optionally, inform the agent
+            addPercept(agentName, Structure.parse("robot_initialized(" + x + "," + y + "," + batteryLevel + ")"));
+            return true;
+        } catch (Exception e) {
+            System.err.println("Error initializing delivery robot for " + agentName + ": " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
     }
 
     /**
@@ -211,13 +434,11 @@ public class FactoryEnv extends Environment {
 
                 // Simulate battery consumption
                 consumeBattery(agName, 1); // 1% per move
-
                 return true;
             } else {
                 System.err.println("Move failed for " + agName + " - path might be blocked");
                 return false;
-            }
-            
+            }            
         } catch (Exception e) {
             System.err.println("Error executing move_towards_target for " + agName + ": " + e.getMessage());
             return false;
@@ -263,9 +484,16 @@ public class FactoryEnv extends Environment {
     private void updateAgentPosition(String agName, Location newPos) {
         // Remove old position percept
         removePerceptsByUnif(agName, Literal.parseLiteral("current_position(_,_)"));
-        
+
         // Add new position percept
         addPercept(agName, Literal.parseLiteral("current_position(" + newPos.x + "," + newPos.y + ")"));
+
+        DeliveryRobot dbot = model.getDeliveryRobotById(this.getAgIdBasedOnName(agName));
+        if (dbot == null) {
+            return;
+        }
+
+        dbot.setLocation(newPos);
     }
     
     /**
@@ -278,6 +506,16 @@ public class FactoryEnv extends Environment {
             
             // Add new battery level percept
             addPercept(agName, Literal.parseLiteral("batteryLevel(" + newBatteryLevel + ")"));
+
+            // Update the model's battery level
+            int agentId = this.getAgIdBasedOnName(agName);
+            if (agentId == -1) {
+                System.err.println("Unknown agent: " + agName);
+                return;
+            }
+            DeliveryRobot dbot = model.getDeliveryRobotById(agentId);
+            dbot.setBattery(newBatteryLevel);
+            view.repaint();
         } catch (Exception e) {
             System.err.println("Error updating battery level for " + agName + ": " + e.getMessage());
         }
@@ -304,12 +542,13 @@ public class FactoryEnv extends Environment {
     /**
     * Get current battery level for agent
     */
-    private int getCurrentBatteryLevel(String agName) {
+    public int getCurrentBatteryLevel(String agName) {
         try {
             for (Literal percept : getPercepts(agName)) {
                 if (percept.getFunctor().equals("batteryLevel") && percept.getArity() == 1) {
                     try {
                         int batteryLevel = (int) ((NumberTerm) percept.getTerm(0)).solve();
+                        System.out.println("Current battery level for " + agName + ": " + batteryLevel);
                         return batteryLevel;
                     } catch (Exception e) {
                         System.err.println("Error parsing battery level for " + agName + ": " + e.getMessage());
@@ -319,6 +558,7 @@ public class FactoryEnv extends Environment {
         } catch (Exception e) {
             System.err.println("Error getting percepts for " + agName + ": " + e.getMessage());
         }
+        System.out.println("Returning default battery level for " + agName);
         Random random = new Random();
         return random.nextInt(21) + 80; //TODO: THIS IS TEMPORARY, REMOVE THIS ONCE FIXED
     }
@@ -450,6 +690,14 @@ public class FactoryEnv extends Environment {
         return Math.sqrt(deltaX * deltaX + deltaY * deltaY);
     }
 
+    public Location getTruckLocation() {
+        return model.getTruckLocation();
+    }
+
+    public Location getDeliveryLocation() {
+        return model.getDeliveryLocation();
+    }
+
     /**
     * Register a charging station at a specific location
     * This method should be called when a charging station initializes
@@ -473,6 +721,14 @@ public class FactoryEnv extends Environment {
     */
     public Map<String, Location> getChargingStationLocations() {
         return model.getChargingStationLocations();
+    }
+
+    public DeliveryRobot getDeliveryRobotByLocation(Location loc) {
+        return model.getDeliveryRobotByLocation(loc);
+    }
+
+    public DeliveryRobot getDeliveryRobotById(int id) {
+        return model.getDeliveryRobotById(id);
     }
 
     public int getAgIdBasedOnName(String agName) {
