@@ -5,29 +5,112 @@ import jason.environment.grid.Location;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
 import javax.swing.SwingUtilities;
 
 import env.agent.DeliveryRobot;
 
-public class FactoryView extends GridWorldView {
+public class FactoryView extends GridWorldView implements FactoryModel.ModelObserver {
     private FactoryEnv environment;
+    private Set<Location> dirtyRegions = new HashSet<>();
+    private boolean isUpdating = false;
    
     public FactoryView(final FactoryModel model) {
         super(model, "Factory Simulation", 700);
         this.defaultFont = new Font("Noto Sans", Font.BOLD, 16);
+        
+        // Register as observer
+        if (model instanceof FactoryModel) {
+            ((FactoryModel) model).addObserver(this);
+        }
+        
         SwingUtilities.invokeLater(() -> {
             this.setVisible(true);
             this.repaint();
         });
     }
     
-    // Method to set the environment reference
     public void setEnvironment(FactoryEnv environment) {
         this.environment = environment;
+    }
+
+    // Observer pattern implementations
+    @Override
+    public void onAgentUpdated(Location location, int agentId) {
+        updateAgent(location, agentId);
+    }
+
+    @Override
+    public void onAgentMoved(Location oldLocation, Location newLocation, int agentId) {
+        updateAgentMovement(oldLocation, newLocation, agentId);
+    }
+
+    @Override
+    public void onCellUpdated(Location location) {
+        updateCell(location);
+    }
+
+    // Selective update methods
+    public void updateAgent(Location location, int agentId) {
+        SwingUtilities.invokeLater(() -> {
+            repaintCell(location);
+        });
+    }
+
+    public void updateAgentMovement(Location oldLocation, Location newLocation, int agentId) {
+        SwingUtilities.invokeLater(() -> {
+            // Repaint both old and new locations
+            repaintCell(oldLocation);
+            repaintCell(newLocation);
+        });
+    }
+
+    public void updateCell(Location location) {
+        SwingUtilities.invokeLater(() -> {
+            repaintCell(location);
+        });
+    }
+
+    // Batch update method for multiple changes
+    public void updateCells(List<Location> locations) {
+        SwingUtilities.invokeLater(() -> {
+            if (locations.size() > 5) {
+                // If too many locations, just repaint everything
+                repaint();
+            } else {
+                // Repaint individual cells
+                for (Location location : locations) {
+                    repaintCell(location);
+                }
+            }
+        });
+    }
+
+    // Helper method to repaint a specific cell
+    private void repaintCell(Location location) {
+        if (location == null || location.x < 0 || location.y < 0 || 
+            location.x >= getModel().getWidth() || location.y >= getModel().getHeight()) {
+            return;
+        }
+        
+        int x = location.x * cellSizeW;
+        int y = location.y * cellSizeH;
+        repaint(x, y, cellSizeW, cellSizeH);
+    }
+
+
+
+    // Force full repaint when needed
+    public void forceFullRepaint() {
+        SwingUtilities.invokeLater(() -> {
+            repaint();
+        });
     }
    
     @Override
@@ -71,10 +154,19 @@ public class FactoryView extends GridWorldView {
                 break;
             default:    // every other agent (delivery robots)
                 DeliveryRobot dbot = getDeliveryRobotById(id);
+                if (dbot != null) {
+                    color = dbot.isBatterySharingActive() ? Color.magenta.darker() : 
+                           dbot.isCharging() ? Color.yellow.darker() : 
+                           dbot.isMalfunctioning() ? Color.red.darker() : 
+                           dbot.isSeekingChargingStation() ? Color.orange : 
+                           dbot.isHelpingRobot() ? Color.magenta : 
+                           dbot.isCarryingPackage() ? Color.cyan : Color.cyan.darker();
 
-                color = dbot.isBatterySharingActive() ? Color.magenta.darker() : dbot.isCharging() ? Color.yellow.darker() : dbot.isMalfunctioning() ? Color.red.darker() : dbot.isSeekingChargingStation() ? Color.orange.darker() : dbot.isHelpingRobot() ? Color.magenta : dbot.isCarryingPackage() ? Color.cyan : Color.cyan.darker();
-
-                agentTextID = "R" + (id + 1) + " " + dbot.getBattery(); // +1 to the id is to match the agent ID with the display
+                    agentTextID = "R" + (id + 1) + " " + dbot.getBattery();
+                } else {
+                    color = Color.gray;
+                    agentTextID = "R" + (id + 1);
+                }
                 break;
         }
         
@@ -82,48 +174,8 @@ public class FactoryView extends GridWorldView {
         graphics.setColor(Color.black);
         super.drawString(graphics, x, y, this.defaultFont, agentTextID);
     }
-    
-    /**
-     * Get agent name based on ID
-     */
-    private String getAgentNameById(int id) {
-        return switch (id) {
-            case 0 -> "d_bot_1";
-            case 1 -> "d_bot_2";
-            case 2 -> "d_bot_3";
-            case 3 -> "d_bot_4";
-            case 4 -> "d_bot_5";
-            case 5 -> "ch_st_1";
-            case 6 -> "ch_st_2";
-            case 7 -> "ch_st_3";
-            case 8 -> "truck_1";
-            case 9 -> "deliv_A";
-            case 10 -> "humn_1";
-            default -> "unknown";
-        };
-    }
-
-    /**
-     * Get agent name based on ID
-     */
-    private int getAgentIdByName(String name) {
-        return switch (name) {
-            case "d_bot_1" -> 0;
-            case "d_bot_2" -> 1;
-            case "d_bot_3" -> 2;
-            case "d_bot_4" -> 3;
-            case "d_bot_5" -> 4;
-            case "ch_st_1" -> 5;
-            case "ch_st_2" -> 6;
-            case "ch_st_3" -> 7;
-            case "truck_1" -> 8;
-            case "deliv_A" -> 9;
-            case "humn_1" -> 10;
-            default -> -1;
-        };
-    }
 
     private DeliveryRobot getDeliveryRobotById(int id) {
-        return environment.getDeliveryRobotById(id);
+        return environment != null ? environment.getDeliveryRobotById(id) : null;
     }
 }

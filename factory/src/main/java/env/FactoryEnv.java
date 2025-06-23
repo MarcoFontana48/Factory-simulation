@@ -15,7 +15,6 @@ import jason.asSyntax.Term;
 import jason.environment.Environment;
 import jason.environment.grid.Location;
 
-//TODO: refactor to become FACTORY
 public class FactoryEnv extends Environment {
     private FactoryModel model = new FactoryModel();
     private FactoryView view;
@@ -31,25 +30,14 @@ public class FactoryEnv extends Environment {
             this.model.setView(view);
         }
         
-        // Initialize robot percepts
-        //initializeRobotPercepts();
-        
         // Boot the agents' percepts
         this.updatePercepts();
     }
 
-    /**
-     * Update the agents' percepts based on current state of the environment
-     * (FactoryModel)
-     */
     void updatePercepts() {
-
+        // Implementation for updating percepts
     }
 
-    /**
-     * The <code>boolean</code> returned represents the action "feedback"
-     * (success/failure)
-     */
     @Override
     public boolean executeAction(String agentName, Structure action) {
         System.out.println("[" + agentName + "] doing: " + action);
@@ -119,8 +107,16 @@ public class FactoryEnv extends Environment {
                 System.err.println("Unknown robot: " + agentName);
                 return false;
             }
+            
+            // Store previous state for comparison
+            boolean previousCarryingState = robot.isCarryingPackage();
             robot.setCarryingPackage(status.equals("true"));
-            view.repaint();
+            
+            // Only update view if state actually changed
+            if (view != null && previousCarryingState != robot.isCarryingPackage()) {
+                view.updateAgent(robot.getLocation(), this.getAgIdBasedOnName(agentName));
+            }
+            
             return true;
         } catch (Exception e) {
             System.err.println("Error updating carrying package status for " + agentName + ": " + e.getMessage());
@@ -137,7 +133,7 @@ public class FactoryEnv extends Environment {
             }
             Term statusT = action.getTerm(0);
             if (!(statusT instanceof Atom)) {
-                System.err.println("update_helping_robot argument must be: Status (Atom) but got: " + (statusT.getClass().getSimpleName()));
+                System.err.println("update_helping_robot argument must be: Status (Atom)");
                 return false;
             }
             String status = ((Atom) statusT).toString();
@@ -146,11 +142,19 @@ public class FactoryEnv extends Environment {
                 System.err.println("Unknown robot: " + agentName);
                 return false;
             }
+            
+            // Store previous state for comparison
+            boolean previousHelpingState = robot.isHelpingRobot();
             robot.setHelpingRobot(status.equals("true"));
-            view.repaint();
+            
+            // Update view if helping state changed
+            if (view != null && previousHelpingState != robot.isHelpingRobot()) {
+                view.updateAgent(robot.getLocation(), this.getAgIdBasedOnName(agentName));
+            }
+            
             return true;
         } catch (Exception e) {
-            System.err.println("Error updating about to help robot status for " + agentName + ": " + e.getMessage());
+            System.err.println("Error updating helping robot status for " + agentName + ": " + e.getMessage());
             e.printStackTrace();
             return false;
         }
@@ -164,7 +168,7 @@ public class FactoryEnv extends Environment {
             }
             Term statusT = action.getTerm(0);
             if (!(statusT instanceof Atom)) {
-                System.err.println("update_battery_sharing_active argument must be: Status (Atom) but got: " + (statusT.getClass().getSimpleName()));
+                System.err.println("update_battery_sharing_active argument must be: Status (Atom)");
                 return false;
             }
             String status = ((Atom) statusT).toString();
@@ -173,8 +177,16 @@ public class FactoryEnv extends Environment {
                 System.err.println("Unknown robot: " + agentName);
                 return false;
             }
+            
+            // Store previous state for comparison
+            boolean previousBatterySharingState = robot.isBatterySharingActive();
             robot.setBatterySharingActive(status.equals("true"));
-            view.repaint();
+            
+            // Update view if battery sharing state changed
+            if (view != null && previousBatterySharingState != robot.isBatterySharingActive()) {
+                view.updateAgent(robot.getLocation(), this.getAgIdBasedOnName(agentName));
+            }
+            
             return true;
         } catch (Exception e) {
             System.err.println("Error updating battery sharing active status for " + agentName + ": " + e.getMessage());
@@ -191,7 +203,7 @@ public class FactoryEnv extends Environment {
             }
             Term statusT = action.getTerm(0);
             if (!(statusT instanceof Atom)) {
-                System.err.println("update_charging argument must be: Status (Atom) but got: " + (statusT.getClass().getSimpleName()));
+                System.err.println("update_charging argument must be: Status (Atom)");
                 return false;
             }
             String status = ((Atom) statusT).toString();
@@ -200,8 +212,16 @@ public class FactoryEnv extends Environment {
                 System.err.println("Unknown robot: " + agentName);
                 return false;
             }
+            
+            // Store previous state for comparison
+            boolean previousChargingState = robot.isCharging();
             robot.setCharging(status.equals("true"));
-            view.repaint();
+            
+            // Update view if charging state changed
+            if (view != null && previousChargingState != robot.isCharging()) {
+                view.updateAgent(robot.getLocation(), this.getAgIdBasedOnName(agentName));
+            }
+            
             return true;
         } catch (Exception e) {
             System.err.println("Error updating charging status for " + agentName + ": " + e.getMessage());
@@ -218,7 +238,7 @@ public class FactoryEnv extends Environment {
             }
             Term statusT = action.getTerm(0);
             if (!(statusT instanceof Atom)) {
-                System.err.println("update_seeking_charging_station argument must be: Status (Atom) but got: " + (statusT.getClass().getSimpleName()));
+                System.err.println("update_seeking_charging_station argument must be: Status (Atom)");
                 return false;
             }
             String status = ((Atom) statusT).toString();
@@ -227,8 +247,16 @@ public class FactoryEnv extends Environment {
                 System.err.println("Unknown robot: " + agentName);
                 return false;
             }
+            
+            // Store previous state for comparison
+            boolean previousSeekingState = robot.isSeekingChargingStation();
             robot.setSeekingChargingStation(status.equals("true"));
-            view.repaint();
+            
+            // Update view if seeking state changed
+            if (view != null && previousSeekingState != robot.isSeekingChargingStation()) {
+                view.updateAgent(robot.getLocation(), this.getAgIdBasedOnName(agentName));
+            }
+            
             return true;
         } catch (Exception e) {
             System.err.println("Error updating seeking charging station status for " + agentName + ": " + e.getMessage());
@@ -245,7 +273,7 @@ public class FactoryEnv extends Environment {
             }
             Term statusT = action.getTerm(0);
             if (!(statusT instanceof Atom)) {
-                System.err.println("update_malfunctioning_status argument must be: Status (Atom) but got: " + (statusT.getClass().getSimpleName()));
+                System.err.println("update_malfunctioning_status argument must be: Status (Atom)");
                 return false;
             }
             String status = ((Atom) statusT).toString();
@@ -254,8 +282,16 @@ public class FactoryEnv extends Environment {
                 System.err.println("Unknown robot: " + agentName);
                 return false;
             }
+            
+            // Store previous state for comparison
+            boolean previousMalfunctioningState = robot.isMalfunctioning();
             robot.setMalfunctioning(status.equals("true"));
-            view.repaint();
+            
+            // Update view if malfunction state changed
+            if (view != null && previousMalfunctioningState != robot.isMalfunctioning()) {
+                view.updateAgent(robot.getLocation(), this.getAgIdBasedOnName(agentName));
+            }
+            
             return true;
         } catch (Exception e) {
             System.err.println("Error updating malfunctioning status for " + agentName + ": " + e.getMessage());
@@ -513,9 +549,14 @@ public class FactoryEnv extends Environment {
                 System.err.println("Unknown agent: " + agName);
                 return;
             }
+            // Update the DeliveryRobot's battery level in the model
             DeliveryRobot dbot = model.getDeliveryRobotById(agentId);
             dbot.setBattery(newBatteryLevel);
-            view.repaint();
+
+            // Optionally, update the view if it exists
+            if (view != null) {
+                view.updateAgent(dbot.getLocation(), agentId);
+            }
         } catch (Exception e) {
             System.err.println("Error updating battery level for " + agName + ": " + e.getMessage());
         }

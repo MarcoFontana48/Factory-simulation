@@ -6,9 +6,12 @@ import jason.environment.grid.GridWorldModel;
 import jason.environment.grid.Location;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
 
 public class FactoryModel extends GridWorldModel {
     private Map<String, DeliveryRobot> deliveryRobots = new HashMap<>();
+    private List<ModelObserver> observers = new ArrayList<>();
 
     public static final int GSize = 13;
     public static final int OBSTACLE = 4;
@@ -25,6 +28,13 @@ public class FactoryModel extends GridWorldModel {
     // Dynamic charging station storage
     private final Map<String, Location> chargingStationLocations = new HashMap<>();
     
+    // Observer interface for model changes
+    public interface ModelObserver {
+        void onAgentUpdated(Location location, int agentId);
+        void onAgentMoved(Location oldLocation, Location newLocation, int agentId);
+        void onCellUpdated(Location location);
+    }
+    
     public FactoryModel() {
         super(FactoryModel.GSize, FactoryModel.GSize, 25);
         this.addWallsRandomly();
@@ -32,6 +42,33 @@ public class FactoryModel extends GridWorldModel {
         // Add static objects to the grid
         this.add(TRUCK, truckLocation);
         this.add(DELIVERY, deliveryLocation);
+    }
+
+    // Observer pattern methods
+    public void addObserver(ModelObserver observer) {
+        observers.add(observer);
+    }
+
+    public void removeObserver(ModelObserver observer) {
+        observers.remove(observer);
+    }
+
+    private void notifyAgentUpdated(Location location, int agentId) {
+        for (ModelObserver observer : observers) {
+            observer.onAgentUpdated(location, agentId);
+        }
+    }
+
+    private void notifyAgentMoved(Location oldLocation, Location newLocation, int agentId) {
+        for (ModelObserver observer : observers) {
+            observer.onAgentMoved(oldLocation, newLocation, agentId);
+        }
+    }
+
+    private void notifyCellUpdated(Location location) {
+        for (ModelObserver observer : observers) {
+            observer.onCellUpdated(location);
+        }
     }
 
     private void addWallsRandomly() {
@@ -45,26 +82,18 @@ public class FactoryModel extends GridWorldModel {
         }
     }
     
-    // Methods to manage dynamic charging stations
+    // Enhanced charging station methods with notifications
     public void addChargingStation(String stationName, Location location) {
         chargingStationLocations.put(stationName, location);
         this.add(CHARGING_STATION, location);
-        
-        // Update view if available
-        if (this.view != null) {
-            this.view.repaint();
-        }
+        notifyCellUpdated(location);
     }
     
     public void removeChargingStation(String stationName) {
         Location location = chargingStationLocations.remove(stationName);
         if (location != null) {
             this.remove(CHARGING_STATION, location);
-            
-            // Update view if available
-            if (this.view != null) {
-                this.view.repaint();
-            }
+            notifyCellUpdated(location);
         }
     }
     
@@ -87,6 +116,28 @@ public class FactoryModel extends GridWorldModel {
         return Math.sqrt(dx * dx + dy * dy);
     }
     
+    // Enhanced robot management with notifications
+    public void addDeliveryRobot(DeliveryRobot robot) {
+        deliveryRobots.put(robot.getName(), robot);
+        // Notify observers of new robot
+        notifyAgentUpdated(robot.getLocation(), getAgIdBasedOnName(robot.getName()));
+    }
+
+    public void updateDeliveryRobotLocation(String robotName, Location oldLocation, Location newLocation) {
+        DeliveryRobot robot = deliveryRobots.get(robotName);
+        if (robot != null) {
+            robot.setLocation(newLocation);
+            notifyAgentMoved(oldLocation, newLocation, getAgIdBasedOnName(robotName));
+        }
+    }
+
+    public void updateDeliveryRobotState(String robotName) {
+        DeliveryRobot robot = deliveryRobots.get(robotName);
+        if (robot != null) {
+            notifyAgentUpdated(robot.getLocation(), getAgIdBasedOnName(robotName));
+        }
+    }
+
     // Existing methods
     public Location getTruckLocation() {
         return truckLocation;
@@ -106,10 +157,6 @@ public class FactoryModel extends GridWorldModel {
     
     public MovementManager getMovementManager() {
         return movementManager;
-    }
-
-    public void addDeliveryRobot(DeliveryRobot robot) {
-        deliveryRobots.put(robot.getName(), robot);
     }
 
     public DeliveryRobot getDeliveryRobotById(int agentId) {
