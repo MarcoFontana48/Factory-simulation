@@ -8,7 +8,6 @@ import jason.asSemantics.TransitionSystem;
 import jason.asSemantics.Unifier;
 import jason.asSyntax.Literal;
 import jason.asSyntax.Term;
-import jason.environment.grid.Location;
 
 /**
  * Internal action to initialize a charging station in the factory environment.

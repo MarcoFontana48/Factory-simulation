@@ -1,7 +1,6 @@
 package env;
 
 import java.util.Map;
-import java.util.Random;
 
 import env.agent.DeliveryRobot;
 import jason.NoValueException;
