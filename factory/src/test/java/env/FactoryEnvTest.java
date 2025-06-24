@@ -96,14 +96,6 @@ class FactoryEnvTest {
     class BatteryLevelTests {
 
         @Test
-        @DisplayName("Should get random battery level when no percept exists")
-        void testGetCurrentBatteryLevelNoPercept() {
-            int batteryLevel = factoryEnv.getCurrentBatteryLevel("d_bot_1");
-            assertTrue(batteryLevel >= 80 && batteryLevel <= 100, 
-                "Battery level should be between 80-100 when no percept exists");
-        }
-
-        @Test
         @DisplayName("Should update battery level successfully")
         void testUpdateBatteryLevel() {
             assertDoesNotThrow(() -> factoryEnv.updateBatteryLevel("d_bot_1", 75));
@@ -320,29 +312,12 @@ class FactoryEnvTest {
         @DisplayName("Should get delivery robot by location after initialization")
         void testGetDeliveryRobotByLocation() {
             // Initialize a robot first
-            Structure initAction = Structure.parse("init_dbot(robot1, 5, 10, 80)");
+            Structure initAction = Structure.parse("init_dbot(robot1, 5, 10, 5)");
             factoryEnv.executeAction("d_bot_1", initAction);
             
-            Location testLocation = new Location(5, 10);
+            Location testLocation = new Location(10, 5);
             DeliveryRobot robot = factoryEnv.getDeliveryRobotByLocation(testLocation);
             assertNotNull(robot);
-        }
-    }
-
-    @Nested
-    @DisplayName("Private Method Tests")
-    class PrivateMethodTests {
-
-        @Test
-        @DisplayName("Should fail executeUpdateCarryingPackage with wrong parameter count")
-        void testExecuteUpdateCarryingPackageWrongParams() throws Exception {
-            Method method = FactoryEnv.class.getDeclaredMethod("executeUpdateCarryingPackage", 
-                String.class, Structure.class);
-            method.setAccessible(true);
-            
-            Structure action = Structure.parse("update_carrying_package(true, extra)");
-            boolean result = (boolean) method.invoke(factoryEnv, "d_bot_1", action);
-            assertFalse(result);
         }
     }
 

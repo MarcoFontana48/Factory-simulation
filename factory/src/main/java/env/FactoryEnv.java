@@ -44,7 +44,7 @@ public class FactoryEnv extends Environment {
     public void init(final String[] args) {
         this.model = new FactoryModel();
 
-        // Initialize GUI if requested
+        // initialize GUI if requested
         if ((args.length == 1) && args[0].equals("gui")) {
             this.view = new FactoryView(this.model);
             view.setEnvironment(this);
@@ -133,11 +133,11 @@ public class FactoryEnv extends Environment {
                 return false;
             }
             
-            // Store previous state for comparison
+            // store previous state for comparison
             boolean previousCarryingState = robot.isCarryingPackage();
             robot.setCarryingPackage(status.equals("true"));
             
-            // Only update view if state actually changed
+            // only update view if state actually changed
             if (view != null && previousCarryingState != robot.isCarryingPackage()) {
                 view.updateAgent(robot.getLocation(), this.getAgIdBasedOnName(agentName));
             }
@@ -175,11 +175,11 @@ public class FactoryEnv extends Environment {
                 return false;
             }
             
-            // Store previous state for comparison
+            // store previous state for comparison
             boolean previousHelpingState = robot.isHelpingRobot();
             robot.setHelpingRobot(status.equals("true"));
             
-            // Update view if helping state changed
+            // update view if helping state changed
             if (view != null && previousHelpingState != robot.isHelpingRobot()) {
                 view.updateAgent(robot.getLocation(), this.getAgIdBasedOnName(agentName));
             }
@@ -217,11 +217,11 @@ public class FactoryEnv extends Environment {
                 return false;
             }
             
-            // Store previous state for comparison
+            // store previous state for comparison
             boolean previousBatterySharingState = robot.isBatterySharingActive();
             robot.setBatterySharingActive(status.equals("true"));
             
-            // Update view if battery sharing state changed
+            // update view if battery sharing state changed
             if (view != null && previousBatterySharingState != robot.isBatterySharingActive()) {
                 view.updateAgent(robot.getLocation(), this.getAgIdBasedOnName(agentName));
             }
@@ -258,11 +258,11 @@ public class FactoryEnv extends Environment {
                 return false;
             }
             
-            // Store previous state for comparison
+            // store previous state for comparison
             boolean previousChargingState = robot.isCharging();
             robot.setCharging(status.equals("true"));
             
-            // Update view if charging state changed
+            // update view if charging state changed
             if (view != null && previousChargingState != robot.isCharging()) {
                 view.updateAgent(robot.getLocation(), this.getAgIdBasedOnName(agentName));
             }
@@ -300,11 +300,11 @@ public class FactoryEnv extends Environment {
                 return false;
             }
             
-            // Store previous state for comparison
+            // store previous state for comparison
             boolean previousSeekingState = robot.isSeekingChargingStation();
             robot.setSeekingChargingStation(status.equals("true"));
             
-            // Update view if seeking state changed
+            // update view if seeking state changed
             if (view != null && previousSeekingState != robot.isSeekingChargingStation()) {
                 view.updateAgent(robot.getLocation(), this.getAgIdBasedOnName(agentName));
             }
@@ -372,9 +372,9 @@ public class FactoryEnv extends Environment {
                 return false;
             }
             Term nameT = action.getTerm(0);
-            Term xT = action.getTerm(1);
-            Term yT = action.getTerm(2);
-            Term batteryT = action.getTerm(3);
+            Term xT = action.getTerm(2);
+            Term yT = action.getTerm(3);
+            Term batteryT = action.getTerm(1);
             if (!(xT instanceof NumberTerm) || !(yT instanceof NumberTerm) || !(batteryT instanceof NumberTerm) || !(nameT instanceof Atom)) {
                 System.err.println("init_dbot arguments must be: Name (Atom), X (Number), Y (Number), BatteryLevel (Number) but got: " + (nameT.getClass().getSimpleName()) + ", " + (xT.getClass().getSimpleName()) + ", " + (yT.getClass().getSimpleName()) + ", " + (batteryT.getClass().getSimpleName()));
                 return false;
@@ -383,14 +383,10 @@ public class FactoryEnv extends Environment {
             int x = (int) ((NumberTerm) xT).solve();
             int y = (int) ((NumberTerm) yT).solve();
             int batteryLevel = (int) ((NumberTerm) batteryT).solve();
-
             // register in the model
             Location loc = new Location(x, y);
             DeliveryRobot robot = new DeliveryRobot(name, batteryLevel, loc);
             model.addDeliveryRobot(robot);
-            System.out.println("Initialized delivery robot '" + name + "' at (" + x + "," + y + ") with battery " + batteryLevel);
-
-            // optionally, inform the agent
             addPercept(agentName, Structure.parse("robot_initialized(" + x + "," + y + "," + batteryLevel + ")"));
             return true;
         } catch (Exception e) {
@@ -445,7 +441,7 @@ public class FactoryEnv extends Environment {
      */
     private boolean executeMoveRandomly(String agentName, Structure action) {
         try {
-            // Parse target coordinates from action parameters
+            // parse target coordinates from action parameters
             if (action.getArity() != 2) {
                 System.err.println("move_towards_target expects 2 arguments: AgentLocationX, AgentLocationY");
                 return false;
@@ -463,21 +459,21 @@ public class FactoryEnv extends Environment {
             int agLocationY = (int) ((NumberTerm) agLocationYTerm).solve();
             Location agentLocation = new Location(agLocationX, agLocationY);
 
-            // Get agent ID from name
+            // get agent ID from name
             int agentId = this.getAgIdBasedOnName(agentName);
             if (agentId == -1) {
                 System.err.println("Unknown agent: " + agentName);
                 return false;
             }
 
-            // Execute one step movement using MovementManager
+            // execute one step movement using MovementManager
             boolean moveSuccess = model.getMovementManager().moveRandomly(agentId, agentLocation);
 
             if (moveSuccess) {
-                // Get new position after move
+                // get new position after move
                 Location newPos = model.getAgPos(agentId);
-                
-                // Update agent percepts with new position
+
+                // update agent percepts with new position
                 updateAgentPosition(agentName, newPos);
 
                 return true;
@@ -500,7 +496,7 @@ public class FactoryEnv extends Environment {
      */
     private boolean executeMoveTowardsTarget(String agName, Structure action) {
         try {
-            // Parse target coordinates from action parameters
+            // parse target coordinates from action parameters
             if (action.getArity() != 4) {
                 System.err.println("move_towards_target expects 4 arguments: TargetX, TargetY, AgentLocationX, AgentLocationY");
                 return false;
@@ -523,24 +519,24 @@ public class FactoryEnv extends Environment {
             Location destination = new Location(targetX, targetY);
             Location agentLocation = new Location(agLocationX, agLocationY);
 
-            // Get agent ID from name
+            // get agent ID from name
             int agentId = this.getAgIdBasedOnName(agName);
             if (agentId == -1) {
                 System.err.println("Unknown agent: " + agName);
                 return false;
             }
 
-            // Execute one step movement using MovementManager
+            // execute one step movement using MovementManager
             boolean moveSuccess = model.getMovementManager().moveTowards(agentId, destination, agentLocation);
 
             if (moveSuccess) {
-                // Get new position after move
+                // get new position after move
                 Location newPos = model.getAgPos(agentId);
-                
-                // Update agent percepts with new position
+
+                // update agent percepts with new position
                 updateAgentPosition(agName, newPos);
 
-                // Simulate battery consumption
+                // simulate battery consumption
                 consumeBattery(agName, 1); // 1% per move
                 return true;
             } else {
@@ -619,23 +615,23 @@ public class FactoryEnv extends Environment {
      */
     public void updateBatteryLevel(String agName, int newBatteryLevel) {
         try {
-            // Remove old battery level percept
+            // remove old battery level percept
             removePerceptsByUnif(agName, Literal.parseLiteral("batteryLevel(_)"));
             
-            // Add new battery level percept
+            // add new battery level percept
             addPercept(agName, Literal.parseLiteral("batteryLevel(" + newBatteryLevel + ")"));
 
-            // Update the model's battery level
+            // update the model's battery level
             int agentId = this.getAgIdBasedOnName(agName);
             if (agentId == -1) {
                 System.err.println("Unknown agent: " + agName);
                 return;
             }
-            // Update the DeliveryRobot's battery level in the model
+            // update the DeliveryRobot's battery level in the model
             DeliveryRobot dbot = model.getDeliveryRobotById(agentId);
             dbot.setBattery(newBatteryLevel);
 
-            // Optionally, update the view if it exists
+            // update the view if it exists
             if (view != null) {
                 view.updateAgent(dbot.getLocation(), agentId);
             }
@@ -649,14 +645,10 @@ public class FactoryEnv extends Environment {
      */
     private void consumeBattery(String agName, int consumption) {
         try {
-            // TODO: THE GET CURRENT BATTERY LEVEL NEEDS A PERCEPTION THAT IS NOT THERE YET, SO IT GOES TO THE END OF METHOD "getCurrentBatteryLevel"
-            // Get current battery level from agent's percepts
             int currentBattery = getCurrentBatteryLevel(agName);
             int newBattery = Math.max(0, currentBattery - consumption);
-            
-            // Use the centralized update method
+
             updateBatteryLevel(agName, newBattery);
-            
         } catch (Exception e) {
             System.err.println("Error consuming battery for " + agName + ": " + e.getMessage());
         }
@@ -666,22 +658,7 @@ public class FactoryEnv extends Environment {
     * get current battery level for agent
     */
     public int getCurrentBatteryLevel(String agName) {
-        try {
-            for (Literal percept : getPercepts(agName)) {
-                if (percept.getFunctor().equals("batteryLevel") && percept.getArity() == 1) {
-                    try {
-                        int batteryLevel = (int) ((NumberTerm) percept.getTerm(0)).solve();
-                        return batteryLevel;
-                    } catch (Exception e) {
-                        System.err.println("Error parsing battery level for " + agName + ": " + e.getMessage());
-                    }
-                }
-            }
-        } catch (Exception e) {
-            System.err.println("Error getting percepts for " + agName + ": " + e.getMessage());
-        }
-        Random random = new Random();
-        return random.nextInt(21) + 80; //TODO: THIS IS TEMPORARY, REMOVE THIS ONCE FIXED
+        return model.getDeliveryRobotById(this.getAgIdBasedOnName(agName)).getBattery();
     }
 
     /**
@@ -697,7 +674,7 @@ public class FactoryEnv extends Environment {
      */
     private boolean executeComputeClosestChargingStation(String agName, Structure action) {
         try {
-            // Get the parameters from the Jason action
+            // get the parameters from the Jason action
             ListTerm stationList = (ListTerm) action.getTerm(0);  // StationList
             NumberTerm robotX = (NumberTerm) action.getTerm(1);   // ThisRobotX
             NumberTerm robotY = (NumberTerm) action.getTerm(2);   // ThisRobotY
@@ -710,19 +687,19 @@ public class FactoryEnv extends Environment {
             int closestStationY = -1;
             double minDistance = Double.MAX_VALUE;
             
-            // Iterate through all stations in the list
+            // iterate through all stations in the list
             for (Term stationTerm : stationList) {
                 ListTerm station = (ListTerm) stationTerm;
                 
-                // Extract station data: [Station, X, Y]
+                // extract station data: [Station, X, Y]
                 String stationName = station.get(0).toString().replace("\"", ""); // Remove quotes
                 int stationX = (int) ((NumberTerm) station.get(1)).solve();
                 int stationY = (int) ((NumberTerm) station.get(2)).solve();
                 
-                // Calculate Euclidean distance
+                // calculate Euclidean distance
                 double distance = calculateEuclideanDistance(currentX, currentY, stationX, stationY);
                 
-                // Check if this is the closest station so far
+                // check if this is the closest station so far
                 if (distance < minDistance) {
                     minDistance = distance;
                     closestStationName = stationName;
@@ -731,12 +708,12 @@ public class FactoryEnv extends Environment {
                 }
             }
             
-            // Add the closest station as a percept for the agent
+            // add the closest station as a percept for the agent
             if (closestStationName != null) {
-                // Remove any previous closestChargingStation percept
+                // remove any previous closestChargingStation percept
                 removePerceptsByUnif(agName, Literal.parseLiteral("closestChargingStation(_, _, _)"));
-                
-                // Add the new closest station percept
+
+                // add the new closest station percept
                 addPercept(agName, Literal.parseLiteral(
                     "closestChargingStation(\"" + closestStationName + "\", " + 
                     closestStationX + ", " + closestStationY + ")"
