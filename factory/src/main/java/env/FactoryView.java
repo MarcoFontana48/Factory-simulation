@@ -202,7 +202,7 @@ public class FactoryView extends JFrame implements FactoryModel.ModelObserver {
             
             if (agentName.equals("humn_1")) {
                 // handle human agent
-                int agentId = model.getAgIdBasedOnName(agentName);
+                int agentId = FactoryUtils.getAgIdBasedOnName(agentName);
                 Location humanLoc = model.getAgPos(agentId);
                 
                 if (humanLoc != null) {
@@ -216,7 +216,7 @@ public class FactoryView extends JFrame implements FactoryModel.ModelObserver {
                 }
             } else {
                 // handle robot agents
-                int agentId = model.getAgIdBasedOnName(agentName);
+                int agentId = FactoryUtils.getAgIdBasedOnName(agentName);
                 DeliveryRobot robot = model.getDeliveryRobotById(agentId);
                 
                 if (robot != null) {
@@ -430,7 +430,7 @@ public class FactoryView extends JFrame implements FactoryModel.ModelObserver {
             // Draw delivery robots
             for (int i = 0; i < 5; i++) {
                 String robotName = "d_bot_" + (i + 1);
-                int agentId = model.getAgIdBasedOnName(robotName);
+                int agentId = FactoryUtils.getAgIdBasedOnName(robotName);
                 DeliveryRobot robot = model.getDeliveryRobotById(agentId);
                 
                 if (robot != null) {
@@ -467,7 +467,7 @@ public class FactoryView extends JFrame implements FactoryModel.ModelObserver {
          * @param g2d The Graphics2D object used for drawing.
          */
         private void drawHuman(Graphics2D g2d) {
-            int humanId = model.getAgIdBasedOnName("humn_1");
+            int humanId = FactoryUtils.getAgIdBasedOnName("humn_1");
             if (humanId != -1) {
                 // Try to get human location from the model
                 Location humanLoc = model.getAgPos(humanId);

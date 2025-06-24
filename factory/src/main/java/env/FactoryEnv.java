@@ -126,7 +126,7 @@ public class FactoryEnv extends Environment {
                 return false;
             }
             String status = ((Atom) statusT).toString();
-            DeliveryRobot robot = model.getDeliveryRobotById(this.getAgIdBasedOnName(agentName));
+            DeliveryRobot robot = model.getDeliveryRobotById(FactoryUtils.getAgIdBasedOnName(agentName));
             if (robot == null) {
                 System.err.println("Unknown robot: " + agentName);
                 return false;
@@ -138,7 +138,7 @@ public class FactoryEnv extends Environment {
             
             // only update view if state actually changed
             if (view != null && previousCarryingState != robot.isCarryingPackage()) {
-                view.updateAgent(robot.getLocation(), this.getAgIdBasedOnName(agentName));
+                view.updateAgent(robot.getLocation(), FactoryUtils.getAgIdBasedOnName(agentName));
             }
             
             return true;
@@ -168,7 +168,7 @@ public class FactoryEnv extends Environment {
                 return false;
             }
             String status = ((Atom) statusT).toString();
-            DeliveryRobot robot = model.getDeliveryRobotById(this.getAgIdBasedOnName(agentName));
+            DeliveryRobot robot = model.getDeliveryRobotById(FactoryUtils.getAgIdBasedOnName(agentName));
             if (robot == null) {
                 System.err.println("Unknown robot: " + agentName);
                 return false;
@@ -180,7 +180,7 @@ public class FactoryEnv extends Environment {
             
             // update view if helping state changed
             if (view != null && previousHelpingState != robot.isHelpingRobot()) {
-                view.updateAgent(robot.getLocation(), this.getAgIdBasedOnName(agentName));
+                view.updateAgent(robot.getLocation(), FactoryUtils.getAgIdBasedOnName(agentName));
             }
             
             return true;
@@ -210,7 +210,7 @@ public class FactoryEnv extends Environment {
                 return false;
             }
             String status = ((Atom) statusT).toString();
-            DeliveryRobot robot = model.getDeliveryRobotById(this.getAgIdBasedOnName(agentName));
+            DeliveryRobot robot = model.getDeliveryRobotById(FactoryUtils.getAgIdBasedOnName(agentName));
             if (robot == null) {
                 System.err.println("Unknown robot: " + agentName);
                 return false;
@@ -222,7 +222,7 @@ public class FactoryEnv extends Environment {
             
             // update view if battery sharing state changed
             if (view != null && previousBatterySharingState != robot.isBatterySharingActive()) {
-                view.updateAgent(robot.getLocation(), this.getAgIdBasedOnName(agentName));
+                view.updateAgent(robot.getLocation(), FactoryUtils.getAgIdBasedOnName(agentName));
             }
             
             return true;
@@ -251,7 +251,7 @@ public class FactoryEnv extends Environment {
                 return false;
             }
             String status = ((Atom) statusT).toString();
-            DeliveryRobot robot = model.getDeliveryRobotById(this.getAgIdBasedOnName(agentName));
+            DeliveryRobot robot = model.getDeliveryRobotById(FactoryUtils.getAgIdBasedOnName(agentName));
             if (robot == null) {
                 System.err.println("Unknown robot: " + agentName);
                 return false;
@@ -263,7 +263,7 @@ public class FactoryEnv extends Environment {
             
             // update view if charging state changed
             if (view != null && previousChargingState != robot.isCharging()) {
-                view.updateAgent(robot.getLocation(), this.getAgIdBasedOnName(agentName));
+                view.updateAgent(robot.getLocation(), FactoryUtils.getAgIdBasedOnName(agentName));
             }
             
             return true;
@@ -293,7 +293,7 @@ public class FactoryEnv extends Environment {
                 return false;
             }
             String status = ((Atom) statusT).toString();
-            DeliveryRobot robot = model.getDeliveryRobotById(this.getAgIdBasedOnName(agentName));
+            DeliveryRobot robot = model.getDeliveryRobotById(FactoryUtils.getAgIdBasedOnName(agentName));
             if (robot == null) {
                 System.err.println("Unknown robot: " + agentName);
                 return false;
@@ -305,7 +305,7 @@ public class FactoryEnv extends Environment {
             
             // update view if seeking state changed
             if (view != null && previousSeekingState != robot.isSeekingChargingStation()) {
-                view.updateAgent(robot.getLocation(), this.getAgIdBasedOnName(agentName));
+                view.updateAgent(robot.getLocation(), FactoryUtils.getAgIdBasedOnName(agentName));
             }
             
             return true;
@@ -334,7 +334,7 @@ public class FactoryEnv extends Environment {
                 return false;
             }
             String status = ((Atom) statusT).toString();
-            DeliveryRobot robot = model.getDeliveryRobotById(this.getAgIdBasedOnName(agentName));
+            DeliveryRobot robot = model.getDeliveryRobotById(FactoryUtils.getAgIdBasedOnName(agentName));
             if (robot == null) {
                 System.err.println("Unknown robot: " + agentName);
                 return false;
@@ -346,7 +346,7 @@ public class FactoryEnv extends Environment {
             
             // update view if malfunction state changed
             if (view != null && previousMalfunctioningState != robot.isMalfunctioning()) {
-                view.updateAgent(robot.getLocation(), this.getAgIdBasedOnName(agentName));
+                view.updateAgent(robot.getLocation(), FactoryUtils.getAgIdBasedOnName(agentName));
             }
             
             return true;
@@ -459,7 +459,7 @@ public class FactoryEnv extends Environment {
             Location agentLocation = new Location(agLocationX, agLocationY);
 
             // get agent ID from name
-            int agentId = this.getAgIdBasedOnName(agentName);
+            int agentId = FactoryUtils.getAgIdBasedOnName(agentName);
             if (agentId == -1) {
                 System.err.println("Unknown agent: " + agentName);
                 return false;
@@ -519,7 +519,7 @@ public class FactoryEnv extends Environment {
             Location agentLocation = new Location(agLocationX, agLocationY);
 
             // get agent ID from name
-            int agentId = this.getAgIdBasedOnName(agName);
+            int agentId = FactoryUtils.getAgIdBasedOnName(agName);
             if (agentId == -1) {
                 System.err.println("Unknown agent: " + agName);
                 return false;
@@ -597,7 +597,7 @@ public class FactoryEnv extends Environment {
         // Add new position percept
         addPercept(agName, Literal.parseLiteral("current_position(" + newPos.x + "," + newPos.y + ")"));
 
-        DeliveryRobot dbot = model.getDeliveryRobotById(this.getAgIdBasedOnName(agName));
+        DeliveryRobot dbot = model.getDeliveryRobotById(FactoryUtils.getAgIdBasedOnName(agName));
         if (dbot == null) {
             return;
         }
@@ -621,7 +621,7 @@ public class FactoryEnv extends Environment {
             addPercept(agName, Literal.parseLiteral("batteryLevel(" + newBatteryLevel + ")"));
 
             // update the model's battery level
-            int agentId = this.getAgIdBasedOnName(agName);
+            int agentId = FactoryUtils.getAgIdBasedOnName(agName);
             if (agentId == -1) {
                 System.err.println("Unknown agent: " + agName);
                 return;
@@ -657,7 +657,7 @@ public class FactoryEnv extends Environment {
     * get current battery level for agent
     */
     public int getCurrentBatteryLevel(String agName) {
-        return model.getDeliveryRobotById(this.getAgIdBasedOnName(agName)).getBattery();
+        return model.getDeliveryRobotById(FactoryUtils.getAgIdBasedOnName(agName)).getBattery();
     }
 
     /**
@@ -860,30 +860,5 @@ public class FactoryEnv extends Environment {
      */
     public DeliveryRobot getDeliveryRobotById(int id) {
         return model.getDeliveryRobotById(id);
-    }
-
-    /**
-     * Get the agent ID based on its name.
-     * @param agName the name of the agent
-     * @return the ID of the agent, or -1 if not found or null
-     */
-    public int getAgIdBasedOnName(String agName) {
-        if (agName == null || agName.isEmpty()) {
-            return -1;
-        }
-        return switch (agName) {
-            case "d_bot_1" -> 0;
-            case "d_bot_2" -> 1;
-            case "d_bot_3" -> 2;
-            case "d_bot_4" -> 3;
-            case "d_bot_5" -> 4;
-            case "ch_st_1" -> 5;
-            case "ch_st_2" -> 6;
-            case "ch_st_3" -> 7;
-            case "truck_1" -> 8;
-            case "deliv_A" -> 9;
-            case "humn_1" -> 10;
-            default -> -1;
-        };
     }
 }
