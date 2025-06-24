@@ -4,6 +4,7 @@ delivery_id("A").               // unique identifier for this delivery location
 delivery_position(4, 2).       // coordinates of this delivery place
 packages_received(0).           // counter for received packages
 
+// Initialize the delivery place
 +!start <-
     ?delivery_id(Id);
     ?delivery_position(X, Y);

@@ -1,6 +1,12 @@
-// HUMAN AGENT
 !start.
 
+// Human agent in the factory simulation
+// It initializes the human's starting position, moves randomly,
+// checks the status of all robots periodically, and repairs a random
+// malfunctioning robots only if all robots are malfunctioning (this
+// edge case may happen because all robots have a random
+// chance of malfunctioning every 1/2 seconds and may simultaneously
+// malfunction, even though there's a slim chance of happening).
 +!start <-
     utils.human_init;
     .belief(current_position(X, Y));
@@ -22,7 +28,7 @@
     .println("About to request status from all robots...");
     .abolish(robot_status(_, _, _, _, _, _, _, _, _, _, _, _));  // clear previous status
     .broadcast(askOne, request_status);
-    .wait(20000);  // wait n seconds for responses
+    .wait(5000);  // wait n seconds for responses
     !check_malfunctioning_robots;
     !periodic_status_check.
 
@@ -73,6 +79,8 @@
     .println("Starting to remotely repair and recharge robot ", R, " at position (", X, ", ", Y, ")");
     !repair_loop(R).
 
+// Repair loop for a robot
+// This will check the robot's battery and repair it if necessary
 +!repair_loop(RobotName) <-
     .wait(100);
     

@@ -3,6 +3,8 @@
 truck_position(8, 10).         // coordinates of this truck
 packages_handed(0).           // counter for handed packages
 
+// Initialize the truck
+// This will register the truck's position and prepare it to handle package requests
 +!start <-
     ?truck_position(X, Y);
     .println("Started at position (", X, ", ", Y, ")").

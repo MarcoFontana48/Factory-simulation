@@ -9,16 +9,37 @@ import jason.asSyntax.Atom;
 import jason.asSyntax.ListTerm;
 import jason.asSyntax.Literal;
 import jason.asSyntax.NumberTerm;
-import jason.asSyntax.StringTerm;
 import jason.asSyntax.Structure;
 import jason.asSyntax.Term;
 import jason.environment.Environment;
 import jason.environment.grid.Location;
 
+/**
+ * FactoryEnv is the main environment class for the factory simulation.
+ * It manages the state of the factory, including delivery robots, charging stations,
+ * and their interactions. It also handles actions performed by the robots and updates
+ * the environment accordingly.
+ */
 public class FactoryEnv extends Environment {
+    public static final Literal initDeliveryBot = Literal.parseLiteral("init_dbot(_,_,_,_)");
+    public static final Literal moveTowardsTarget = Literal.parseLiteral("move_towards_target(_,_,_,_)");
+    public static final Literal moveRandomly = Literal.parseLiteral("move_randomly(_,_)");
+    public static final Literal updateBatteryLevel = Literal.parseLiteral("update_battery_level(_)");
+    public static final Literal waitingReparationsDueToMalfunction = Literal.parseLiteral("waiting_reparations_due_to_malfunction(_)");
+    public static final Literal goingTowardsChargingStation = Literal.parseLiteral("going_towards_charging_station(_)");
+    public static final Literal batteryChargingUpdate = Literal.parseLiteral("battery_charging_update(_)");
+    public static final Literal movingToRobotToRepairIt = Literal.parseLiteral("moving_to_robot_to_repair_it(_)");
+    public static final Literal computeClosestChargingStation = Literal.parseLiteral("compute_closest_charging_station(_,_,_)");
+    public static final Literal computeClosestRobot = Literal.parseLiteral("compute_closest_robot(_,_,_)");
+    public static final Literal rechargingRobotAfterMalfunction = Literal.parseLiteral("recharging_robot_after_malfunction(_)");
+    public static final Literal goingTowardsDeliveryLocation = Literal.parseLiteral("going_towards_delivery_location(_)");
+
     private FactoryModel model = new FactoryModel();
     private FactoryView view;
 
+    /**
+     * Initialize the factory environment.
+     */
     @Override
     public void init(final String[] args) {
         this.model = new FactoryModel();
@@ -28,15 +49,12 @@ public class FactoryEnv extends Environment {
             this.view = new FactoryView(this.model);
             view.setEnvironment(this);
         }
-        
-        // Boot the agents' percepts
-        this.updatePercepts();
     }
 
-    void updatePercepts() {
-        // Implementation for updating percepts
-    }
-
+    /**
+     * Execute an action based on the agent's name and the action structure.
+     * This method interprets the action and updates the state of the factory accordingly.
+     */
     @Override
     public boolean executeAction(String agentName, Structure action) {
         System.out.println("[" + agentName + "] doing: " + action);
@@ -55,17 +73,17 @@ public class FactoryEnv extends Environment {
             case "update_battery_level":
                 result = executeUpdateBatteryLevel(agentName, action);
                 break;
-            case "update_malfunctioning_status":
-                result = executeUpdateMalfunctioningStatus(agentName, action);
+            case "waiting_reparations_due_to_malfunction":
+                result = executeWaitingReparationsDueToMalfunction(agentName, action);
                 break;
-            case "update_seeking_charging_station":
-                result = executeUpdateSeekingChargingStation(agentName, action);
+            case "going_towards_charging_station":
+                result = executeMovingTowardsChargingStation(agentName, action);
                 break;
-            case "update_charging":
-                result = executeUpdateCharging(agentName, action);
+            case "battery_charging_update":
+                result = executeBatteryChargingUpdate(agentName, action);
                 break;
-            case "update_helping_robot":
-                result = executeUpdateHelpingRobot(agentName, action);
+            case "moving_to_robot_to_repair_it":
+                result = executeMovingToRobotToRepairIt(agentName, action);
                 break;
             case "compute_closest_charging_station":
                 result = executeComputeClosestChargingStation(agentName, action);
@@ -76,11 +94,11 @@ public class FactoryEnv extends Environment {
             case "register_charging_station":
                 result = executeRegisterChargingStation(agentName, action);
                 break;
-            case "update_battery_sharing_active":
-                result = executeUpdateBatterySharingActive(agentName, action);
+            case "recharging_robot_after_malfunction":
+                result = executeRechargingRobotAfterMalfunction(agentName, action);
                 break;
-            case "update_carrying_package":
-                result = executeUpdateCarryingPackage(agentName, action);
+            case "going_towards_delivery_location":
+                result = executeGoingTowardsDeliveryLocation(agentName, action);
                 break;
             default:
                 System.err.println("Unknown action: " + action);
@@ -89,15 +107,23 @@ public class FactoryEnv extends Environment {
         return result;
     }
 
-    private boolean executeUpdateCarryingPackage(String agentName, Structure action) {
+    /**
+     * Handles the action of a delivery robot going towards a delivery location.
+     * It updates the model and view with the robot's carrying package status
+     * based on the provided action.
+     * @param agentName the name of the agent performing the action
+     * @param action the action structure containing the status of carrying a package
+     * @return true if the action was executed successfully, false otherwise
+     */
+    private boolean executeGoingTowardsDeliveryLocation(String agentName, Structure action) {
         try {
             if (action.getArity() != 1) {
-                System.err.println("update_carrying_package expects 1 argument: Status");
+                System.err.println("going_towards_delivery_location expects 1 argument: Status");
                 return false;
             }
             Term statusT = action.getTerm(0);
             if (!(statusT instanceof Atom)) {
-                System.err.println("update_carrying_package argument must be: Status (Atom) but got: " + (statusT.getClass().getSimpleName()));
+                System.err.println("going_towards_delivery_location argument must be: Status (Atom) but got: " + (statusT.getClass().getSimpleName()));
                 return false;
             }
             String status = ((Atom) statusT).toString();
@@ -124,15 +150,22 @@ public class FactoryEnv extends Environment {
         }
     }
 
-    private boolean executeUpdateHelpingRobot(String agentName, Structure action) {
+    /**
+     *  Handles the action of a delivery robot moving towards a target location.
+     *  It updates the robot's location in the model and view.
+     * @param agentName the name of the agent performing the action
+     * @param action the action structure containing the target location
+     * @return true if the action was executed successfully, false otherwise
+     */
+    private boolean executeMovingToRobotToRepairIt(String agentName, Structure action) {
         try {
             if (action.getArity() != 1) {
-                System.err.println("update_helping_robot expects 1 argument: Status");
+                System.err.println("moving_to_robot_to_repair_it expects 1 argument: Status");
                 return false;
             }
             Term statusT = action.getTerm(0);
             if (!(statusT instanceof Atom)) {
-                System.err.println("update_helping_robot argument must be: Status (Atom)");
+                System.err.println("moving_to_robot_to_repair_it argument must be: Status (Atom)");
                 return false;
             }
             String status = ((Atom) statusT).toString();
@@ -159,15 +192,22 @@ public class FactoryEnv extends Environment {
         }
     }
 
-    private boolean executeUpdateBatterySharingActive(String agentName, Structure action) {
+    /**
+     *  Executes the action of recharging a robot sharing
+     *  its battery with another one after a malfunction.
+     * @param agentName the name of the agent performing the action
+     * @param action the action structure containing the status of battery sharing
+     * @return true if the action was executed successfully, false otherwise
+     */
+    private boolean executeRechargingRobotAfterMalfunction(String agentName, Structure action) {
         try {
             if (action.getArity() != 1) {
-                System.err.println("update_battery_sharing_active expects 1 argument: Status");
+                System.err.println("recharging_robot_after_malfunction expects 1 argument: Status");
                 return false;
             }
             Term statusT = action.getTerm(0);
             if (!(statusT instanceof Atom)) {
-                System.err.println("update_battery_sharing_active argument must be: Status (Atom)");
+                System.err.println("recharging_robot_after_malfunction argument must be: Status (Atom)");
                 return false;
             }
             String status = ((Atom) statusT).toString();
@@ -194,15 +234,21 @@ public class FactoryEnv extends Environment {
         }
     }
 
-    private boolean executeUpdateCharging(String agentName, Structure action) {
+    /**
+     * Executes the action of charging a battery of a delivery robot, updating its battery level.
+     * @param agentName the name of the agent performing the action
+     * @param action the action structure containing the status of battery charging
+     * @return true if the action was executed successfully, false otherwise
+     */
+    private boolean executeBatteryChargingUpdate(String agentName, Structure action) {
         try {
             if (action.getArity() != 1) {
-                System.err.println("update_charging expects 1 argument: Status");
+                System.err.println("battery_charging_update expects 1 argument: Status");
                 return false;
             }
             Term statusT = action.getTerm(0);
             if (!(statusT instanceof Atom)) {
-                System.err.println("update_charging argument must be: Status (Atom)");
+                System.err.println("battery_charging_update argument must be: Status (Atom)");
                 return false;
             }
             String status = ((Atom) statusT).toString();
@@ -229,15 +275,22 @@ public class FactoryEnv extends Environment {
         }
     }
 
-    private boolean executeUpdateSeekingChargingStation(String agentName, Structure action) {
+    /**
+     * Executes the action of moving a delivery robot towards a target location.
+     * It updates the robot's location in the model and view.
+     * @param agentName the name of the agent performing the action
+     * @param action the action structure containing the target location
+     * @return true if the action was executed successfully, false otherwise
+     */
+    private boolean executeMovingTowardsChargingStation(String agentName, Structure action) {
         try {
             if (action.getArity() != 1) {
-                System.err.println("update_seeking_charging_station expects 1 argument: Status");
+                System.err.println("going_towards_charging_station expects 1 argument: Status");
                 return false;
             }
             Term statusT = action.getTerm(0);
             if (!(statusT instanceof Atom)) {
-                System.err.println("update_seeking_charging_station argument must be: Status (Atom)");
+                System.err.println("going_towards_charging_station argument must be: Status (Atom)");
                 return false;
             }
             String status = ((Atom) statusT).toString();
@@ -264,15 +317,21 @@ public class FactoryEnv extends Environment {
         }
     }
 
-    private boolean executeUpdateMalfunctioningStatus(String agentName, Structure action) {
+    /**
+     * Handles the malfunctioning status of a delivery robot waiting for reparations.
+     * @param agentName the name of the agent performing the action
+     * @param action the action structure containing the new battery level
+     * @return true if the action was executed successfully, false otherwise
+     */
+    private boolean executeWaitingReparationsDueToMalfunction(String agentName, Structure action) {
         try {
             if (action.getArity() != 1) {
-                System.err.println("update_malfunctioning_status expects 1 argument: Status");
+                System.err.println("waiting_reparations_due_to_malfunction expects 1 argument: Status");
                 return false;
             }
             Term statusT = action.getTerm(0);
             if (!(statusT instanceof Atom)) {
-                System.err.println("update_malfunctioning_status argument must be: Status (Atom)");
+                System.err.println("waiting_reparations_due_to_malfunction argument must be: Status (Atom)");
                 return false;
             }
             String status = ((Atom) statusT).toString();
@@ -282,11 +341,11 @@ public class FactoryEnv extends Environment {
                 return false;
             }
             
-            // Store previous state for comparison
+            // store previous state for comparison
             boolean previousMalfunctioningState = robot.isMalfunctioning();
             robot.setMalfunctioning(status.equals("true"));
             
-            // Update view if malfunction state changed
+            // update view if malfunction state changed
             if (view != null && previousMalfunctioningState != robot.isMalfunctioning()) {
                 view.updateAgent(robot.getLocation(), this.getAgIdBasedOnName(agentName));
             }
@@ -299,6 +358,13 @@ public class FactoryEnv extends Environment {
         }
     }
 
+    /**
+     * Executes the initialization of a delivery robot,
+     * setting its name, location, and battery level.
+     * @param agentName the name of the agent performing the action
+     * @param action the action structure containing the new battery level
+     * @return true if the action was executed successfully, false otherwise
+     */
     private boolean executeInitDeliveryRobot(String agentName, Structure action) {
         try {
             if (action.getArity() != 4) {
@@ -335,9 +401,11 @@ public class FactoryEnv extends Environment {
     }
 
     /**
-    * Execute register_charging_station action
-    * Expected action format: register_charging_station(X, Y)
-    */
+     * Executes the action of registering a charging station in the environment.
+     * @param agentName the name of the agent performing the action
+     * @param action the action structure containing the charging station location
+     * @return true if the action was executed successfully, false otherwise
+     */
     private boolean executeRegisterChargingStation(String agName, Structure action) {
         try {
             if (action.getArity() != 2) {
@@ -368,6 +436,13 @@ public class FactoryEnv extends Environment {
         }
     }
 
+    /**
+     * Execute move_randomly action, moving in a 
+     * completely random direction without any logic.
+     * @param agentName the name of the agent performing the action
+     * @param action the action structure containing the agent's current location
+     * @return true if the action was executed successfully, false otherwise
+     */
     private boolean executeMoveRandomly(String agentName, Structure action) {
         try {
             // Parse target coordinates from action parameters
@@ -418,8 +493,10 @@ public class FactoryEnv extends Environment {
     }
 
     /**
-     * Execute move_towards_target action
-     * Expected action format: move_towards_target(TargetX, TargetY)
+     * Execute move_towards_target action, moving towards a specified target location.
+     * @param agName the name of the agent performing the action
+     * @param action the action structure containing the target coordinates and agent's current location
+     * @return true if the action was executed successfully, false otherwise
      */
     private boolean executeMoveTowardsTarget(String agName, Structure action) {
         try {
@@ -454,18 +531,14 @@ public class FactoryEnv extends Environment {
             }
 
             // Execute one step movement using MovementManager
-            System.out.println("about to move towards target " + destination.x + " " + destination.y + " from " + agentLocation.x + " " + agentLocation.y);
             boolean moveSuccess = model.getMovementManager().moveTowards(agentId, destination, agentLocation);
-            System.out.println("move towards target " + destination.x + " " + destination.y + " from " + agentLocation.x + " " + agentLocation.y + " success: " + moveSuccess);
 
             if (moveSuccess) {
                 // Get new position after move
                 Location newPos = model.getAgPos(agentId);
                 
                 // Update agent percepts with new position
-                System.out.println("Updating position for " + agName + " from " + agentLocation.x + ", " + agentLocation.y + " to " + newPos.x + ", " + newPos.y);
                 updateAgentPosition(agName, newPos);
-                System.out.println("Position updated for " + agName + " from " + agentLocation.x + ", " + agentLocation.y + " to " + newPos.x + ", " + newPos.y);
 
                 // Simulate battery consumption
                 consumeBattery(agName, 1); // 1% per move
@@ -481,8 +554,10 @@ public class FactoryEnv extends Environment {
     }
 
     /**
-     * Execute update_battery_level action
-     * Expected action format: update_battery_level(NewBatteryLevel)
+     * Execute update_battery_level action, updating the agent's battery level.
+     * @param agName the name of the agent performing the action
+     * @param action the action structure containing the new battery level
+     * @return true if the action was executed successfully, false otherwise
      */
     private boolean executeUpdateBatteryLevel(String agName, Structure action) {
         if (action.getArity() != 1) {
@@ -514,7 +589,11 @@ public class FactoryEnv extends Environment {
     }
 
     /**
-     * Update agent's position percepts
+     * Update the agent's position percepts and model state.
+     * This method removes the old position percept and adds a new one based on the provided location.
+     * It also updates the DeliveryRobot's location in the model.
+     * @param agName the name of the agent whose position is being updated
+     * @param newPos the new location of the agent
      */
     private void updateAgentPosition(String agName, Location newPos) {
         // Remove old position percept
@@ -532,8 +611,12 @@ public class FactoryEnv extends Environment {
     }
     
     /**
-    * Update agent's battery level percepts (can be called from external sources like charging stations)
-    */
+     * Update the battery level of a delivery robot.
+     * This method removes the old battery level percept and adds a new one.
+     * It also updates the DeliveryRobot's battery level in the model and view if applicable.
+     * @param agName the name of the agent whose battery level is being updated
+     * @param newBatteryLevel the new battery level to set
+     */
     public void updateBatteryLevel(String agName, int newBatteryLevel) {
         try {
             // Remove old battery level percept
@@ -562,8 +645,8 @@ public class FactoryEnv extends Environment {
     }
 
     /**
-    * Simulate battery consumption (modified to use the new update method)
-    */
+     * simulates battery consumption
+     */
     private void consumeBattery(String agName, int consumption) {
         try {
             // TODO: THE GET CURRENT BATTERY LEVEL NEEDS A PERCEPTION THAT IS NOT THERE YET, SO IT GOES TO THE END OF METHOD "getCurrentBatteryLevel"
@@ -580,7 +663,7 @@ public class FactoryEnv extends Environment {
     }
 
     /**
-    * Get current battery level for agent
+    * get current battery level for agent
     */
     public int getCurrentBatteryLevel(String agName) {
         try {
@@ -588,7 +671,6 @@ public class FactoryEnv extends Environment {
                 if (percept.getFunctor().equals("batteryLevel") && percept.getArity() == 1) {
                     try {
                         int batteryLevel = (int) ((NumberTerm) percept.getTerm(0)).solve();
-                        System.out.println("Current battery level for " + agName + ": " + batteryLevel);
                         return batteryLevel;
                     } catch (Exception e) {
                         System.err.println("Error parsing battery level for " + agName + ": " + e.getMessage());
@@ -598,11 +680,21 @@ public class FactoryEnv extends Environment {
         } catch (Exception e) {
             System.err.println("Error getting percepts for " + agName + ": " + e.getMessage());
         }
-        System.out.println("Returning default battery level for " + agName);
         Random random = new Random();
         return random.nextInt(21) + 80; //TODO: THIS IS TEMPORARY, REMOVE THIS ONCE FIXED
     }
 
+    /**
+     * Execute compute_closest_charging_station action, evaluating the closest charging station
+     * based on the agent's current location and a list of available stations.
+     * This method calculates the Euclidean distance to each station and updates the agent's percepts
+     * with the closest station's name and coordinates.
+     * It does not take into account obstacles or other agents, focusing solely on the distance
+     * from the agent's current position to the charging stations.
+     * @param agName the name of the agent performing the action
+     * @param action the action structure containing the station list and agent's current location
+     * @return true if the action was executed successfully, false otherwise
+     */
     private boolean executeComputeClosestChargingStation(String agName, Structure action) {
         try {
             // Get the parameters from the Jason action
@@ -660,6 +752,17 @@ public class FactoryEnv extends Environment {
         }
     }
 
+    /**
+     * Execute compute_closest_robot action, evaluating the closest robot
+     * based on the agent's current location and a list of available robots.
+     * This method calculates the Euclidean distance to each robot and updates the agent's percepts
+     * with the closest robot's name and coordinates.
+     * It does not take into account obstacles or other agents, focusing solely on the distance
+     * from the agent's current position to the robots.
+     * @param agName the name of the agent performing the action
+     * @param action the action structure containing the robot list and agent's current location
+     * @return true if the action was executed successfully, false otherwise
+     */
     private boolean executeComputeClosestRobot(String agName, Structure action) {
         try {
             // get the parameters from the Jason action
@@ -763,15 +866,35 @@ public class FactoryEnv extends Environment {
         return model.getChargingStationLocations();
     }
 
+    /**
+     *  Get a delivery robot by its location.
+     *  This method retrieves the DeliveryRobot instance that is currently at the specified location.
+     * @param loc
+     * @return
+     */
     public DeliveryRobot getDeliveryRobotByLocation(Location loc) {
         return model.getDeliveryRobotByLocation(loc);
     }
 
+    /**
+     * Get a delivery robot by its ID.
+     * This method retrieves the DeliveryRobot instance that has the specified ID.
+     * @param id the ID of the delivery robot
+     * @return the DeliveryRobot instance with the specified ID, or null if not found
+     */
     public DeliveryRobot getDeliveryRobotById(int id) {
         return model.getDeliveryRobotById(id);
     }
 
+    /**
+     * Get the agent ID based on its name.
+     * @param agName the name of the agent
+     * @return the ID of the agent, or -1 if not found or null
+     */
     public int getAgIdBasedOnName(String agName) {
+        if (agName == null || agName.isEmpty()) {
+            return -1;
+        }
         return switch (agName) {
             case "d_bot_1" -> 0;
             case "d_bot_2" -> 1;
