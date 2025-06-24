@@ -27,7 +27,6 @@ public class FactoryEnv extends Environment {
         if ((args.length == 1) && args[0].equals("gui")) {
             this.view = new FactoryView(this.model);
             view.setEnvironment(this);
-            this.model.setView(view);
         }
         
         // Boot the agents' percepts
