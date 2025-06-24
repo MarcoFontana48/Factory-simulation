@@ -117,7 +117,7 @@ public class FactoryView extends JFrame implements FactoryModel.ModelObserver {
         addLegendItem("■ Seeking Charging", Color.ORANGE);
         addLegendItem("■ Helping Robot", Color.MAGENTA);
         addLegendItem("■ Carrying Package", Color.cyan.darker());
-        addLegendItem("■ Normal", new Color(0, 139, 139));
+        addLegendItem("■ Going to Truck", new Color(0, 139, 139));
         
         infoPanel.add(Box.createVerticalStrut(10));
     }
