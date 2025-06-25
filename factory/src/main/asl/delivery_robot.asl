@@ -132,6 +132,7 @@ delivery_completed(false).              // track if delivery is completed
     .println("ignoring redirect request - battery too low (", BatteryLevel, "%), continuing to charging station at: (", TargetX, ", ", TargetY, ")");
     if (BatteryLevel == 0) {
         +malfunctioning;
+        !step(TargetX, TargetY);
     } else {
         .abolish(moving_to_target(_, _));  
         +moving_to_target(TargetX, TargetY);
@@ -206,7 +207,7 @@ delivery_completed(false).              // track if delivery is completed
     utils.rand_malfunction(Value);  // using custom internal action
     ?current_position(X, Y);
     // slim chance of malfunctioning
-    if (Value >= 0.99) {
+    if (Value >= 0.999) {
         .println("random malfunction check currently disabled, skipping it for now...");
         ?delivery_position(DId, DX, DY);
         ?truck_position(TX, TY);

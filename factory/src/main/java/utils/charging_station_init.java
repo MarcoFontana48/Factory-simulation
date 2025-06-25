@@ -33,7 +33,7 @@ public class charging_station_init extends DefaultInternalAction {
     public Object execute(TransitionSystem ts, Unifier un, Term[] args) throws Exception {
         Agent currentAgent = ts.getAg();
         
-        addLocationBelief(currentAgent);
+        addRandomLocationBelief(currentAgent);
 
         return true;
     }
@@ -45,7 +45,7 @@ public class charging_station_init extends DefaultInternalAction {
      * @param currentAgent the agent to which the belief will be added
      * @throws RevisionFailedException if the belief cannot be added
      */
-    private void addLocationBelief(Agent currentAgent) throws RevisionFailedException {
+    private void addRandomLocationBelief(Agent currentAgent) throws RevisionFailedException {
         do {
             x = (int) (Math.random() * FactoryModel.GSize);
             y = (int) (Math.random() * FactoryModel.GSize);

@@ -30,7 +30,7 @@
     .println("About to request status from all robots...");
     .abolish(robot_status(_, _, _, _, _, _, _, _, _, _, _, _));  // clear previous status
     .broadcast(askOne, request_status);
-    .wait(5000);  // wait n seconds for responses
+    .wait(15000);  // wait n seconds for responses
     !check_malfunctioning_robots;
     !periodic_status_check.
 
