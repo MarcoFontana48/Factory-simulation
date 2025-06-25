@@ -13,6 +13,8 @@
     ?current_position(X, Y);
     .println("Started at position (", X, ", ", Y, ")");
     !!periodic_status_check;
+    .my_name(HumanName);
+    init_human(HumanName, X, Y);
     !step(X, Y).
 
 // main movement loop

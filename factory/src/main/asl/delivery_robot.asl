@@ -1,7 +1,6 @@
 !start.
 
 delivery_completed(false).              // track if delivery is completed
-askedChargingStationLocation(false).    // track if charging station location has been asked
 
 /* initialization plan */
 +!start <-
@@ -69,7 +68,7 @@ askedChargingStationLocation(false).    // track if charging station location ha
     } else {
         +saved_carrying_status(false);
     }
-    .println("saved state - target: (", TargetX, ", ", TargetY, "), carrying: ", CarryingStatus);
+    .println("saved status - target: (", TargetX, ", ", TargetY, ")");
     -moving_to_target(X, Y);
     !seekChargingStation.
 
@@ -178,6 +177,7 @@ askedChargingStationLocation(false).    // track if charging station location ha
 
 /* backup plan, that should never be reached */
 +!step(X, Y) : not malfunctioning <-
+    .println("ERROR: reached an unexpected state at (", X, ", ", Y, ")");
     !reboot_robot.
 
 /* carry a package */
@@ -206,7 +206,7 @@ askedChargingStationLocation(false).    // track if charging station location ha
     utils.rand_malfunction(Value);  // using custom internal action
     ?current_position(X, Y);
     // slim chance of malfunctioning
-    if (Value >= 0.999) {
+    if (Value >= 0.99) {
         .println("random malfunction check currently disabled, skipping it for now...");
         ?delivery_position(DId, DX, DY);
         ?truck_position(TX, TY);
@@ -242,23 +242,34 @@ askedChargingStationLocation(false).    // track if charging station location ha
     !broadcast_malfunction(X, Y, RobotName).
 
 /* broadcast malfunction to other robots */
-+!broadcast_malfunction(X, Y, RobotName) : not malfunction_ack(_, _, _) <-
++!broadcast_malfunction(X, Y, RobotName) : not malfunction_ack(_, _, _) & malfunctioning <-
     .println("broadcasting malfunction at (", X, ", ", Y, ")");
     .broadcast(askOne, robotMalfunctioning(RobotName, X, Y));
     .wait(2000);  // wait N second before retrying if no acknowledgment is received, otherwise it will evaluate the distances from the other robots and choose the closest one
     !broadcast_malfunction(X, Y, RobotName).
 
-+!broadcast_malfunction(ThisRobotX, ThisRobotY, _) : malfunction_ack(_, _, _) <-
++!broadcast_malfunction(ThisRobotX, ThisRobotY, _) : malfunction_ack(_, _, _) & malfunctioning<-
     .findall([ThatRobotName, ThatRobotX, ThatRobotY], malfunction_ack(ThatRobotName, ThatRobotX, ThatRobotY), RobotList);
     .length(RobotList, Count);
     .println("received ", Count, " malfunction acknowledgments from other robots: ", RobotList);
+    /* it is possible to comment out the line below, to let all robots that 
+       responded with an acknowledgment to help this one after they have
+       completed their current task. Leaving it on means that those robots 
+       will keep doing this, but also one robot (the closest one to this)
+       will be chosen to immediately go to this one, not waiting for task
+       completition, requiring it to adapt to this new situation. By default,
+       this line is left uncommented to see this more complex behaviour. */
     !find_closest_robot_to_help(RobotList, ThisRobotX, ThisRobotY).
+
+// every other possible case (where the robot is not malfunctioning)
++!broadcast_malfunction(_, _, _) <-
+    .println("no longer required to broadcast malfunction, resuming normal operation.").
 
 /* computes who the closest robot is to help */
 +!find_closest_robot_to_help(RobotList, ThisRobotX, ThisRobotY) <-
     compute_closest_robot(RobotList, ThisRobotX, ThisRobotY);   //the list is composed of: [["name1", X, Y], ["name2", X2, Y2], ...]
     ?closestRobot(ClosestName, ThatRobotX, ThatRobotY);
-    .println("closest robot to me, is ", ClosestName, " at (", ThatRobotX, ", ", ThatRobotY, "), sending help request to it");
+    .println("closest robot to me, is ", ClosestName, " at (", ThatRobotX, ", ", ThatRobotY, "), sending help request to it to speed up the repair process...");
     .my_name(MyName);
     .send(ClosestName, achieve, redirect_to_help(MyName, ThisRobotX, ThisRobotY)).
 
@@ -284,7 +295,7 @@ askedChargingStationLocation(false).    // track if charging station location ha
 
 /* redirect to help another robot */
 +!redirect_to_help(R, X, Y) <-
-    .println("i have been requested to help robot ", R, " at (", X, ", ", Y, ")");
+    .println("the robot ", R, " is malfunctioning, redirecting to it at (", X, ", ", Y, ") in order to repair and recharge it...");
 
     // save current state before going to help
     ?current_position(CurrentX, CurrentY);
@@ -408,7 +419,7 @@ askedChargingStationLocation(false).    // track if charging station location ha
     .wait(500);
     .println("arrived at charging station location (", CurrentX, ", ", CurrentY, ")");
     -seekingChargingStation;
-    ?knownChargingStation(Station, TargetX, TargetY);   //TODO: might get stuck if its position is not the same as the one of the ch station (bug) --- using target may might fix it
+    ?knownChargingStation(Station, TargetX, TargetY);
     !request_charge(Station, TargetX, TargetY).
 
 // Plan for handling arrival when helping a robot and close enough
@@ -475,6 +486,7 @@ askedChargingStationLocation(false).    // track if charging station location ha
     -moving_to_target(TargetX, TargetY);
     ?current_position(CurrentX, CurrentY);
     .wait(500);
+    .println("ERROR: reached target (", TargetX, ", ", TargetY, ") but not carrying a package and not at truck or delivery location.");
     !reboot_robot.
 
 // Battery sharing plan
@@ -486,7 +498,7 @@ askedChargingStationLocation(false).    // track if charging station location ha
     +battery_shared_amount(0);
     !battery_sharing_loop(RobotName).
 
-// Battery sharing loop
+// Battery sharing loop to keep charging until conditions are met
 +!battery_sharing_loop(RobotName) : battery_sharing_active(RobotName) <-
     ?batteryLevel(MyBattery);
     ?battery_shared_amount(SharedSoFar);
@@ -570,14 +582,12 @@ askedChargingStationLocation(false).    // track if charging station location ha
     
     if (.count(receiving_battery(_), N) & N > 0) {
         .println("still receiving battery from other robot(s), waiting for more units before restoring normal operation...");
-    }
-
     // check if we have enough battery to resume operation. It may happen that the robot has not enough battery to resume operation even after receiving battery from another robot or the other robot has not enough battery to share
-    if (FinalBattery > 0 & malfunctioning) {
+    } elif (FinalBattery > 0 & malfunctioning) { 
         -malfunctioning;
         .println("malfunction status cleared. Ready to resume normal operation");
+    // this may happen when the charger has not enough battery to fully recharge this robot (it recharges only if its battery is higher than 30%, if it's lower than 30 and higher than 20 it tries to charge but only shares 0 battery, so this robot does not receive any battery and has to wait for the human to help it) 
     } else {
-        // this may happen when the charger has not enough battery to fully recharge this robot (it recharges only if its battery is higher than 30%, if it's lower than 30 and higher than 20 it tries to charge but only shares 0 battery, so this robot does not receive any battery and has to wait for the human to help it) 
         .println("still not enough battery to resume operation... waiting for further assistance");
     }.
 
@@ -621,20 +631,20 @@ were starting the simulation from scratch
     .abolish(saved_target_before_help(_, _));
     -saved_carrying_status_before_help(_);
     -delivery_completed(false);              // track if delivery is completed
-    -askedChargingStationLocation(false);    // track if charging station location has been asked
 
     .drop_all_desires;
     .drop_all_intentions;
 
+    ?current_position(X, Y);
     if (not carrying_package) {
         ?truck_position(TX, TY);
+        .println("robot rebooted successfully. Currently not carrying package, so i'll start moving towards the truck...");
         !step(TX, TY);
     } else {
         ?delivery_position(DId, DX, DY);
+        .println("robot rebooted successfully. Currently carrying package, so i'll start moving towards the delivery location...");
         !step(DX, DY);
-    }
-
-    .println("robot rebooted successfully. Ready for new tasks.").
+    }.
 
 // handle battery level queries from other robots
 +?batteryLevel(Level)[source(RequesterRobot)] <-
@@ -700,12 +710,8 @@ were starting the simulation from scratch
 +!seekChargingStation <-
     +seekingChargingStation;
     .println("searching for charging stations...");
-    // there's no need to ask for charging station location if we already know it, since they won't move, so this is asked only once
-    if (askedChargingStationLocation(false)) {
-        +askedChargingStationLocation(true);
-        .broadcast(askOne, whereIsChargingStation(_));
-        .wait(500);
-    }
+    .broadcast(askOne, whereIsChargingStation(_));
+    .wait(500);
     .findall([Station, X, Y], knownChargingStation(Station, X, Y), StationList);
     .length(StationList, Count);
     if (Count > 0) {
@@ -721,6 +727,7 @@ were starting the simulation from scratch
 
 /* handle known charging station locations */
 +chargingStationLocation(X, Y)[source(Station)] <-
+    -chargingStationLocation(X, Y)[source(Station)];
     +knownChargingStation(Station, X, Y);
     .println("found charging station ", Station, " at (", X, ", ", Y, ")").
 

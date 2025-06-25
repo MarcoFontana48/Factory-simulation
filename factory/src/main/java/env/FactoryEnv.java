@@ -3,6 +3,8 @@ package env;
 import java.util.Map;
 
 import env.agent.DeliveryRobot;
+import env.agent.HumanTechnician;
+import env.agent.AbstractAgent;
 import jason.NoValueException;
 import jason.asSyntax.Atom;
 import jason.asSyntax.ListTerm;
@@ -21,6 +23,7 @@ import jason.environment.grid.Location;
  */
 public class FactoryEnv extends Environment {
     public static final Literal initDeliveryBot = Literal.parseLiteral("init_dbot(_,_,_,_)");
+    public static final Literal initHumanTechnician = Literal.parseLiteral("init_human(_,_)");
     public static final Literal moveTowardsTarget = Literal.parseLiteral("move_towards_target(_,_,_,_)");
     public static final Literal moveRandomly = Literal.parseLiteral("move_randomly(_,_)");
     public static final Literal updateBatteryLevel = Literal.parseLiteral("update_battery_level(_)");
@@ -62,6 +65,9 @@ public class FactoryEnv extends Environment {
         switch (action.getFunctor()) {
             case "init_dbot":
                 result = executeInitDeliveryRobot(agentName, action);
+                break;
+            case "init_human":
+                result = executeInitHumanTechnician(agentName, action);
                 break;
             case "move_towards_target":
                 result = executeMoveTowardsTarget(agentName, action);
@@ -126,7 +132,7 @@ public class FactoryEnv extends Environment {
                 return false;
             }
             String status = ((Atom) statusT).toString();
-            DeliveryRobot robot = model.getDeliveryRobotById(FactoryUtils.getAgIdBasedOnName(agentName));
+            DeliveryRobot robot = (DeliveryRobot) model.getAgentById(FactoryUtils.getAgIdBasedOnName(agentName));
             if (robot == null) {
                 System.err.println("Unknown robot: " + agentName);
                 return false;
@@ -168,7 +174,7 @@ public class FactoryEnv extends Environment {
                 return false;
             }
             String status = ((Atom) statusT).toString();
-            DeliveryRobot robot = model.getDeliveryRobotById(FactoryUtils.getAgIdBasedOnName(agentName));
+            DeliveryRobot robot = (DeliveryRobot) model.getAgentById(FactoryUtils.getAgIdBasedOnName(agentName));
             if (robot == null) {
                 System.err.println("Unknown robot: " + agentName);
                 return false;
@@ -210,7 +216,7 @@ public class FactoryEnv extends Environment {
                 return false;
             }
             String status = ((Atom) statusT).toString();
-            DeliveryRobot robot = model.getDeliveryRobotById(FactoryUtils.getAgIdBasedOnName(agentName));
+            DeliveryRobot robot = (DeliveryRobot) model.getAgentById(FactoryUtils.getAgIdBasedOnName(agentName));
             if (robot == null) {
                 System.err.println("Unknown robot: " + agentName);
                 return false;
@@ -251,7 +257,7 @@ public class FactoryEnv extends Environment {
                 return false;
             }
             String status = ((Atom) statusT).toString();
-            DeliveryRobot robot = model.getDeliveryRobotById(FactoryUtils.getAgIdBasedOnName(agentName));
+            DeliveryRobot robot = (DeliveryRobot) model.getAgentById(FactoryUtils.getAgIdBasedOnName(agentName));
             if (robot == null) {
                 System.err.println("Unknown robot: " + agentName);
                 return false;
@@ -293,7 +299,7 @@ public class FactoryEnv extends Environment {
                 return false;
             }
             String status = ((Atom) statusT).toString();
-            DeliveryRobot robot = model.getDeliveryRobotById(FactoryUtils.getAgIdBasedOnName(agentName));
+            DeliveryRobot robot = (DeliveryRobot) model.getAgentById(FactoryUtils.getAgIdBasedOnName(agentName));
             if (robot == null) {
                 System.err.println("Unknown robot: " + agentName);
                 return false;
@@ -334,7 +340,7 @@ public class FactoryEnv extends Environment {
                 return false;
             }
             String status = ((Atom) statusT).toString();
-            DeliveryRobot robot = model.getDeliveryRobotById(FactoryUtils.getAgIdBasedOnName(agentName));
+            DeliveryRobot robot = (DeliveryRobot) model.getAgentById(FactoryUtils.getAgIdBasedOnName(agentName));
             if (robot == null) {
                 System.err.println("Unknown robot: " + agentName);
                 return false;
@@ -396,6 +402,48 @@ public class FactoryEnv extends Environment {
     }
 
     /**
+     * Executes the initialization of a human agent.
+     */
+    private boolean executeInitHumanTechnician(String agentName, Structure action) {
+        try {
+            if (action.getArity() != 3) {
+                System.err.println("init_human expects 3 arguments: Name, X, Y");
+                return false;
+            }
+            Term nameT = action.getTerm(0);
+            Term xLoc = action.getTerm(1);
+            Term yLoc = action.getTerm(2);
+            if (!(nameT instanceof Atom) || !(xLoc instanceof NumberTerm) || !(yLoc instanceof NumberTerm)) {
+                System.err.println("init_human arguments must be: Name (Atom), X (Number), Y (Number) but got: " + (nameT.getClass().getSimpleName()) + ", " + (xLoc.getClass().getSimpleName()) + ", " + (yLoc.getClass().getSimpleName()));
+                return false;
+            }
+            String name = ((Atom) nameT).toString();
+            int x = (int) ((NumberTerm) xLoc).solve();
+            int y = (int) ((NumberTerm) yLoc).solve();
+            // register in the model
+            Location loc = new Location(x, y);
+            HumanTechnician robot = new HumanTechnician(name, loc);
+            model.addHumanTechnician(robot);
+            addPercept(agentName, Structure.parse("human_initialized(" + x + "," + y + ")"));
+            return true;
+        } catch (Exception e) {
+            System.err.println("Error initializing human agent for " + agentName + ": " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * Executes the action of registering a charging station in the environment.
+     * @param agentName the name of the agent performing the action
+        } catch (Exception e) {
+            System.err.println("Error initializing human agent for " + agentName + ": " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
      * Executes the action of registering a charging station in the environment.
      * @param agentName the name of the agent performing the action
      * @param action the action structure containing the charging station location
@@ -419,7 +467,6 @@ public class FactoryEnv extends Environment {
             // register in the model
             Location loc = new Location(x, y);
             model.addChargingStation(agName, loc);
-            System.out.println("Registered charging station '" + agName + "' at (" + x + "," + y + ")");
 
             // optionally, inform the agent
             addPercept(agName, Structure.parse("station_registered(" + x + "," + y + ")"));
@@ -466,20 +513,15 @@ public class FactoryEnv extends Environment {
             }
 
             // execute one step movement using MovementManager
-            boolean moveSuccess = model.getMovementManager().moveRandomly(agentId, agentLocation);
+            model.getMovementManager().moveRandomly(agentId, agentLocation);
 
-            if (moveSuccess) {
-                // get new position after move
-                Location newPos = model.getAgPos(agentId);
+            // get new position after move
+            Location newPos = model.getAgPos(agentId);
 
-                // update agent percepts with new position
-                updateAgentPosition(agentName, newPos);
+            // update agent with new position
+            updateAgentPosition(agentName, newPos);
 
-                return true;
-            } else {
-                System.err.println("Move failed for " + agentName + " - path might be blocked");
-                return false;
-            }
+            return true;
         } catch (Exception e) {
             System.err.println("Error executing move_randomly for " + agentName + ": " + e.getMessage());
             e.printStackTrace();
@@ -532,7 +574,7 @@ public class FactoryEnv extends Environment {
                 // get new position after move
                 Location newPos = model.getAgPos(agentId);
 
-                // update agent percepts with new position
+                // update agent with new position
                 updateAgentPosition(agName, newPos);
 
                 // simulate battery consumption
@@ -597,12 +639,12 @@ public class FactoryEnv extends Environment {
         // Add new position percept
         addPercept(agName, Literal.parseLiteral("current_position(" + newPos.x + "," + newPos.y + ")"));
 
-        DeliveryRobot dbot = model.getDeliveryRobotById(FactoryUtils.getAgIdBasedOnName(agName));
-        if (dbot == null) {
+        AbstractAgent agent = model.getAgentById(FactoryUtils.getAgIdBasedOnName(agName));
+        if (agent == null) {
             return;
         }
 
-        dbot.setLocation(newPos);
+        agent.setLocation(newPos);
     }
     
     /**
@@ -627,7 +669,7 @@ public class FactoryEnv extends Environment {
                 return;
             }
             // update the DeliveryRobot's battery level in the model
-            DeliveryRobot dbot = model.getDeliveryRobotById(agentId);
+            DeliveryRobot dbot = (DeliveryRobot) model.getAgentById(agentId);
             dbot.setBattery(newBatteryLevel);
 
             // update the view if it exists
@@ -657,7 +699,7 @@ public class FactoryEnv extends Environment {
     * get current battery level for agent
     */
     public int getCurrentBatteryLevel(String agName) {
-        return model.getDeliveryRobotById(FactoryUtils.getAgIdBasedOnName(agName)).getBattery();
+        return ((DeliveryRobot) model.getAgentById(FactoryUtils.getAgIdBasedOnName(agName))).getBattery();
     }
 
     /**
@@ -849,7 +891,7 @@ public class FactoryEnv extends Environment {
      * @return
      */
     public DeliveryRobot getDeliveryRobotByLocation(Location loc) {
-        return model.getDeliveryRobotByLocation(loc);
+        return (DeliveryRobot) model.getDeliveryRobotByLocation(loc);
     }
 
     /**
@@ -859,6 +901,6 @@ public class FactoryEnv extends Environment {
      * @return the DeliveryRobot instance with the specified ID, or null if not found
      */
     public DeliveryRobot getDeliveryRobotById(int id) {
-        return model.getDeliveryRobotById(id);
+        return (DeliveryRobot) model.getAgentById(id);
     }
 }

@@ -217,8 +217,8 @@ public class FactoryView extends JFrame implements FactoryModel.ModelObserver {
             } else {
                 // handle robot agents
                 int agentId = FactoryUtils.getAgIdBasedOnName(agentName);
-                DeliveryRobot robot = model.getDeliveryRobotById(agentId);
-                
+                DeliveryRobot robot = (DeliveryRobot) model.getAgentById(agentId);
+
                 if (robot != null) {
                     String info = String.format("%s: Pos(%d,%d) %s%s%s%s%s%s%s", 
                         agentName,
@@ -431,8 +431,8 @@ public class FactoryView extends JFrame implements FactoryModel.ModelObserver {
             for (int i = 0; i < 5; i++) {
                 String robotName = "d_bot_" + (i + 1);
                 int agentId = FactoryUtils.getAgIdBasedOnName(robotName);
-                DeliveryRobot robot = model.getDeliveryRobotById(agentId);
-                
+                DeliveryRobot robot = (DeliveryRobot) model.getAgentById(agentId);
+
                 if (robot != null) {
                     Location loc = robot.getLocation();
                     Color robotColor = getRobotColorByStatus(robot);

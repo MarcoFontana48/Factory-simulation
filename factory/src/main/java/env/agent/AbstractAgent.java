@@ -37,4 +37,9 @@ public abstract class AbstractAgent {
     public Location getLocation() {
         return location;
     }
+
+    public void setLocation(Location newPos) {
+        location.x = newPos.x;
+        location.y = newPos.y;
+    }
 }

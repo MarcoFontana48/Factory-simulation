@@ -1,6 +1,8 @@
 package env;
 
 import env.agent.DeliveryRobot;
+import env.agent.HumanTechnician;
+import env.agent.AbstractAgent;
 import env.behaviour.MovementManager;
 import jason.environment.grid.GridWorldModel;
 import jason.environment.grid.Location;
@@ -15,7 +17,7 @@ import java.util.ArrayList;
  * The model supports dynamic charging stations and delivery robots with observer notifications.
  */
 public class FactoryModel extends GridWorldModel {
-    private Map<String, DeliveryRobot> deliveryRobots = new HashMap<>();
+    private Map<String, AbstractAgent> agentsMap = new HashMap<>();
     private List<ModelObserver> observers = new ArrayList<>();
     public static final int GSize = 13;
     public static final int OBSTACLE = 4;
@@ -192,9 +194,20 @@ public class FactoryModel extends GridWorldModel {
      * @param robot the DeliveryRobot to add
      */
     public void addDeliveryRobot(DeliveryRobot robot) {
-        deliveryRobots.put(robot.getName(), robot);
+        agentsMap.put(robot.getName(), robot);
         // Notify observers of new robot
         notifyAgentUpdated(robot.getLocation(), FactoryUtils.getAgIdBasedOnName(robot.getName()));
+    }
+
+    /**
+     * Adds a new human technician to the model.
+     * The robot is added to the agentsMap and observers are notified of its initial location.
+     * @param human the HumanTechnician to add
+     */
+    public void addHumanTechnician(HumanTechnician human) {
+        agentsMap.put(human.getName(), human);
+        // Notify observers of new robot
+        notifyAgentUpdated(human.getLocation(), FactoryUtils.getAgIdBasedOnName(human.getName()));
     }
 
     /**
@@ -203,7 +216,7 @@ public class FactoryModel extends GridWorldModel {
      * @param robotName the name of the DeliveryRobot to remove
      */
     public void updateDeliveryRobotLocation(String robotName, Location oldLocation, Location newLocation) {
-        DeliveryRobot robot = deliveryRobots.get(robotName);
+        AbstractAgent robot = agentsMap.get(robotName);
         if (robot != null) {
             robot.setLocation(newLocation);
             notifyAgentMoved(oldLocation, newLocation, FactoryUtils.getAgIdBasedOnName(robotName));
@@ -216,7 +229,7 @@ public class FactoryModel extends GridWorldModel {
      * @param robotName the name of the DeliveryRobot to update
      */
     public void updateDeliveryRobotState(String robotName) {
-        DeliveryRobot robot = deliveryRobots.get(robotName);
+        AbstractAgent robot = agentsMap.get(robotName);
         if (robot != null) {
             notifyAgentUpdated(robot.getLocation(), FactoryUtils.getAgIdBasedOnName(robotName));
         }
@@ -264,12 +277,12 @@ public class FactoryModel extends GridWorldModel {
     }
 
     /**
-     * Retrieves a delivery robot by its agent ID.
-     * @param agentId the ID of the delivery robot
-     * @return the DeliveryRobot with the specified ID, or null if not found
+     * Retrieves a human technician by its agent ID.
+     * @param agentId the ID of the human technician
+     * @return the HumanTechnician with the specified ID, or null if not found
      */
-    public DeliveryRobot getDeliveryRobotById(int agentId) {
-        return deliveryRobots.get(FactoryUtils.getAgNameBasedOnId(agentId));
+    public AbstractAgent getAgentById(int agentId) {
+        return agentsMap.get(FactoryUtils.getAgNameBasedOnId(agentId));
     }
 
     /**
@@ -277,9 +290,9 @@ public class FactoryModel extends GridWorldModel {
      * @param location the location of the delivery robot
      * @return the DeliveryRobot at the specified location, or null if not found
      */
-    public DeliveryRobot getDeliveryRobotByLocation(Location location) {
-        for (DeliveryRobot robot : deliveryRobots.values()) {
-            if (robot.getLocation().equals(location)) {
+    public AbstractAgent getDeliveryRobotByLocation(Location location) {
+        for (AbstractAgent robot : agentsMap.values()) {
+            if (robot.getLocation().equals(location) && robot instanceof DeliveryRobot) {
                 return robot;
             }
         }

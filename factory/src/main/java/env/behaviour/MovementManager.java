@@ -43,8 +43,9 @@ public class MovementManager {
         Location randomMove = new Location(agentLocation.x + dx, agentLocation.y + dy);
         if (this.model.isFree(randomMove.x, randomMove.y)) {
             return tryMove(agentId, randomMove);
+        } else {
+            return tryMove(agentId, agentLocation); // If the move is blocked, stay in place
         }
-        return true;
     }
 
     /**
