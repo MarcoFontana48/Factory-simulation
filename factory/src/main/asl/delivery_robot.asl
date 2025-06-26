@@ -176,9 +176,9 @@ delivery_completed(false).              // track if delivery is completed
     .wait(500);
     !step(TargetX, TargetY).
 
-/* backup plan, that should never be reached */
+/* backup plan */
 +!step(X, Y) : not malfunctioning <-
-    .println("ERROR: reached an unexpected state at (", X, ", ", Y, ")");
+    .println("DEBUG: reached an unexpected state at (", X, ", ", Y, ")");
     !reboot_robot.
 
 /* carry a package */
@@ -481,13 +481,13 @@ delivery_completed(false).              // track if delivery is completed
     .println("arrived at delivery location. delivering package...");
     !deliver_package.
 
-/* backup plan for handling arrival at a target when not carrying a package, but should never be reached */
+/* backup plan for handling arrival at a target when not carrying a package */
 +!handleArrival(TargetX, TargetY) <-
     .println("reached destination (", TargetX, ", ", TargetY, ")");
     -moving_to_target(TargetX, TargetY);
     ?current_position(CurrentX, CurrentY);
     .wait(500);
-    .println("ERROR: reached target (", TargetX, ", ", TargetY, ") but not carrying a package and not at truck or delivery location.");
+    .println("DEBUG: reached target (", TargetX, ", ", TargetY, ") but not carrying a package and not at truck or delivery location.");
     !reboot_robot.
 
 // Battery sharing plan
@@ -673,7 +673,7 @@ were starting the simulation from scratch
             .println("now heading to delivery location (", DX, ", ", DY, ")");
             !step(DX, DY);
         } else {
-            .println("ERROR: did not receive package_received message from truck");
+            .println("DEBUG: did not receive package_received message from truck");
         }
     }.
 
@@ -694,12 +694,12 @@ were starting the simulation from scratch
         +delivery_completed(true);
         .println("package delivery process completed");
         
-        // Return to truck after successful delivery for next package
+        // return to truck after successful delivery for next package
         ?truck_position(TX, TY);
         .println("delivery completed! Now returning to truck at (", TX, ", ", TY, ") for next package");
         !step(TX, TY);
     } else {
-        .println("ERROR: cannot deliver package - not at delivery location or not carrying package");
+        .println("DEBUG: cannot deliver package - not at delivery location or not carrying package");
         !reboot_robot;
     }.
 
