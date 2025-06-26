@@ -165,7 +165,7 @@ delivery_completed(false).              // track if delivery is completed
                 ?current_position(X, Y);
                 .my_name(RobotName);
                 !broadcast_malfunction(X, Y, RobotName);
-                -rebroadcast_counter(_); // Reset counter after broadcasting
+                .abolish(rebroadcast_counter(_)); // reset counter after broadcasting
                 +rebroadcast_counter(0);
             }
         } else {
