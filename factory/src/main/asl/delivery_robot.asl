@@ -208,7 +208,7 @@ delivery_completed(false).              // track if delivery is completed
 +!monitor_malfunction_loop : monitoring_active & moving_to_target(_, _) & not malfunctioning <-
     utils.rand_malfunction(Value);  // using custom internal action
     ?current_position(X, Y);
-    /* slim chance of malfunctioning, even though it is low, it is checked frequently (and 
+    /* slim chance of malfunctioning, even though it seems low, it is checked frequently (and 
        the number of agents is high), so it still happens quite frequently */
     if (Value >= 0.9999) {
         .println("random malfunction check currently disabled, skipping it for now...");
