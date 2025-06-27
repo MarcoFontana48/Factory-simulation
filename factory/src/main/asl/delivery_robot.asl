@@ -46,7 +46,7 @@ delivery_completed(false).              // track if delivery is completed
     }
     // moves one step towards target avoiding obstacles and updating battery level
     move_towards_target(TargetX, TargetY, CurrentX, CurrentY);
-    .wait(500);
+    .wait(750);
     !step(TargetX, TargetY).
 
 // Plan 2: Handle battery depletion (malfunction case)
@@ -101,7 +101,7 @@ delivery_completed(false).              // track if delivery is completed
     }
     // moves one step towards target avoiding obstacles and updating battery level
     move_towards_target(TargetX, TargetY, CurrentX, CurrentY);
-    .wait(500);
+    .wait(750);
     !step(TargetX, TargetY).
 
 // Plan 7: Continue moving towards regular target
@@ -115,7 +115,7 @@ delivery_completed(false).              // track if delivery is completed
     }
     // moves one step towards target avoiding obstacles and updating battery level
     move_towards_target(TargetX, TargetY, CurrentX, CurrentY);
-    .wait(500);
+    .wait(750);
     !step(TargetX, TargetY).
 
 // Plan 8: Handle arrival at charging station
@@ -139,7 +139,7 @@ delivery_completed(false).              // track if delivery is completed
         .abolish(moving_to_target(_, _));  
         +moving_to_target(TargetX, TargetY);
         move_towards_target(TargetX, TargetY, CurrentX, CurrentY);
-        .wait(500);
+        .wait(750);
         !step(TargetX, TargetY);
     }.
 
@@ -175,7 +175,7 @@ delivery_completed(false).              // track if delivery is completed
             .println("rebroadcast_counter not found, initializing to 1");
             +rebroadcast_counter(1);
         }
-    .wait(500);
+    .wait(750);
     !step(TargetX, TargetY).
 
 /* backup plan */
@@ -215,14 +215,14 @@ delivery_completed(false).              // track if delivery is completed
         ?truck_position(TX, TY);
         if ((X == DX & Y == DY) | (X == TX & Y == TY)) {
             .println("skipping malfunctioning at delivery/truck position (", X, ", ", Y, ")");
-            .wait(500);
+            .wait(750);
             !monitor_malfunction_loop;
         } else {
             .println("malfunction detected at (", X, ", ", Y, ")");
             +malfunctioning;
         }
     } else {
-        .wait(500);
+        .wait(750);
         !monitor_malfunction_loop;
     }.
 
@@ -448,7 +448,7 @@ delivery_completed(false).              // track if delivery is completed
     .println("reached destination (", TargetX, ", ", TargetY, ")");
     -moving_to_target(TargetX, TargetY);
     ?current_position(CurrentX, CurrentY);
-    .wait(500);
+    .wait(750);
     .println("arrived at charging station location (", CurrentX, ", ", CurrentY, ")");
     -seekingChargingStation;
     ?knownChargingStation(Station, TargetX, TargetY);
@@ -459,7 +459,7 @@ delivery_completed(false).              // track if delivery is completed
     .println("reached destination (", TargetX, ", ", TargetY, ")");
     -moving_to_target(TargetX, TargetY);
     ?current_position(CurrentX, CurrentY);
-    .wait(500);
+    .wait(750);
     EuclideanDistanceFromMalfunctioningRobot = math.sqrt((CurrentX - MalfunctionX) * (CurrentX - MalfunctionX) + (CurrentY - MalfunctionY) * (CurrentY - MalfunctionY));
     if (.count(about_to_help_robot(_, MalfunctionX, MalfunctionY)) == 0) {
         .println("arrived at target, but it's not present: redirecting to help robot ", RobotName, " at (", MalfunctionX, ", ", MalfunctionY, ")");
@@ -481,7 +481,7 @@ delivery_completed(false).              // track if delivery is completed
     .println("reached destination (", TargetX, ", ", TargetY, ")");
     -moving_to_target(TargetX, TargetY);
     ?current_position(CurrentX, CurrentY);
-    .wait(500);
+    .wait(750);
     EuclideanDistanceFromMalfunctioningRobot = math.sqrt((CurrentX - MalfunctionX) * (CurrentX - MalfunctionX) + (CurrentY - MalfunctionY) * (CurrentY - MalfunctionY));
     .println("not close enough to robot ", RobotName, " (distance: ", EuclideanDistanceFromMalfunctioningRobot, "), i will be continuing to approach it...");
     !step(TargetX, TargetY).
@@ -491,7 +491,7 @@ delivery_completed(false).              // track if delivery is completed
     .println("reached destination (", TargetX, ", ", TargetY, ")");
     -moving_to_target(TargetX, TargetY);
     ?current_position(CurrentX, CurrentY);
-    .wait(500);
+    .wait(750);
     if (about_to_help_robot(_, _, _)) {
         ?about_to_help_robot(RobotName, HelpX, HelpY);
         !redirect_to_help(RobotName, HelpX, HelpY);
@@ -504,7 +504,7 @@ delivery_completed(false).              // track if delivery is completed
     .println("reached destination (", TargetX, ", ", TargetY, ")");
     -moving_to_target(TargetX, TargetY);
     ?current_position(CurrentX, CurrentY);
-    .wait(500);
+    .wait(750);
     if (about_to_help_robot(_, _, _)) {
         ?about_to_help_robot(RobotName, HelpX, HelpY);
         !redirect_to_help(RobotName, HelpX, HelpY);
@@ -517,7 +517,7 @@ delivery_completed(false).              // track if delivery is completed
     .println("reached destination (", TargetX, ", ", TargetY, ")");
     -moving_to_target(TargetX, TargetY);
     ?current_position(CurrentX, CurrentY);
-    .wait(500);
+    .wait(750);
     .println("DEBUG: reached target (", TargetX, ", ", TargetY, ") but not carrying a package and not at truck or delivery location.");
     !reboot_robot.
 
@@ -692,7 +692,7 @@ were starting the simulation from scratch
     if (X == TX & Y == TY) {
         .send(truck, achieve, request_package);
         .println("message sent to truck, waiting for response...");
-        .wait(500);
+        .wait(750);
 
         if (package_received) {
             .println("received package_received message");
@@ -720,7 +720,7 @@ were starting the simulation from scratch
         .my_name(RobotName);
         .println("at delivery location - requesting package delivery");
         .send(delivery_place, achieve, package_delivery_request("PKG001", RobotName));
-        .wait(500);
+        .wait(750);
         -carrying_package;
         +delivery_completed(true);
         .println("package delivery process completed");
@@ -743,7 +743,7 @@ were starting the simulation from scratch
     +seekingChargingStation;
     .println("searching for charging stations...");
     .broadcast(askOne, whereIsChargingStation(_));
-    .wait(500);
+    .wait(750);
     .findall([Station, X, Y], knownChargingStation(Station, X, Y), StationList);
     .length(StationList, Count);
     if (Count > 0) {
