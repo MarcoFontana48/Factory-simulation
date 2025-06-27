@@ -37,6 +37,7 @@ delivery_completed(false).              // track if delivery is completed
 // Plan 1a: Handle redirect to help another robot if seeking a charging station when asked to redirect to the malfunctioning robot (go to the charging station first)
 +!step(TargetX, TargetY) : not malfunctioning & redirect_to_help(_, _) & current_position(CurrentX, CurrentY) & (CurrentX \== TargetX | CurrentY \== TargetY) & not helping_robot(_, TargetX, TargetY) & seekingChargingStation & batteryLevel(BatteryLevel) & BatteryLevel > 0 & BatteryLevel < 20 <-
     .println("DEBUG step P1a");
+    ?current_position(CurrentX, CurrentY);
     ?batteryLevel(BatteryLevel);
     .println("current position: (", CurrentX, ", ", CurrentY, "), Target: (", TargetX, ", ", TargetY, "), Battery: ", BatteryLevel, "%");
     +moving_to_target(TargetX, TargetY);
