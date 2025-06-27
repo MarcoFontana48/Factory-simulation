@@ -311,7 +311,7 @@ class FactoryModelTest {
             DeliveryRobot robot = createTestRobot("d_bot_1", robotLocation);
             
             factoryModel.addDeliveryRobot(robot);
-            DeliveryRobot retrieved = factoryModel.getDeliveryRobotById(0);
+            DeliveryRobot retrieved = (DeliveryRobot) factoryModel.getAgentById(0);
             
             assertEquals(robot, retrieved);
         }
@@ -319,7 +319,7 @@ class FactoryModelTest {
         @Test
         @DisplayName("Should return null for non-existent robot ID")
         void shouldReturnNullForNonExistentRobotId() {
-            DeliveryRobot retrieved = factoryModel.getDeliveryRobotById(99);
+            DeliveryRobot retrieved = (DeliveryRobot) factoryModel.getAgentById(99);
             assertNull(retrieved);
         }
         
@@ -330,7 +330,7 @@ class FactoryModelTest {
             DeliveryRobot robot = createTestRobot("d_bot_1", robotLocation);
             
             factoryModel.addDeliveryRobot(robot);
-            DeliveryRobot retrieved = factoryModel.getDeliveryRobotByLocation(robotLocation);
+            DeliveryRobot retrieved = (DeliveryRobot) factoryModel.getDeliveryRobotByLocation(robotLocation);
             
             assertEquals(robot, retrieved);
         }
@@ -339,7 +339,7 @@ class FactoryModelTest {
         @DisplayName("Should return null for robot at non-existent location")
         void shouldReturnNullForRobotAtNonExistentLocation() {
             Location emptyLocation = new Location(5, 5);
-            DeliveryRobot retrieved = factoryModel.getDeliveryRobotByLocation(emptyLocation);
+            DeliveryRobot retrieved = (DeliveryRobot) factoryModel.getDeliveryRobotByLocation(emptyLocation);
             assertNull(retrieved);
         }
     }
@@ -414,69 +414,69 @@ class FactoryModelTest {
         @Test
         @DisplayName("Should map delivery bot names to correct IDs")
         void shouldMapDeliveryBotNamesToCorrectIds() {
-            assertEquals(0, factoryModel.getAgIdBasedOnName("d_bot_1"));
-            assertEquals(1, factoryModel.getAgIdBasedOnName("d_bot_2"));
-            assertEquals(2, factoryModel.getAgIdBasedOnName("d_bot_3"));
-            assertEquals(3, factoryModel.getAgIdBasedOnName("d_bot_4"));
-            assertEquals(4, factoryModel.getAgIdBasedOnName("d_bot_5"));
+            assertEquals(0, FactoryUtils.getAgIdBasedOnName("d_bot_1"));
+            assertEquals(1, FactoryUtils.getAgIdBasedOnName("d_bot_2"));
+            assertEquals(2, FactoryUtils.getAgIdBasedOnName("d_bot_3"));
+            assertEquals(3, FactoryUtils.getAgIdBasedOnName("d_bot_4"));
+            assertEquals(4, FactoryUtils.getAgIdBasedOnName("d_bot_5"));
         }
         
         @Test
         @DisplayName("Should map charging station names to correct IDs")
         void shouldMapChargingStationNamesToCorrectIds() {
-            assertEquals(5, factoryModel.getAgIdBasedOnName("ch_st_1"));
-            assertEquals(6, factoryModel.getAgIdBasedOnName("ch_st_2"));
-            assertEquals(7, factoryModel.getAgIdBasedOnName("ch_st_3"));
+            assertEquals(5, FactoryUtils.getAgIdBasedOnName("ch_st_1"));
+            assertEquals(6, FactoryUtils.getAgIdBasedOnName("ch_st_2"));
+            assertEquals(7, FactoryUtils.getAgIdBasedOnName("ch_st_3"));
         }
         
         @Test
         @DisplayName("Should map other agent names to correct IDs")
         void shouldMapOtherAgentNamesToCorrectIds() {
-            assertEquals(8, factoryModel.getAgIdBasedOnName("truck_1"));
-            assertEquals(9, factoryModel.getAgIdBasedOnName("deliv_A"));
-            assertEquals(10, factoryModel.getAgIdBasedOnName("humn_1"));
+            assertEquals(8, FactoryUtils.getAgIdBasedOnName("truck_1"));
+            assertEquals(9, FactoryUtils.getAgIdBasedOnName("deliv_A"));
+            assertEquals(10, FactoryUtils.getAgIdBasedOnName("humn_1"));
         }
         
         @Test
         @DisplayName("Should return -1 for unknown agent names")
         void shouldReturnMinusOneForUnknownAgentNames() {
-            assertEquals(-1, factoryModel.getAgIdBasedOnName("unknown_agent"));
-            assertEquals(-1, factoryModel.getAgIdBasedOnName(""));
-            assertEquals(-1, factoryModel.getAgIdBasedOnName(null));
+            assertEquals(-1, FactoryUtils.getAgIdBasedOnName("unknown_agent"));
+            assertEquals(-1, FactoryUtils.getAgIdBasedOnName(""));
+            assertEquals(-1, FactoryUtils.getAgIdBasedOnName(null));
         }
         
         @Test
         @DisplayName("Should map IDs to correct delivery bot names")
         void shouldMapIdsToCorrectDeliveryBotNames() {
-            assertEquals("d_bot_1", factoryModel.getAgNameBasedOnId(0));
-            assertEquals("d_bot_2", factoryModel.getAgNameBasedOnId(1));
-            assertEquals("d_bot_3", factoryModel.getAgNameBasedOnId(2));
-            assertEquals("d_bot_4", factoryModel.getAgNameBasedOnId(3));
-            assertEquals("d_bot_5", factoryModel.getAgNameBasedOnId(4));
+            assertEquals("d_bot_1", FactoryUtils.getAgNameBasedOnId(0));
+            assertEquals("d_bot_2", FactoryUtils.getAgNameBasedOnId(1));
+            assertEquals("d_bot_3", FactoryUtils.getAgNameBasedOnId(2));
+            assertEquals("d_bot_4", FactoryUtils.getAgNameBasedOnId(3));
+            assertEquals("d_bot_5", FactoryUtils.getAgNameBasedOnId(4));
         }
         
         @Test
         @DisplayName("Should map IDs to correct charging station names")
         void shouldMapIdsToCorrectChargingStationNames() {
-            assertEquals("ch_st_1", factoryModel.getAgNameBasedOnId(5));
-            assertEquals("ch_st_2", factoryModel.getAgNameBasedOnId(6));
-            assertEquals("ch_st_3", factoryModel.getAgNameBasedOnId(7));
+            assertEquals("ch_st_1", FactoryUtils.getAgNameBasedOnId(5));
+            assertEquals("ch_st_2", FactoryUtils.getAgNameBasedOnId(6));
+            assertEquals("ch_st_3", FactoryUtils.getAgNameBasedOnId(7));
         }
         
         @Test
         @DisplayName("Should map IDs to correct other agent names")
         void shouldMapIdsToCorrectOtherAgentNames() {
-            assertEquals("truck_1", factoryModel.getAgNameBasedOnId(8));
-            assertEquals("deliv_A", factoryModel.getAgNameBasedOnId(9));
-            assertEquals("humn_1", factoryModel.getAgNameBasedOnId(10));
+            assertEquals("truck_1", FactoryUtils.getAgNameBasedOnId(8));
+            assertEquals("deliv_A", FactoryUtils.getAgNameBasedOnId(9));
+            assertEquals("humn_1", FactoryUtils.getAgNameBasedOnId(10));
         }
         
         @Test
         @DisplayName("Should return unknown for invalid IDs")
         void shouldReturnUnknownForInvalidIds() {
-            assertEquals("unknown", factoryModel.getAgNameBasedOnId(-1));
-            assertEquals("unknown", factoryModel.getAgNameBasedOnId(99));
-            assertEquals("unknown", factoryModel.getAgNameBasedOnId(Integer.MAX_VALUE));
+            assertEquals("unknown", FactoryUtils.getAgNameBasedOnId(-1));
+            assertEquals("unknown", FactoryUtils.getAgNameBasedOnId(99));
+            assertEquals("unknown", FactoryUtils.getAgNameBasedOnId(Integer.MAX_VALUE));
         }
         
         @Test
@@ -486,10 +486,9 @@ class FactoryModelTest {
                                  "ch_st_1", "ch_st_2", "ch_st_3", "truck_1", "deliv_A", "humn_1"};
             
             for (String name : knownNames) {
-                int id = factoryModel.getAgIdBasedOnName(name);
-                String mappedBackName = factoryModel.getAgNameBasedOnId(id);
-                assertEquals(name, mappedBackName, 
-                    "Bidirectional mapping failed for: " + name);
+                int id = FactoryUtils.getAgIdBasedOnName(name);
+                String mappedBackName = FactoryUtils.getAgNameBasedOnId(id);
+                assertEquals(name, mappedBackName, "Bidirectional mapping failed for: " + name);
             }
         }
     }

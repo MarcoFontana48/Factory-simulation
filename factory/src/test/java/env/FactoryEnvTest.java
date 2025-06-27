@@ -74,20 +74,20 @@ class FactoryEnvTest {
         })
         @DisplayName("Should return correct agent ID for valid agent names")
         void testGetAgIdBasedOnNameValid(String agentName, int expectedId) {
-            assertEquals(expectedId, factoryEnv.getAgIdBasedOnName(agentName));
+            assertEquals(expectedId, FactoryUtils.getAgIdBasedOnName(agentName));
         }
 
         @ParameterizedTest
         @ValueSource(strings = {"invalid_agent", "d_bot_6", "", "null", "random_name"})
         @DisplayName("Should return -1 for invalid agent names")
         void testGetAgIdBasedOnNameInvalid(String agentName) {
-            assertEquals(-1, factoryEnv.getAgIdBasedOnName(agentName));
+            assertEquals(-1, FactoryUtils.getAgIdBasedOnName(agentName));
         }
 
         @Test
         @DisplayName("Should return -1 for null agent name")
         void testGetAgIdBasedOnNameNull() {
-            assertEquals(-1, factoryEnv.getAgIdBasedOnName(null));
+            assertEquals(-1, FactoryUtils.getAgIdBasedOnName(null));
         }
     }
 
@@ -182,17 +182,17 @@ class FactoryEnvTest {
         }
 
         @Test
-        @DisplayName("Should handle init_dbot action with correct parameters")
+        @DisplayName("Should handle register_dbot action with correct parameters")
         void testExecuteActionInitDbot() {
-            Structure initAction = Structure.parse("init_dbot(robot1, 5, 10, 80)");
+            Structure initAction = Structure.parse("register_dbot(robot1, 5, 10, 80)");
             boolean result = factoryEnv.executeAction("d_bot_1", initAction);
             assertTrue(result);
         }
 
         @Test
-        @DisplayName("Should fail init_dbot action with incorrect parameter count")
+        @DisplayName("Should fail register_dbot action with incorrect parameter count")
         void testExecuteActionInitDbotWrongParams() {
-            Structure initAction = Structure.parse("init_dbot(robot1, 5)");
+            Structure initAction = Structure.parse("register_dbot(robot1, 5)");
             boolean result = factoryEnv.executeAction("d_bot_1", initAction);
             assertFalse(result);
         }
@@ -294,7 +294,7 @@ class FactoryEnvTest {
         @DisplayName("Should get delivery robot by ID after initialization")
         void testGetDeliveryRobotById() {
             // Initialize a robot first
-            Structure initAction = Structure.parse("init_dbot(robot1, 5, 10, 80)");
+            Structure initAction = Structure.parse("register_dbot(robot1, 5, 10, 80)");
             factoryEnv.executeAction("d_bot_1", initAction);
             
             DeliveryRobot robot = factoryEnv.getDeliveryRobotById(0);
@@ -312,7 +312,7 @@ class FactoryEnvTest {
         @DisplayName("Should get delivery robot by location after initialization")
         void testGetDeliveryRobotByLocation() {
             // Initialize a robot first
-            Structure initAction = Structure.parse("init_dbot(robot1, 5, 10, 5)");
+            Structure initAction = Structure.parse("register_dbot(robot1, 5, 10, 5)");
             factoryEnv.executeAction("d_bot_1", initAction);
             
             Location testLocation = new Location(10, 5);
@@ -328,7 +328,7 @@ class FactoryEnvTest {
         @Test
         @DisplayName("Should handle null agent name gracefully")
         void testNullAgentName() {
-            Structure action = Structure.parse("init_dbot(robot1, 5, 2, 5)");
+            Structure action = Structure.parse("register_dbot(robot1, 5, 2, 5)");
             assertDoesNotThrow(() -> factoryEnv.executeAction(null, action));
         }
 
@@ -342,7 +342,7 @@ class FactoryEnvTest {
         @DisplayName("Should handle malformed action parameters gracefully")
         void testMalformedActionParameters() {
             // Test with string instead of number
-            Structure malformedAction = Structure.parse("init_dbot(robot1, \"five\", 1, 80)");
+            Structure malformedAction = Structure.parse("register_dbot(robot1, \"five\", 1, 80)");
             boolean result = factoryEnv.executeAction("d_bot_1", malformedAction);
             assertFalse(result);
         }
@@ -355,7 +355,7 @@ class FactoryEnvTest {
         @Test
         @DisplayName("Should handle zero coordinates")
         void testZeroCoordinates() {
-            Structure initAction = Structure.parse("init_dbot(robot1, 0, 0, 50)");
+            Structure initAction = Structure.parse("register_dbot(robot1, 0, 0, 50)");
             boolean result = factoryEnv.executeAction("d_bot_1", initAction);
             assertTrue(result);
         }
@@ -363,7 +363,7 @@ class FactoryEnvTest {
         @Test
         @DisplayName("Should handle maximum integer coordinates")
         void testMaxIntegerCoordinates() {
-            Structure initAction = Structure.parse("init_dbot(robot1, " + Integer.MAX_VALUE + ", " + Integer.MAX_VALUE + ", 100)");
+            Structure initAction = Structure.parse("register_dbot(robot1, " + Integer.MAX_VALUE + ", " + Integer.MAX_VALUE + ", 100)");
             boolean result = factoryEnv.executeAction("d_bot_1", initAction);
             assertTrue(result);
         }
@@ -371,7 +371,7 @@ class FactoryEnvTest {
         @Test
         @DisplayName("Should handle negative coordinates")
         void testNegativeCoordinates() {
-            Structure initAction = Structure.parse("init_dbot(robot1, -10, -20, 75)");
+            Structure initAction = Structure.parse("register_dbot(robot1, -10, -20, 75)");
             boolean result = factoryEnv.executeAction("d_bot_1", initAction);
             assertTrue(result);
         }
@@ -379,9 +379,9 @@ class FactoryEnvTest {
         @Test
         @DisplayName("Should handle boundary battery levels")
         void testBoundaryBatteryLevels() {
-            Structure initAction0 = Structure.parse("init_dbot(robot1, 5, 10, 0)");
-            Structure initAction100 = Structure.parse("init_dbot(robot2, 15, 20, 100)");
-            
+            Structure initAction0 = Structure.parse("register_dbot(robot1, 5, 10, 0)");
+            Structure initAction100 = Structure.parse("register_dbot(robot2, 15, 20, 100)");
+
             assertTrue(factoryEnv.executeAction("d_bot_1", initAction0));
             assertTrue(factoryEnv.executeAction("d_bot_2", initAction100));
         }
