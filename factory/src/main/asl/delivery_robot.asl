@@ -14,13 +14,14 @@ delivery_completed(false).              // track if delivery is completed
     .println("truck is at: (", TX, ", ", TY, ")");
     .println("delivery location is: (", DX, ", ", DY, ")");
     .my_name(RobotName);
-    init_dbot(RobotName, BatteryLevel, X, Y);
+    register_dbot(RobotName, BatteryLevel, X, Y);
     !step(TX, TY).
 
-/* multiple plans to handle different possible scenarios */
+/* 'step' contains the main logic of the robot and recursively calls itself,
+    it contains multiple plans to handle different possible scenarios */
 // Plan 1: Handle redirect to help another robot
 +!step(TargetX, TargetY) : not malfunctioning & redirect_to_help(HelpX, HelpY) & not seekingChargingStation & batteryLevel(BatteryLevel) & BatteryLevel > 20 <-
-    .println("DEBUG P1");
+    .println("DEBUG step P1");
     ?current_position(CurrentX, CurrentY);
     ?batteryLevel(BatteryLevel);
     -redirect_to_help(HelpX, HelpY);
@@ -35,7 +36,7 @@ delivery_completed(false).              // track if delivery is completed
 
 // Plan 1a: Handle redirect to help another robot if seeking a charging station when asked to redirect to the malfunctioning robot (go to the charging station first)
 +!step(TargetX, TargetY) : not malfunctioning & redirect_to_help(_, _) & current_position(CurrentX, CurrentY) & (CurrentX \== TargetX | CurrentY \== TargetY) & not helping_robot(_, TargetX, TargetY) & seekingChargingStation & batteryLevel(BatteryLevel) & BatteryLevel > 0 & BatteryLevel < 20 <-
-    .println("DEBUG P1a");
+    .println("DEBUG step P1a");
     ?batteryLevel(BatteryLevel);
     .println("current position: (", CurrentX, ", ", CurrentY, "), Target: (", TargetX, ", ", TargetY, "), Battery: ", BatteryLevel, "%");
     +moving_to_target(TargetX, TargetY);
@@ -49,7 +50,7 @@ delivery_completed(false).              // track if delivery is completed
 
 // Plan 2: Handle battery depletion (malfunction case)
 +!step(TargetX, TargetY) : not malfunctioning & not redirect_to_help(_, _) & batteryLevel(BatteryLevel) & BatteryLevel <= 0 <-
-    .println("Debug P2");
+    .println("Debug step P2");
     ?current_position(CurrentX, CurrentY);
     .println("current position: (", CurrentX, ", ", CurrentY, "), Target: (", TargetX, ", ", TargetY, "), Battery: ", BatteryLevel, "%");
     +malfunctioning;
@@ -57,7 +58,7 @@ delivery_completed(false).              // track if delivery is completed
 
 // Plan 3: Handle low battery (seek charging station)
 +!step(TargetX, TargetY) : not malfunctioning & not redirect_to_help(_, _) & batteryLevel(BatteryLevel) & BatteryLevel < 20 & not seekingChargingStation & not charging <-
-    .println("Debug P3");
+    .println("Debug step P3");
     ?current_position(CurrentX, CurrentY);
     .println("current position: (", CurrentX, ", ", CurrentY, "), Target: (", TargetX, ", ", TargetY, "), Battery: ", BatteryLevel, "%");
     .println("battery level is low (", BatteryLevel, "%). Going to nearest charging station.");
@@ -74,7 +75,7 @@ delivery_completed(false).              // track if delivery is completed
 
 // Plan 4: Handle arrival at regular target
 +!step(TargetX, TargetY) : not malfunctioning & not redirect_to_help(_, _) & current_position(CurrentX, CurrentY) & CurrentX == TargetX & CurrentY == TargetY & not helping_robot(_, TargetX, TargetY) <-
-    .println("Debug P4");
+    .println("Debug step P4");
     ?batteryLevel(BatteryLevel);
     .println("current position: (", CurrentX, ", ", CurrentY, "), Target: (", TargetX, ", ", TargetY, "), Battery: ", BatteryLevel, "%");
     !!stop_malfunction_monitoring;
@@ -82,7 +83,7 @@ delivery_completed(false).              // track if delivery is completed
 
 // Plan 5: Handle arrival when helping a robot (adjacent check)
 +!step(TargetX, TargetY) : not malfunctioning & not redirect_to_help(_, _) & helping_robot(_, HelpX, HelpY) & TargetX == HelpX & TargetY == HelpY & current_position(CurrentX, CurrentY) & math.sqrt((CurrentX - TargetX) * (CurrentX - TargetX) + (CurrentY - TargetY) * (CurrentY - TargetY)) <= 1.5 <-
-    .println("Debug P5");
+    .println("Debug step P5");
     ?batteryLevel(BatteryLevel);
     .println("current position: (", CurrentX, ", ", CurrentY, "), Target: (", TargetX, ", ", TargetY, "), Battery: ", BatteryLevel, "%");
     !!stop_malfunction_monitoring;
@@ -90,7 +91,7 @@ delivery_completed(false).              // track if delivery is completed
 
 // Plan 6: Continue moving when helping a robot (not yet adjacent)
 +!step(TargetX, TargetY) : not malfunctioning & not redirect_to_help(_, _) & helping_robot(_, HelpX, HelpY) & TargetX == HelpX & TargetY == HelpY & current_position(CurrentX, CurrentY) & math.sqrt((CurrentX - TargetX) * (CurrentX - TargetX) + (CurrentY - TargetY) * (CurrentY - TargetY)) > 1.5 <-
-    .println("Debug P6");
+    .println("Debug step P6");
     ?batteryLevel(BatteryLevel);
     .println("current position: (", CurrentX, ", ", CurrentY, "), Target: (", TargetX, ", ", TargetY, "), Battery: ", BatteryLevel, "%");
     +moving_to_target(TargetX, TargetY);
@@ -104,7 +105,7 @@ delivery_completed(false).              // track if delivery is completed
 
 // Plan 7: Continue moving towards regular target
 +!step(TargetX, TargetY) : not malfunctioning & not redirect_to_help(_, _) & current_position(CurrentX, CurrentY) & (CurrentX \== TargetX | CurrentY \== TargetY) & not helping_robot(_, TargetX, TargetY) <-
-    .println("Debug P7");
+    .println("Debug step P7");
     ?batteryLevel(BatteryLevel);
     .println("current position: (", CurrentX, ", ", CurrentY, "), Target: (", TargetX, ", ", TargetY, "), Battery: ", BatteryLevel, "%");
     +moving_to_target(TargetX, TargetY);
@@ -118,7 +119,7 @@ delivery_completed(false).              // track if delivery is completed
 
 // Plan 8: Handle arrival at charging station
 +!step(TargetX, TargetY) : not malfunctioning & seekingChargingStation & current_position(CurrentX, CurrentY) & CurrentX == TargetX & CurrentY == TargetY <-
-    .println("Debug P8");
+    .println("Debug step P8");
     ?batteryLevel(BatteryLevel);
     .println("arrived at charging station at (", CurrentX, ", ", CurrentY, "), Battery: ", BatteryLevel, "%");
     !!stop_malfunction_monitoring;
@@ -126,7 +127,7 @@ delivery_completed(false).              // track if delivery is completed
 
 // Plan 9: Handle redirect while seeking charging station but should prioritize charging
 +!step(TargetX, TargetY) : not malfunctioning & redirect_to_help(_, _) & seekingChargingStation & batteryLevel(BatteryLevel) & BatteryLevel <= 20 <-
-    .println("DEBUG P9");
+    .println("DEBUG step P9");
     ?batteryLevel(BatteryLevel);
     ?current_position(CurrentX, CurrentY);
     .println("ignoring redirect request - battery too low (", BatteryLevel, "%), continuing to charging station at: (", TargetX, ", ", TargetY, ")");
@@ -361,13 +362,42 @@ delivery_completed(false).              // track if delivery is completed
 
 // Sub-plan for handling robot help when it's not ourselves
 +!handle_robot_help(RobotName, MyName, MalfunctionX, MalfunctionY) : RobotName \== MyName <-
-    // Check if robot is still malfunctioning
+    // check if robot is still malfunctioning
     .send(RobotName, askOne, malfunctioning, Reply);
+    // check position and malfunction status
     !process_malfunction_check(RobotName, Reply, MalfunctionX, MalfunctionY).
 
-// Process the reply from the malfunctioning check
+// process the reply from the malfunctioning check - robot is still malfunctioning
 +!process_malfunction_check(RobotName, malfunctioning, MalfunctionX, MalfunctionY) <-
-    .println("Robot ", RobotName, " is still malfunctioning. Starting battery sharing.");
+    // now check if the robot is still at the expected position
+    .send(RobotName, askOne, current_position(X, Y), PositionReply);
+    !verify_position_and_help(RobotName, PositionReply, MalfunctionX, MalfunctionY).
+
+// Robot is at the expected position and still malfunctioning - proceed with help
++!verify_position_and_help(RobotName, current_position(X, Y), MalfunctionX, MalfunctionY) : X == MalfunctionX & Y == MalfunctionY <-
+    .println("Robot ", RobotName, " is still malfunctioning at position (", X, ",", Y, "). Starting battery sharing.");
+    !start_battery_sharing(RobotName);
+    .println("Finished helping robot ", RobotName, ". Returning to previous task.");
+    -about_to_help_robot(RobotName, MalfunctionX, MalfunctionY);
+    .abolish(helping_robot(_, _, _)); // remove the helping robot belief
+    ?saved_target_before_help(SavedX, SavedY);
+    !restore_carrying_status;
+    -saved_target_before_help(SavedX, SavedY);
+    !step(SavedX, SavedY).
+
+// Robot has moved from the expected position - no help needed
++!verify_position_and_help(RobotName, current_position(X, Y), MalfunctionX, MalfunctionY) : (X \== MalfunctionX | Y \== MalfunctionY) <-
+    .println("Robot ", RobotName, " has moved from position (", MalfunctionX, ",", MalfunctionY, ") to (", X, ",", Y, "). No help needed.");
+    -about_to_help_robot(RobotName, MalfunctionX, MalfunctionY);
+    .abolish(helping_robot(_, _, _)); // remove the helping robot belief
+    ?saved_target_before_help(SavedX, SavedY);
+    !restore_carrying_status;
+    -saved_target_before_help(SavedX, SavedY);
+    !step(SavedX, SavedY).
+
+// Handle case when position query fails (robot might be completely down)
++!verify_position_and_help(RobotName, PositionReply, MalfunctionX, MalfunctionY) : PositionReply \== current_position(_, _) <-
+    .println("Could not get position from robot ", RobotName, ". Assuming it's still at malfunction location and proceeding with help.");
     !start_battery_sharing(RobotName);
     .println("Finished helping robot ", RobotName, ". Returning to previous task.");
     -about_to_help_robot(RobotName, MalfunctionX, MalfunctionY);

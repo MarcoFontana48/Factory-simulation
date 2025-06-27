@@ -22,8 +22,8 @@ import jason.environment.grid.Location;
  * the environment accordingly.
  */
 public class FactoryEnv extends Environment {
-    public static final Literal initDeliveryBot = Literal.parseLiteral("init_dbot(_,_,_,_)");
-    public static final Literal initHumanTechnician = Literal.parseLiteral("init_human(_,_)");
+    public static final Literal initDeliveryBot = Literal.parseLiteral("register_dbot(_,_,_,_)");
+    public static final Literal initHumanTechnician = Literal.parseLiteral("register_human(_,_)");
     public static final Literal moveTowardsTarget = Literal.parseLiteral("move_towards_target(_,_,_,_)");
     public static final Literal moveRandomly = Literal.parseLiteral("move_randomly(_,_)");
     public static final Literal updateBatteryLevel = Literal.parseLiteral("update_battery_level(_)");
@@ -63,10 +63,10 @@ public class FactoryEnv extends Environment {
         boolean result = false;
 
         switch (action.getFunctor()) {
-            case "init_dbot":
+            case "register_dbot":
                 result = executeInitDeliveryRobot(agentName, action);
                 break;
-            case "init_human":
+            case "register_human":
                 result = executeInitHumanTechnician(agentName, action);
                 break;
             case "move_towards_target":
@@ -373,7 +373,7 @@ public class FactoryEnv extends Environment {
     private boolean executeInitDeliveryRobot(String agentName, Structure action) {
         try {
             if (action.getArity() != 4) {
-                System.err.println("init_dbot expects 4 arguments: Name, X, Y, BatteryLevel");
+                System.err.println("register_dbot expects 4 arguments: Name, X, Y, BatteryLevel");
                 return false;
             }
             Term nameT = action.getTerm(0);
@@ -381,7 +381,7 @@ public class FactoryEnv extends Environment {
             Term yT = action.getTerm(3);
             Term batteryT = action.getTerm(1);
             if (!(xT instanceof NumberTerm) || !(yT instanceof NumberTerm) || !(batteryT instanceof NumberTerm) || !(nameT instanceof Atom)) {
-                System.err.println("init_dbot arguments must be: Name (Atom), X (Number), Y (Number), BatteryLevel (Number) but got: " + (nameT.getClass().getSimpleName()) + ", " + (xT.getClass().getSimpleName()) + ", " + (yT.getClass().getSimpleName()) + ", " + (batteryT.getClass().getSimpleName()));
+                System.err.println("register_dbot arguments must be: Name (Atom), X (Number), Y (Number), BatteryLevel (Number) but got: " + (nameT.getClass().getSimpleName()) + ", " + (xT.getClass().getSimpleName()) + ", " + (yT.getClass().getSimpleName()) + ", " + (batteryT.getClass().getSimpleName()));
                 return false;
             }
             String name = ((Atom) nameT).toString();
@@ -407,14 +407,14 @@ public class FactoryEnv extends Environment {
     private boolean executeInitHumanTechnician(String agentName, Structure action) {
         try {
             if (action.getArity() != 3) {
-                System.err.println("init_human expects 3 arguments: Name, X, Y");
+                System.err.println("register_human expects 3 arguments: Name, X, Y");
                 return false;
             }
             Term nameT = action.getTerm(0);
             Term xLoc = action.getTerm(1);
             Term yLoc = action.getTerm(2);
             if (!(nameT instanceof Atom) || !(xLoc instanceof NumberTerm) || !(yLoc instanceof NumberTerm)) {
-                System.err.println("init_human arguments must be: Name (Atom), X (Number), Y (Number) but got: " + (nameT.getClass().getSimpleName()) + ", " + (xLoc.getClass().getSimpleName()) + ", " + (yLoc.getClass().getSimpleName()));
+                System.err.println("register_human arguments must be: Name (Atom), X (Number), Y (Number) but got: " + (nameT.getClass().getSimpleName()) + ", " + (xLoc.getClass().getSimpleName()) + ", " + (yLoc.getClass().getSimpleName()));
                 return false;
             }
             String name = ((Atom) nameT).toString();
