@@ -13,7 +13,7 @@ import java.util.Map;
  * FactoryView represents the graphical user interface for the factory simulation.
  * It displays the grid, robot information, and system status.
  */
-public class FactoryView extends JFrame implements FactoryModel.ModelObserver {
+public class FactoryView extends JFrame implements ModelObserver {
     private static final int CELL_SIZE = 40;
     private static final Color BACKGROUND_COLOR = Color.white;
     private static final Color GRID_COLOR = Color.gray.brighter();

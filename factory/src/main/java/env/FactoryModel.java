@@ -32,16 +32,6 @@ public class FactoryModel extends GridWorldModel {
     private final Map<String, Location> chargingStationLocations = new HashMap<>();
     
     /**
-     * ModelObserver interface for observing changes in the FactoryModel.
-     * Observers can implement this interface to receive updates on agent movements and cell updates.
-     */
-    public interface ModelObserver {
-        void onAgentUpdated(Location location, int agentId);
-        void onAgentMoved(Location oldLocation, Location newLocation, int agentId);
-        void onCellUpdated(Location location);
-    }
-
-    /**
      * FactoryModel constructor initializes the grid and adds static objects.
      */
     public FactoryModel() {
