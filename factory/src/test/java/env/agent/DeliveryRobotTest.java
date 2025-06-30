@@ -19,14 +19,16 @@ public class DeliveryRobotTest {
 
     @Test
     public void testInitialValues() {
-        assertEquals(50, robot.getBattery());
-        assertEquals(initialLocation, robot.getLocation());
-        assertFalse(robot.isCarryingPackage());
-        assertFalse(robot.isMalfunctioning());
-        assertFalse(robot.isCharging());
-        assertFalse(robot.isSeekingChargingStation());
-        assertFalse(robot.isBatterySharingActive());
-        assertFalse(robot.isHelpingRobot());
+        assertAll(
+            () -> assertEquals(50, robot.getBattery()),
+            () -> assertEquals(initialLocation, robot.getLocation()),
+            () -> assertFalse(robot.isCarryingPackage()),
+            () -> assertFalse(robot.isMalfunctioning()),
+            () -> assertFalse(robot.isCharging()),
+            () -> assertFalse(robot.isSeekingChargingStation()),
+            () -> assertFalse(robot.isBatterySharingActive()),
+            () -> assertFalse(robot.isHelpingRobot())
+        );
     }
 
     @Test
@@ -36,21 +38,27 @@ public class DeliveryRobotTest {
     }
 
     @Test
+    public void testDecreaseBatteryLowerThanZero() {
+        robot.decreaseBattery(150);
+        assertEquals(0, robot.getBattery()); // should not go below 0
+    }
+
+    @Test
     public void testDecreaseBattery() {
         robot.decreaseBattery(10);
         assertEquals(40, robot.getBattery());
+    }
 
-        robot.decreaseBattery(50); // go below zero
-        assertEquals(0, robot.getBattery());
+    @Test
+    public void testIncreaseBatteryOverOneHundred() {
+        robot.increaseBattery(150);
+        assertEquals(100, robot.getBattery()); // should cap at 100
     }
 
     @Test
     public void testIncreaseBattery() {
         robot.increaseBattery(30);
-        assertEquals(80, robot.getBattery());
-
-        robot.increaseBattery(50);
-        assertEquals(100, robot.getBattery());
+        assertEquals(80, robot.getBattery()); // after first increase
     }
 
     @Test
@@ -64,17 +72,23 @@ public class DeliveryRobotTest {
     public void testSetAndGetLocationCoordinates() {
         robot.setLocation(5, 7);
         Location loc = robot.getLocation();
-        assertEquals(5, loc.x);
-        assertEquals(7, loc.y);
+        assertAll(
+            () -> assertEquals(5, loc.x),
+            () -> assertEquals(7, loc.y)
+        );
     }
 
     @Test
     public void testSetAndGetCarryingPackage() {
         robot.setCarryingPackage(true);
-        assertTrue(robot.isCarryingPackage());
-
         robot.setCarryingPackage(false);
-        assertFalse(robot.isCarryingPackage());
+        assertAll(
+            () -> assertFalse(robot.isCarryingPackage()),
+            () -> {
+            robot.setCarryingPackage(true);
+            assertTrue(robot.isCarryingPackage());
+            }
+        );
     }
 
     @Test

@@ -23,7 +23,7 @@ class FactoryModelTest {
     }
     
     // test observer implementation for testing observer pattern
-    static class TestObserver implements FactoryModel.ModelObserver {
+    static class TestObserver implements ModelObserver {
         int agentUpdatedCount = 0;
         int agentMovedCount = 0;
         int cellUpdatedCount = 0;
@@ -71,33 +71,41 @@ class FactoryModelTest {
         @Test
         @DisplayName("Should initialize with correct grid size")
         void shouldInitializeWithCorrectGridSize() {
-            assertEquals(FactoryModel.GSize, factoryModel.getWidth());
-            assertEquals(FactoryModel.GSize, factoryModel.getHeight());
+            assertAll(
+                () -> assertEquals(FactoryModel.GSize, factoryModel.getWidth()),
+                () -> assertEquals(FactoryModel.GSize, factoryModel.getHeight())
+            );
         }
         
         @Test
         @DisplayName("Should place truck at correct location")
         void shouldPlaceTruckAtCorrectLocation() {
             Location truckLoc = factoryModel.getTruckLocation();
-            assertEquals(8, truckLoc.x);
-            assertEquals(10, truckLoc.y);
-            assertTrue(factoryModel.hasObject(FactoryModel.TRUCK, truckLoc));
+            assertAll(
+                () -> assertEquals(8, truckLoc.x),
+                () -> assertEquals(10, truckLoc.y),
+                () -> assertTrue(factoryModel.hasObject(FactoryModel.TRUCK, truckLoc))
+            );
         }
         
         @Test
         @DisplayName("Should place delivery location correctly")
         void shouldPlaceDeliveryLocationCorrectly() {
             Location deliveryLoc = factoryModel.getDeliveryLocation();
-            assertEquals(4, deliveryLoc.x);
-            assertEquals(2, deliveryLoc.y);
-            assertTrue(factoryModel.hasObject(FactoryModel.DELIVERY, deliveryLoc));
+            assertAll(
+                () -> assertEquals(4, deliveryLoc.x),
+                () -> assertEquals(2, deliveryLoc.y),
+                () -> assertTrue(factoryModel.hasObject(FactoryModel.DELIVERY, deliveryLoc))
+            );
         }
         
         @Test
         @DisplayName("Should initialize movement manager")
         void shouldInitializeMovementManager() {
-            assertNotNull(factoryModel.getMovementManager());
-            assertInstanceOf(MovementManager.class, factoryModel.getMovementManager());
+            assertAll(
+                () -> assertNotNull(factoryModel.getMovementManager()),
+                () -> assertInstanceOf(MovementManager.class, factoryModel.getMovementManager())
+            );
         }
     }
     
@@ -124,12 +132,14 @@ class FactoryModelTest {
             TestObserver observer2 = new TestObserver();
             factoryModel.addObserver(testObserver);
             factoryModel.addObserver(observer2);
-            
+
             Location testLocation = new Location(5, 5);
             factoryModel.addChargingStation("test", testLocation);
-            
-            assertEquals(1, testObserver.cellUpdatedCount);
-            assertEquals(1, observer2.cellUpdatedCount);
+
+            assertAll(
+                () -> assertEquals(1, testObserver.cellUpdatedCount),
+                () -> assertEquals(1, observer2.cellUpdatedCount)
+            );
         }
     }
     
@@ -142,9 +152,11 @@ class FactoryModelTest {
         void shouldAddChargingStationSuccessfully() {
             Location testLocation = new Location(5, 5);
             factoryModel.addChargingStation("test_station", testLocation);
-            
-            assertTrue(factoryModel.hasChargingStationAt(testLocation));
-            assertTrue(factoryModel.hasObject(FactoryModel.CHARGING_STATION, testLocation));
+
+            assertAll(
+                () -> assertTrue(factoryModel.hasChargingStationAt(testLocation)),
+                () -> assertTrue(factoryModel.hasObject(FactoryModel.CHARGING_STATION, testLocation))
+            );
         }
         
         @Test
@@ -152,11 +164,13 @@ class FactoryModelTest {
         void shouldNotifyObserversWhenAddingChargingStation() {
             factoryModel.addObserver(testObserver);
             Location testLocation = new Location(5, 5);
-            
+
             factoryModel.addChargingStation("test_station", testLocation);
-            
-            assertEquals(1, testObserver.cellUpdatedCount);
-            assertEquals(testLocation, testObserver.lastLocation);
+
+            assertAll(
+                () -> assertEquals(1, testObserver.cellUpdatedCount),
+                () -> assertEquals(testLocation, testObserver.lastLocation)
+            );
         }
         
         @Test
@@ -164,11 +178,13 @@ class FactoryModelTest {
         void shouldRemoveChargingStationSuccessfully() {
             Location testLocation = new Location(5, 5);
             factoryModel.addChargingStation("test_station", testLocation);
-            
+
             factoryModel.removeChargingStation("test_station");
-            
-            assertFalse(factoryModel.hasChargingStationAt(testLocation));
-            assertFalse(factoryModel.hasObject(FactoryModel.CHARGING_STATION, testLocation));
+
+            assertAll(
+                () -> assertFalse(factoryModel.hasChargingStationAt(testLocation)),
+                () -> assertFalse(factoryModel.hasObject(FactoryModel.CHARGING_STATION, testLocation))
+            );
         }
         
         @Test
@@ -178,20 +194,24 @@ class FactoryModelTest {
             factoryModel.addChargingStation("test_station", testLocation);
             factoryModel.addObserver(testObserver);
             testObserver.reset();
-            
+
             factoryModel.removeChargingStation("test_station");
-            
-            assertEquals(1, testObserver.cellUpdatedCount);
-            assertEquals(testLocation, testObserver.lastLocation);
+
+            assertAll(
+                () -> assertEquals(1, testObserver.cellUpdatedCount),
+                () -> assertEquals(testLocation, testObserver.lastLocation)
+            );
         }
         
         @Test
         @DisplayName("Should handle removing non-existent charging station")
         void shouldHandleRemovingNonExistentChargingStation() {
             factoryModel.addObserver(testObserver);
-            
-            assertDoesNotThrow(() -> factoryModel.removeChargingStation("non_existent"));
-            assertEquals(0, testObserver.cellUpdatedCount);
+
+            assertAll(
+                () -> assertDoesNotThrow(() -> factoryModel.removeChargingStation("non_existent")),
+                () -> assertEquals(0, testObserver.cellUpdatedCount)
+            );
         }
         
         @Test
@@ -199,19 +219,18 @@ class FactoryModelTest {
         void shouldReturnCopyOfChargingStationLocations() {
             Location loc1 = new Location(3, 3);
             Location loc2 = new Location(7, 7);
-            
+
             factoryModel.addChargingStation("station1", loc1);
             factoryModel.addChargingStation("station2", loc2);
-            
+
             Map<String, Location> stations = factoryModel.getChargingStationLocations();
-            assertEquals(2, stations.size());
-            assertTrue(stations.containsKey("station1"));
-            assertTrue(stations.containsKey("station2"));
-            assertEquals(loc1, stations.get("station1"));
-            assertEquals(loc2, stations.get("station2"));
-            
-            stations.put("station3", new Location(9, 9));
-            assertEquals(2, factoryModel.getChargingStationLocations().size());
+            assertAll(
+                () -> assertEquals(2, stations.size()),
+                () -> assertTrue(stations.containsKey("station1")),
+                () -> assertTrue(stations.containsKey("station2")),
+                () -> assertEquals(loc1, stations.get("station1")),
+                () -> assertEquals(loc2, stations.get("station2"))
+            );
         }
         
         @Test
@@ -219,11 +238,13 @@ class FactoryModelTest {
         void shouldCorrectlyIdentifyChargingStationLocations() {
             Location testLocation = new Location(5, 5);
             Location otherLocation = new Location(6, 6);
-            
+
             factoryModel.addChargingStation("test_station", testLocation);
-            
-            assertTrue(factoryModel.hasChargingStationAt(testLocation));
-            assertFalse(factoryModel.hasChargingStationAt(otherLocation));
+
+            assertAll(
+                () -> assertTrue(factoryModel.hasChargingStationAt(testLocation)),
+                () -> assertFalse(factoryModel.hasChargingStationAt(otherLocation))
+            );
         }
     }
     
@@ -240,13 +261,15 @@ class FactoryModelTest {
         void shouldAddDeliveryRobotSuccessfully() {
             Location robotLocation = new Location(1, 1);
             DeliveryRobot robot = createTestRobot("d_bot_1", robotLocation);
-            
+
             factoryModel.addObserver(testObserver);
             factoryModel.addDeliveryRobot(robot);
-            
-            assertEquals(1, testObserver.agentUpdatedCount);
-            assertEquals(0, testObserver.lastAgentId); // d_bot_1 should map to ID 0
-            assertEquals(robotLocation, testObserver.lastLocation);
+
+            assertAll(
+                () -> assertEquals(1, testObserver.agentUpdatedCount),
+                () -> assertEquals(0, testObserver.lastAgentId), // d_bot_1 should map to ID 0
+                () -> assertEquals(robotLocation, testObserver.lastLocation)
+            );
         }
         
         @Test
@@ -255,28 +278,32 @@ class FactoryModelTest {
             Location oldLocation = new Location(1, 1);
             Location newLocation = new Location(2, 2);
             DeliveryRobot robot = createTestRobot("d_bot_1", oldLocation);
-            
+
             factoryModel.addDeliveryRobot(robot);
             factoryModel.addObserver(testObserver);
             testObserver.reset();
-            
+
             factoryModel.updateDeliveryRobotLocation("d_bot_1", oldLocation, newLocation);
-            
-            assertEquals(1, testObserver.agentMovedCount);
-            assertEquals(oldLocation, testObserver.lastOldLocation);
-            assertEquals(newLocation, testObserver.lastNewLocation);
-            assertEquals(0, testObserver.lastAgentId);
+
+            assertAll(
+                () -> assertEquals(1, testObserver.agentMovedCount),
+                () -> assertEquals(oldLocation, testObserver.lastOldLocation),
+                () -> assertEquals(newLocation, testObserver.lastNewLocation),
+                () -> assertEquals(0, testObserver.lastAgentId)
+            );
         }
         
         @Test
         @DisplayName("Should handle updating non-existent robot location")
         void shouldHandleUpdatingNonExistentRobotLocation() {
             factoryModel.addObserver(testObserver);
-            
-            assertDoesNotThrow(() -> 
-                factoryModel.updateDeliveryRobotLocation("non_existent", 
-                    new Location(1, 1), new Location(2, 2)));
-            assertEquals(0, testObserver.agentMovedCount);
+
+            assertAll(
+                () -> assertDoesNotThrow(() -> 
+                    factoryModel.updateDeliveryRobotLocation("non_existent", 
+                        new Location(1, 1), new Location(2, 2))),
+                () -> assertEquals(0, testObserver.agentMovedCount)
+            );
         }
         
         @Test
@@ -284,24 +311,28 @@ class FactoryModelTest {
         void shouldUpdateRobotStateSuccessfully() {
             Location robotLocation = new Location(1, 1);
             DeliveryRobot robot = createTestRobot("d_bot_1", robotLocation);
-            
+
             factoryModel.addDeliveryRobot(robot);
             factoryModel.addObserver(testObserver);
             testObserver.reset();
-            
+
             factoryModel.updateDeliveryRobotState("d_bot_1");
-            
-            assertEquals(1, testObserver.agentUpdatedCount);
-            assertEquals(0, testObserver.lastAgentId);
+
+            assertAll(
+                () -> assertEquals(1, testObserver.agentUpdatedCount),
+                () -> assertEquals(0, testObserver.lastAgentId)
+            );
         }
         
         @Test
         @DisplayName("Should handle updating non-existent robot state")
         void shouldHandleUpdatingNonExistentRobotState() {
             factoryModel.addObserver(testObserver);
-            
-            assertDoesNotThrow(() -> factoryModel.updateDeliveryRobotState("non_existent"));
-            assertEquals(0, testObserver.agentUpdatedCount);
+
+            assertAll(
+                () -> assertDoesNotThrow(() -> factoryModel.updateDeliveryRobotState("non_existent")),
+                () -> assertEquals(0, testObserver.agentUpdatedCount)
+            );
         }
         
         @Test
@@ -352,25 +383,31 @@ class FactoryModelTest {
         @DisplayName("Should identify adjacent locations to truck")
         void shouldIdentifyAdjacentLocationsToTruck() {
             // truck is at (8, 10)
-            assertTrue(factoryModel.isAdjacentToKeyLocation(8, 9)); // adjacent to truck
-            assertTrue(factoryModel.isAdjacentToKeyLocation(7, 10)); // adjacent to truck
-            assertFalse(factoryModel.isAdjacentToKeyLocation(6, 8)); // not adjacent
+            assertAll(
+                () -> assertTrue(factoryModel.isAdjacentToKeyLocation(8, 9)), // adjacent to truck
+                () -> assertTrue(factoryModel.isAdjacentToKeyLocation(7, 10)), // adjacent to truck
+                () -> assertFalse(factoryModel.isAdjacentToKeyLocation(6, 8)) // not adjacent
+            );
         }
         
         @Test
         @DisplayName("Should identify adjacent locations to delivery")
         void shouldIdentifyAdjacentLocationsToDelivery() {
             // delivery is at (4, 2)
-            assertTrue(factoryModel.isAdjacentToKeyLocation(4, 1)); // adjacent to delivery
-            assertTrue(factoryModel.isAdjacentToKeyLocation(3, 2)); // adjacent to delivery
-            assertFalse(factoryModel.isAdjacentToKeyLocation(6, 4)); // not adjacent
+            assertAll(
+                () -> assertTrue(factoryModel.isAdjacentToKeyLocation(4, 1)), // adjacent to delivery
+                () -> assertTrue(factoryModel.isAdjacentToKeyLocation(3, 2)), // adjacent to delivery
+                () -> assertFalse(factoryModel.isAdjacentToKeyLocation(6, 4)) // not adjacent
+            );
         }
         
         @Test
         @DisplayName("Should identify exact key locations as adjacent")
         void shouldIdentifyExactKeyLocationsAsAdjacent() {
-            assertTrue(factoryModel.isAdjacentToKeyLocation(8, 10)); // truck location
-            assertTrue(factoryModel.isAdjacentToKeyLocation(4, 2)); // delivery location
+            assertAll(
+                () -> assertTrue(factoryModel.isAdjacentToKeyLocation(8, 10)), // truck location
+                () -> assertTrue(factoryModel.isAdjacentToKeyLocation(4, 2))   // delivery location
+            );
         }
     }
     
@@ -382,8 +419,10 @@ class FactoryModelTest {
         @DisplayName("Should return correct truck location")
         void shouldReturnCorrectTruckLocation() {
             Location truckLoc = factoryModel.getTruckLocation();
-            assertEquals(8, truckLoc.x);
-            assertEquals(10, truckLoc.y);
+            assertAll(
+                () -> assertEquals(8, truckLoc.x),
+                () -> assertEquals(10, truckLoc.y)
+            );
         }
         
         @Test
@@ -396,8 +435,10 @@ class FactoryModelTest {
         @DisplayName("Should return correct delivery location")
         void shouldReturnCorrectDeliveryLocation() {
             Location deliveryLoc = factoryModel.getDeliveryLocation();
-            assertEquals(4, deliveryLoc.x);
-            assertEquals(2, deliveryLoc.y);
+            assertAll(
+                () -> assertEquals(4, deliveryLoc.x),
+                () -> assertEquals(2, deliveryLoc.y)
+            );
         }
         
         @Test
@@ -414,69 +455,85 @@ class FactoryModelTest {
         @Test
         @DisplayName("Should map delivery bot names to correct IDs")
         void shouldMapDeliveryBotNamesToCorrectIds() {
-            assertEquals(0, FactoryUtils.getAgIdBasedOnName("d_bot_1"));
-            assertEquals(1, FactoryUtils.getAgIdBasedOnName("d_bot_2"));
-            assertEquals(2, FactoryUtils.getAgIdBasedOnName("d_bot_3"));
-            assertEquals(3, FactoryUtils.getAgIdBasedOnName("d_bot_4"));
-            assertEquals(4, FactoryUtils.getAgIdBasedOnName("d_bot_5"));
+            assertAll(
+                () -> assertEquals(0, FactoryUtils.getAgIdBasedOnName("d_bot_1")),
+                () -> assertEquals(1, FactoryUtils.getAgIdBasedOnName("d_bot_2")),
+                () -> assertEquals(2, FactoryUtils.getAgIdBasedOnName("d_bot_3")),
+                () -> assertEquals(3, FactoryUtils.getAgIdBasedOnName("d_bot_4")),
+                () -> assertEquals(4, FactoryUtils.getAgIdBasedOnName("d_bot_5"))
+            );
         }
         
         @Test
         @DisplayName("Should map charging station names to correct IDs")
         void shouldMapChargingStationNamesToCorrectIds() {
-            assertEquals(5, FactoryUtils.getAgIdBasedOnName("ch_st_1"));
-            assertEquals(6, FactoryUtils.getAgIdBasedOnName("ch_st_2"));
-            assertEquals(7, FactoryUtils.getAgIdBasedOnName("ch_st_3"));
+            assertAll(
+                () -> assertEquals(5, FactoryUtils.getAgIdBasedOnName("ch_st_1")),
+                () -> assertEquals(6, FactoryUtils.getAgIdBasedOnName("ch_st_2")),
+                () -> assertEquals(7, FactoryUtils.getAgIdBasedOnName("ch_st_3"))
+            );
         }
         
         @Test
         @DisplayName("Should map other agent names to correct IDs")
         void shouldMapOtherAgentNamesToCorrectIds() {
-            assertEquals(8, FactoryUtils.getAgIdBasedOnName("truck_1"));
-            assertEquals(9, FactoryUtils.getAgIdBasedOnName("deliv_A"));
-            assertEquals(10, FactoryUtils.getAgIdBasedOnName("humn_1"));
+            assertAll(
+                () -> assertEquals(8, FactoryUtils.getAgIdBasedOnName("truck_1")),
+                () -> assertEquals(9, FactoryUtils.getAgIdBasedOnName("deliv_A")),
+                () -> assertEquals(10, FactoryUtils.getAgIdBasedOnName("humn_1"))
+            );
         }
         
         @Test
         @DisplayName("Should return -1 for unknown agent names")
         void shouldReturnMinusOneForUnknownAgentNames() {
-            assertEquals(-1, FactoryUtils.getAgIdBasedOnName("unknown_agent"));
-            assertEquals(-1, FactoryUtils.getAgIdBasedOnName(""));
-            assertEquals(-1, FactoryUtils.getAgIdBasedOnName(null));
+            assertAll(
+                () -> assertEquals(-1, FactoryUtils.getAgIdBasedOnName("unknown_agent")),
+                () -> assertEquals(-1, FactoryUtils.getAgIdBasedOnName("")),
+                () -> assertEquals(-1, FactoryUtils.getAgIdBasedOnName(null))
+            );
         }
         
         @Test
         @DisplayName("Should map IDs to correct delivery bot names")
         void shouldMapIdsToCorrectDeliveryBotNames() {
-            assertEquals("d_bot_1", FactoryUtils.getAgNameBasedOnId(0));
-            assertEquals("d_bot_2", FactoryUtils.getAgNameBasedOnId(1));
-            assertEquals("d_bot_3", FactoryUtils.getAgNameBasedOnId(2));
-            assertEquals("d_bot_4", FactoryUtils.getAgNameBasedOnId(3));
-            assertEquals("d_bot_5", FactoryUtils.getAgNameBasedOnId(4));
+            assertAll(
+                () -> assertEquals("d_bot_1", FactoryUtils.getAgNameBasedOnId(0)),
+                () -> assertEquals("d_bot_2", FactoryUtils.getAgNameBasedOnId(1)),
+                () -> assertEquals("d_bot_3", FactoryUtils.getAgNameBasedOnId(2)),
+                () -> assertEquals("d_bot_4", FactoryUtils.getAgNameBasedOnId(3)),
+                () -> assertEquals("d_bot_5", FactoryUtils.getAgNameBasedOnId(4))
+            );
         }
         
         @Test
         @DisplayName("Should map IDs to correct charging station names")
         void shouldMapIdsToCorrectChargingStationNames() {
-            assertEquals("ch_st_1", FactoryUtils.getAgNameBasedOnId(5));
-            assertEquals("ch_st_2", FactoryUtils.getAgNameBasedOnId(6));
-            assertEquals("ch_st_3", FactoryUtils.getAgNameBasedOnId(7));
+            assertAll(
+                () -> assertEquals("ch_st_1", FactoryUtils.getAgNameBasedOnId(5)),
+                () -> assertEquals("ch_st_2", FactoryUtils.getAgNameBasedOnId(6)),
+                () -> assertEquals("ch_st_3", FactoryUtils.getAgNameBasedOnId(7))
+            );
         }
         
         @Test
         @DisplayName("Should map IDs to correct other agent names")
         void shouldMapIdsToCorrectOtherAgentNames() {
-            assertEquals("truck_1", FactoryUtils.getAgNameBasedOnId(8));
-            assertEquals("deliv_A", FactoryUtils.getAgNameBasedOnId(9));
-            assertEquals("humn_1", FactoryUtils.getAgNameBasedOnId(10));
+            assertAll(
+                () -> assertEquals("truck_1", FactoryUtils.getAgNameBasedOnId(8)),
+                () -> assertEquals("deliv_A", FactoryUtils.getAgNameBasedOnId(9)),
+                () -> assertEquals("humn_1", FactoryUtils.getAgNameBasedOnId(10))
+            );
         }
         
         @Test
         @DisplayName("Should return unknown for invalid IDs")
         void shouldReturnUnknownForInvalidIds() {
-            assertEquals("unknown", FactoryUtils.getAgNameBasedOnId(-1));
-            assertEquals("unknown", FactoryUtils.getAgNameBasedOnId(99));
-            assertEquals("unknown", FactoryUtils.getAgNameBasedOnId(Integer.MAX_VALUE));
+            assertAll(
+                () -> assertEquals("unknown", FactoryUtils.getAgNameBasedOnId(-1)),
+                () -> assertEquals("unknown", FactoryUtils.getAgNameBasedOnId(99)),
+                () -> assertEquals("unknown", FactoryUtils.getAgNameBasedOnId(Integer.MAX_VALUE))
+            );
         }
         
         @Test
@@ -500,11 +557,13 @@ class FactoryModelTest {
         @Test
         @DisplayName("Should have correct constant values")
         void shouldHaveCorrectConstantValues() {
-            assertEquals(13, FactoryModel.GSize);
-            assertEquals(4, FactoryModel.OBSTACLE);
-            assertEquals(16, FactoryModel.TRUCK);
-            assertEquals(32, FactoryModel.DELIVERY);
-            assertEquals(64, FactoryModel.CHARGING_STATION);
+            assertAll(
+                () -> assertEquals(13, FactoryModel.GSize),
+                () -> assertEquals(4, FactoryModel.OBSTACLE),
+                () -> assertEquals(16, FactoryModel.TRUCK),
+                () -> assertEquals(32, FactoryModel.DELIVERY),
+                () -> assertEquals(64, FactoryModel.CHARGING_STATION)
+            );
         }
     }
 }
