@@ -475,10 +475,10 @@ public class FactoryView extends JFrame implements ModelObserver {
                     g2d.setColor(new Color(102, 51, 0)); // Brown color for human
                     int centerX = humanLoc.x * CELL_SIZE + CELL_SIZE / 2;
                     int centerY = humanLoc.y * CELL_SIZE + CELL_SIZE / 2;
-                    int humanSize = CELL_SIZE - 6;
+                    int humanSize = CELL_SIZE;
                     
                     // Draw human as a square to distinguish from robots
-                    g2d.fillRoundRect(centerX - humanSize/2, centerY - humanSize/2, humanSize, humanSize, 10, 10);
+                    g2d.fillRect(centerX - humanSize/2, centerY - humanSize/2, humanSize, humanSize);
 
                     // Draw "H" for human
                     g2d.setColor(Color.WHITE);

@@ -23,24 +23,10 @@ public class MovementManager {
     }
 
     /**
-     * Moves an agent randomly within the factory model.
-     * The agent will attempt to move in a random direction, ensuring that the new location is free.
-     *
-     * @param agentId the ID of the agent to move
-     * @param agentLocation the current location of the agent
-     * @return true if the move was successful, false otherwise
+     * Updates the position of an agent to a its location
      */
-    public boolean moveRandomly(int agentId, Location agentLocation) {
-        int dx = 0, dy = 0;
-        // Ensure at least one coordinate moves
-        while (dx == 0 && dy == 0) {
-            dx = random.nextBoolean() ? 1 : -1;
-            dy = random.nextBoolean() ? 1 : -1;
-            // Randomly decide to move only in one direction sometimes
-            if (random.nextBoolean()) dx = 0;
-            else dy = 0;
-        }
-        Location randomMove = new Location(agentLocation.x + dx, agentLocation.y + dy);
+    public boolean updatePos(int agentId, Location agentLocation) {
+        Location randomMove = new Location(agentLocation.x, agentLocation.y);
         if (this.model.isFree(randomMove.x, randomMove.y)) {
             return tryMove(agentId, randomMove);
         } else {

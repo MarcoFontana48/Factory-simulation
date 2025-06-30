@@ -201,9 +201,8 @@ public class FactoryModel extends GridWorldModel {
     }
 
     /**
-     * Removes a delivery robot from the model.
-     * The robot is removed from the deliveryRobots map and observers are notified of its removal.
-     * @param robotName the name of the DeliveryRobot to remove
+     * Updates the location of a delivery robot in the model.
+     * This method is called when the robot moves to a new location.
      */
     public void updateDeliveryRobotLocation(String robotName, Location oldLocation, Location newLocation) {
         AbstractAgent robot = agentsMap.get(robotName);

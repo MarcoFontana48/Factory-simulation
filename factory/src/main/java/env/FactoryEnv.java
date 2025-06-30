@@ -422,20 +422,11 @@ public class FactoryEnv extends Environment {
             int y = (int) ((NumberTerm) yLoc).solve();
             // register in the model
             Location loc = new Location(x, y);
-            HumanTechnician robot = new HumanTechnician(name, loc);
-            model.addHumanTechnician(robot);
+            HumanTechnician human = new HumanTechnician(name, loc);
+            model.addHumanTechnician(human);
             addPercept(agentName, Structure.parse("human_initialized(" + x + "," + y + ")"));
+            model.getMovementManager().updatePos(FactoryUtils.getAgIdBasedOnName(human.getName()), loc);
             return true;
-        } catch (Exception e) {
-            System.err.println("Error initializing human agent for " + agentName + ": " + e.getMessage());
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    /**
-     * Executes the action of registering a charging station in the environment.
-     * @param agentName the name of the agent performing the action
         } catch (Exception e) {
             System.err.println("Error initializing human agent for " + agentName + ": " + e.getMessage());
             e.printStackTrace();
@@ -513,7 +504,7 @@ public class FactoryEnv extends Environment {
             }
 
             // execute one step movement using MovementManager
-            model.getMovementManager().moveRandomly(agentId, agentLocation);
+            model.getMovementManager().updatePos(agentId, agentLocation);
 
             // get new position after move
             Location newPos = model.getAgPos(agentId);

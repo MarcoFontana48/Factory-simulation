@@ -12,25 +12,17 @@
     .belief(current_position(X, Y));
     ?current_position(X, Y);
     .println("Started at position (", X, ", ", Y, ")");
-    !!periodic_status_check;
     .my_name(HumanName);
     register_human(HumanName, X, Y);
-    !step(X, Y).
-
-// main movement loop
-+!step(GoToX, GoToY) <-
-    ?current_position(X, Y);
-    .println("Current position: (", X, ", ", Y, ")");
-    move_randomly(X, Y);    // may move randomly or not move at all at each step
-    .wait(1500);
-    !step(X, Y).
+    !periodic_status_check.
 
 // periodic status checking
 +!periodic_status_check <-
+    .wait(30000);  // wait n seconds for responses
     .println("About to request status from all robots...");
     .abolish(robot_status(_, _, _, _, _, _, _, _, _, _, _, _));  // clear previous status
     .broadcast(askOne, request_status);
-    .wait(15000);  // wait n seconds for responses
+    .wait(500);  // wait n seconds for responses
     !check_malfunctioning_robots;
     !periodic_status_check.
 
